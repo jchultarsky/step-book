@@ -27,10 +27,23 @@ chapters/            One .qmd file per chapter, numbered in reading order
 appendices/          Complete block file, entity quick reference, sources, glossary
 examples/            The STEP files every listing in the book is taken from
 syntax/              Syntax-highlighting definitions for Part 21 files and EXPRESS
-styles/              Stylesheet for the HTML edition
+styles/              Stylesheet for the HTML edition and typography fixes for the PDF
+tools/               Checks that validate the book against published EXPRESS schemas
 docs/                The original PDF draft the book was converted from
-.github/workflows/   CI: renders the book and deploys it to GitHub Pages
+.github/workflows/   CI: runs the checks, renders the book, deploys it to GitHub Pages
 ```
+
+## Checking the book
+
+Every entity name, listing and attribute claim is verified against the published AP242, AP214 and AP203 schemas, which are vendored under `tools/schemas/`.
+CI runs these before rendering, so a wrong entity name or parameter count fails the build instead of reaching a reader.
+
+```bash
+python3 tools/check_book.py
+python3 tools/check_appendix_b.py
+```
+
+See [tools/README.md](tools/README.md) for what each check covers.
 
 ## Contributing
 
