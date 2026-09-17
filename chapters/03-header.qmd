@@ -104,8 +104,8 @@ The object identifier's digits differ between AP242 editions, which is how a rea
 The same block, exported by the same OCCT build with the schema set to AP242, has this header and a slightly different pair of opening records:
 
 ```step
-FILE_SCHEMA(('AP242_MANAGED_MODEL_BASED_3D_ENGINEERING_MIM_LF {1 0 10303 442 1
-1 4 }'));
+FILE_SCHEMA(
+  ('AP242_MANAGED_MODEL_BASED_3D_ENGINEERING_MIM_LF {1 0 10303 442 1 1 4 }'));
 ENDSEC;
 DATA;
 #1 = APPLICATION_PROTOCOL_DEFINITION('international standard',
@@ -113,7 +113,7 @@ DATA;
 #2 = APPLICATION_CONTEXT('Managed model based 3d engineering');
 ```
 
-Every other record is identical.
+Every other data record is identical, apart from the product name, which was not edited in this export.
 For a plain solid there is no difference between an AP214 and an AP242 file beyond the header and these two strings, which is why a reader that handles one handles the other with little extra work.
 The differences begin with colours, PMI and tessellation.
 

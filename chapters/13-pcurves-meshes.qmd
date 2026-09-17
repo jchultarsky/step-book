@@ -14,7 +14,7 @@ Without it, the same block is 350 records instead of 170, and edge `#21` looks l
 #26 = SURFACE_CURVE('',#27,(#31,#43),.PCURVE_S1.);
 #27 = LINE('',#28,#29);                       /* the 3D line, as before */
 #31 = PCURVE('',#32,#37);
-#32 = PLANE('',#33);                          /* a copy of the x=0 face's plane */
+#32 = PLANE('',#33);                          /* the x=0 face's own plane, shared */
 #37 = DEFINITIONAL_REPRESENTATION('',(#38),#42);
 #38 = LINE('',#39,#40);                       /* a 2D line in the plane's parameter space */
 #39 = CARTESIAN_POINT('',(0.,0.));
@@ -24,7 +24,7 @@ Without it, the same block is 350 records instead of 170, and edge `#21` looks l
         PARAMETRIC_REPRESENTATION_CONTEXT()
         REPRESENTATION_CONTEXT('2D SPACE','') );
 #43 = PCURVE('',#44,#49);
-#44 = PLANE('',#45);                          /* a copy of the y=0 face's plane */
+#44 = PLANE('',#45);                          /* the y=0 face's own plane, shared */
 #49 = DEFINITIONAL_REPRESENTATION('',(#50),#54);
     /* ... another 2D line, another 2D context ... */
 ```
@@ -46,7 +46,7 @@ It can compute that by projecting each edge's 3D curve onto the surface, but pro
 So kernels store the 2D curve directly, for every edge, on every face it bounds.
 Those are the pcurves.
 Writing them into the exchange file spares the importing kernel the projection and, more importantly, removes the ambiguities.
-It also roughly doubles the number of records, since every edge acquires two 2D curves, two 2D contexts, two representations, and — as this exporter does it — two duplicate copies of the surfaces it lies on.
+It also roughly doubles the number of records, since every edge acquires two 2D curves, two 2D contexts, two representations, two vectors and two directions — fifteen extra records per edge in this file.
 :::
 
 Three subtypes of `SURFACE_CURVE` appear.
@@ -69,11 +69,10 @@ Most CAD exporters do.
 OCCT and a few others make it optional.
 A file without them is smaller, not wrong.
 
-::: {.callout-warning title="In the wild: Duplicated surfaces"}
-The pcurve `#31` points at `#32`, a `PLANE` — but the face `#17` that the edge belongs to already has a plane, `#52`, identical in every value.
-The exporter has written the plane twice: once for the face, once for the pcurve to refer to.
-Every pcurve in this file does the same, so a file that "has 6 planes" in its faces has 30 `PLANE` records.
-Other exporters share them.
+::: {.callout-warning title="In the wild: Shared or duplicated surfaces"}
+The pcurve `#31` points at `#32`, a `PLANE` — and that is the very record the face `#17` uses as its own surface.
+This exporter shares one plane between a face and every pcurve that lies on it, so the file still holds only six `PLANE` records for six faces.
+Other exporters write a fresh copy of the surface for each pcurve, and the same part then carries thirty planes instead of six.
 Neither is wrong, and this is one reason two files of the same part from two systems can differ by a factor of two in size while describing identical geometry.
 :::
 

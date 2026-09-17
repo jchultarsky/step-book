@@ -6,7 +6,7 @@ Where the tree is, where the positions are, why they are kept apart, and the sec
 :::
 
 The clamp is the bracket of @sec-curves-surfaces-hole-in-bracket with two pins standing on it: one at x = 15, one at x = 45, both on the top face.
-As a STEP file it has three products but only two solids’ worth of geometry — the pin’s geometry appears once, not twice — and about forty records of structure that say how they fit together.
+As a STEP file it has three products but only two solids' worth of geometry — the pin's geometry appears once, not twice — and about forty records of structure that say how they fit together.
 This chapter is about those forty.
 
 ## Three product chains {#sec-assemblies-product-chains}
@@ -26,13 +26,13 @@ Then it has two more:
 ```
 
 Each has its own formation, its own pair of contexts, its own category record.
-`#5` is the assembly’s definition, `#35` the bracket’s, `#243` the pin’s.
+`#5` is the assembly's definition, `#35` the bracket's, `#243` the pin's.
 Nothing in these records relates them to one another.
-The pin’s product is called `'pin-1'` rather than `'pin'` — the exporter took the name of the first instance it met as the name of the part — which is the kind of thing you learn to expect from assembly exports and which the structure below does not depend on.
+The pin's product is called `'pin-1'` rather than `'pin'` — the exporter took the name of the first instance it met as the name of the part — which is the kind of thing you learn to expect from assembly exports and which the structure below does not depend on.
 
 Each product also has its shape.
-The bracket’s and pin’s are `ADVANCED_BREP_SHAPE_REPRESENTATION`s containing solids, exactly as in the single-part files.
-The assembly’s is different:
+The bracket's and pin's are `ADVANCED_BREP_SHAPE_REPRESENTATION`s containing solids, exactly as in the single-part files.
+The assembly's is different:
 
 ```step
 #3 = SHAPE_DEFINITION_REPRESENTATION(#4,#10);
@@ -50,7 +50,7 @@ here */
 The assembly has no solid.
 Its shape representation is a plain `SHAPE_REPRESENTATION` whose items are four coordinate frames: its own origin and one target position for each child.
 The geometry of an assembly *is* the geometry of its children, placed.
-This representation is the assembly’s coordinate space, and the placements in it are the only numbers in the whole structure.
+This representation is the assembly's coordinate space, and the placements in it are the only numbers in the whole structure.
 
 ## The tree: `NEXT_ASSEMBLY_USAGE_OCCURRENCE` {#sec-assemblies-tree}
 
@@ -91,7 +91,7 @@ END_ENTITY;
 Six parameters: an id, a name, a description, the **relating** (parent) definition, the **related** (child) definition, and an optional reference designator.
 One record is one **occurrence** of one child inside one parent.
 That is the entire assembly tree: a set of directed edges between product definitions.
-There is no record for “the assembly structure” as a whole; there are only edges, and the tree is whatever they add up to.
+There is no record for "the assembly structure" as a whole; there are only edges, and the tree is whatever they add up to.
 
 Three things to notice.
 
@@ -101,14 +101,14 @@ This is the distinction a bill of materials rests on: one product definition, tw
 The BOM line for the pin has quantity 2 because two NAUOs point at it, and there is one pin geometry in the file, not two.
 
 The `name` attribute carries the **instance name** — `'pin-1'`, `'pin-2'` — which is how the CAD system distinguished the two occurrences in its tree.
-The part’s own name is on the `PRODUCT` record.
-In this file they collide (`'pin-1'` is both the product name and the first instance name) because of the exporter’s naming choice; in a SolidWorks or NX export the product would be `'PIN'` and the instances `'PIN-1'` and `'PIN-2'`.
+The part's own name is on the `PRODUCT` record.
+In this file they collide (`'pin-1'` is both the product name and the first instance name) because of the exporter's naming choice; in a SolidWorks or NX export the product would be `'PIN'` and the instances `'PIN-1'` and `'PIN-2'`.
 
 The `reference_designator` is `$`.
 It is meant for the position label on an electrical schematic or a drawing balloon — `'R12'`, `'B3'` — and most mechanical exporters leave it empty.
 
 A tree with only NAUOs is unplaced.
-Every child would sit at its parent’s origin.
+Every child would sit at its parent's origin.
 Position is a separate structure, attached to each NAUO from the side.
 
 ## The position: five records per occurrence {#sec-assemblies-position}
@@ -131,29 +131,29 @@ Reading it from the NAUO outward:
 **`#238`** is a `PRODUCT_DEFINITION_SHAPE` whose `definition` is the NAUO `#239` rather than a product definition.
 @sec-product-to-shape said the `definition` attribute is a SELECT that admits either; this is the other case.
 It means: *the occurrence of the bracket in the clamp has a shape*.
-The strings `'Placement'` and `'Placement of an item'` are this exporter’s habit; others write `''`.
+The strings `'Placement'` and `'Placement of an item'` are this exporter's habit; others write `''`.
 
 **`#235`** is the bridge.
 `CONTEXT_DEPENDENT_SHAPE_REPRESENTATION` has two attributes: a `representation_relation` and a `represented_product_relation`.
 It ties the occurrence-shape `#238` to a relationship between two representations.
 
 **`#236`** is a complex instance you can now read.
-It is a `REPRESENTATION_RELATIONSHIP` between `#40` (the bracket’s shape representation) and `#10` (the assembly’s); it is *with a transformation*, `#237`; and it is specifically a *shape representation relationship*.
+It is a `REPRESENTATION_RELATIONSHIP` between `#40` (the bracket's shape representation) and `#10` (the assembly's); it is *with a transformation*, `#237`; and it is specifically a *shape representation relationship*.
 `REPRESENTATION_RELATIONSHIP_WITH_TRANSFORMATION` and `SHAPE_REPRESENTATION_RELATIONSHIP` are sibling subtypes of `REPRESENTATION_RELATIONSHIP`, and no single leaf names the pair.
 So the instance is written externally, with their shared supertype listed as well, and the blocks in alphabetical order.
 
 **`#237`** is the transformation, and it contains no numbers.
 `ITEM_DEFINED_TRANSFORMATION` has two attributes beyond name and description: `transform_item_1` and `transform_item_2`, both representation items.
-Here they are two axis placements: `#11`, the origin frame that sits in the bracket’s own representation, and `#15`, a frame in the assembly’s representation.
+Here they are two axis placements: `#11`, the origin frame that sits in the bracket's own representation, and `#15`, a frame in the assembly's representation.
 The transformation is *whatever rigid motion carries frame `#11` onto frame `#15`*.
-Put the bracket’s origin at `#15`’s origin, its Z along `#15`’s Z, its X along `#15`’s X.
+Put the bracket's origin at `#15`'s origin, its Z along `#15`'s Z, its X along `#15`'s X.
 
 **`#15`** is that target frame — at (0, 0, 0) with identity orientation, because the bracket sits at the assembly origin.
 For pin-1 the corresponding record is `#19`, at (15, 10, 10); for pin-2 it is `#23`, at (45, 10, 10).
 Those three points are the only coordinates in the assembly structure.
 
 So the NAUO says *what* goes inside *what*, and its placement chain says *where*, and the two are joined through `#238` only — and only in the inverse direction, since `#238` points at the NAUO and nothing points at `#238` except `#235`, which nothing points at either.
-From a NAUO, finding its position means asking “what `PRODUCT_DEFINITION_SHAPE` refers to me?” and then “what `CONTEXT_DEPENDENT_SHAPE_REPRESENTATION` refers to *that*?” — two more walks against the arrows before the references turn forward.
+From a NAUO, finding its position means asking "what `PRODUCT_DEFINITION_SHAPE` refers to me?" and then "what `CONTEXT_DEPENDENT_SHAPE_REPRESENTATION` refers to *that*?" — two more walks against the arrows before the references turn forward.
 
 ## The frame as a transform {#sec-assemblies-frame-transform}
 
@@ -165,18 +165,18 @@ From a NAUO, finding its position means asking “what `PRODUCT_DEFINITION_SHAPE
 ```
 
 An `AXIS2_PLACEMENT_3D` has a `location`, an optional `axis` and an optional `ref_direction`.
-The axis is the frame’s Z; the reference direction is projected perpendicular to it to give X; Y is their cross product.
+The axis is the frame's Z; the reference direction is projected perpendicular to it to give X; Y is their cross product.
 If the axis is omitted it is (0, 0, 1); if the reference direction is omitted it is (1, 0, 0) or whatever is perpendicular.
 Three references, and the result is a complete right-handed coordinate frame — which is to say a rigid transformation: a rotation plus a translation, with no scaling and no reflection.
 
-Placing pin-1, then, means: take the pin’s geometry, whose coordinates are in its own frame (`#11` in the pin’s representation — the pin stands on the origin with its axis along Z), and move it so that frame lands on `#19`.
+Placing pin-1, then, means: take the pin's geometry, whose coordinates are in its own frame (`#11` in the pin's representation — the pin stands on the origin with its axis along Z), and move it so that frame lands on `#19`.
 Translation by (15, 10, 10), no rotation.
-The pin’s base circle, at z = 0 in its own file, is at z = 10 in the assembly: the top of the bracket.
+The pin's base circle, at z = 0 in its own file, is at z = 10 in the assembly: the top of the bracket.
 
 ::: {.callout-warning title="In the wild: Which frame is which"}
-`ITEM_DEFINED_TRANSFORMATION` does not say which of its two items is the child’s origin and which is the target.
-The recommended practice from the CAx Implementor Forum is that `transform_item_1` belongs to the child’s representation and `transform_item_2` to the parent’s, and that in the `REPRESENTATION_RELATIONSHIP`, `rep_1` is the child (component) and `rep_2` the parent (assembly).
-This file follows both conventions: `#236` has `rep_1 = #40` (bracket) and `rep_2 = #10` (assembly); `#237` has item 1 in the bracket’s representation and item 2 in the assembly’s.
+`ITEM_DEFINED_TRANSFORMATION` does not say which of its two items is the child's origin and which is the target.
+The recommended practice from the CAx Implementor Forum is that `transform_item_1` belongs to the child's representation and `transform_item_2` to the parent's, and that in the `REPRESENTATION_RELATIONSHIP`, `rep_1` is the child (component) and `rep_2` the parent (assembly).
+This file follows both conventions: `#236` has `rep_1 = #40` (bracket) and `rep_2 = #10` (assembly); `#237` has item 1 in the bracket's representation and item 2 in the assembly's.
 Not every exporter does.
 A robust reader does not trust the order; it checks which representation actually *contains* each axis placement in its `items` and orients the transformation from that.
 When both frames are the identity, as for the bracket here, getting it backwards is invisible — which is how the bug survives.
@@ -186,11 +186,11 @@ When both frames are the identity, as for the bracket here, getting it backwards
 
 With the records understood, the procedure for reconstructing the assembly:
 
-1. **Find the roots.** A root is a product definition that is nobody’s `related_product_definition`. Here `#5`. A file may have several roots (a multi-body export, or several unrelated assemblies).
+1. **Find the roots.** A root is a product definition that is nobody's `related_product_definition`. Here `#5`. A file may have several roots (a multi-body export, or several unrelated assemblies).
 2. **Children of a definition** are the NAUOs whose `relating_product_definition` is it. For `#5`: `#239`, `#311`, `#317`.
 3. **For each NAUO**, find the `PRODUCT_DEFINITION_SHAPE` that points at it, the `CONTEXT_DEPENDENT_SHAPE_REPRESENTATION` that points at *that*, and from there forward to the relationship, the transformation, and the two frames. If any link is missing, the child is at identity.
 4. **Geometry of a definition** is found through its own `PRODUCT_DEFINITION_SHAPE` and `SHAPE_DEFINITION_REPRESENTATION`, as in @sec-product-to-shape.
-5. **World position of a child** = parent’s world transform composed with the local one. Recurse into the child’s own NAUOs.
+5. **World position of a child** = parent's world transform composed with the local one. Recurse into the child's own NAUOs.
 
 The **bill of materials** is steps 1, 2 and 5 without the geometry: walk the tree, group occurrences by `related_product_definition`, count.
 For the clamp: bracket × 1, pin × 2.
@@ -218,16 +218,16 @@ There is a second, older mechanism that some exporters use for assemblies and mo
 #401 = REPRESENTATION_MAP(#11,#248);
 ```
 
-A `MAPPED_ITEM` is a representation item — it sits in the *parent’s* `SHAPE_REPRESENTATION.items`, next to the axis placements — that says “the representation `#248`, whose origin is `#11`, placed at frame `#19`.”
+A `MAPPED_ITEM` is a representation item — it sits in the *parent's* `SHAPE_REPRESENTATION.items`, next to the axis placements — that says "the representation `#248`, whose origin is `#11`, placed at frame `#19`."
 The `REPRESENTATION_MAP` pairs a source representation with its origin; the mapped item pairs the map with a target.
 Same information as `#235`–`#237`, two records instead of three, and no `PRODUCT_DEFINITION_SHAPE` on the NAUO.
 
-When an exporter uses mapped items for an assembly, the NAUOs are still written — the product structure is unchanged — but the positions are in the parent’s representation items rather than hanging off the NAUOs.
+When an exporter uses mapped items for an assembly, the NAUOs are still written — the product structure is unchanged — but the positions are in the parent's representation items rather than hanging off the NAUOs.
 A reader that only knows the `CONTEXT_DEPENDENT_SHAPE_REPRESENTATION` route will find no placements and put every child at the origin.
-The check is simple: if a NAUO has no placement chain, look in the parent’s shape representation for `MAPPED_ITEM`s whose map’s source is the child’s representation.
+The check is simple: if a NAUO has no placement chain, look in the parent's shape representation for `MAPPED_ITEM`s whose map's source is the child's representation.
 
 Mapped items also appear where there is no assembly at all: a part with a bolt-hole pattern may have one hole modelled and eleven mapped items placing copies of it.
-There the mapped item is simply an instancing mechanism, and the “child” representation is not a product’s shape but an anonymous representation containing the repeated geometry.
+There the mapped item is simply an instancing mechanism, and the "child" representation is not a product's shape but an anonymous representation containing the repeated geometry.
 
 ## Deeper trees and other variations {#sec-assemblies-deeper-trees}
 
@@ -244,7 +244,7 @@ Variations you will meet:
 
 ::: {.callout-important title="In brief"}
 The assembly tree is a set of `NEXT_ASSEMBLY_USAGE_OCCURRENCE` edges from parent definition to child definition; one edge is one occurrence, and a bill of materials is a count of edges per child.
-Position is separate: a `PRODUCT_DEFINITION_SHAPE` on the NAUO, a `CONTEXT_DEPENDENT_SHAPE_REPRESENTATION`, a three-way relationship record, an `ITEM_DEFINED_TRANSFORMATION` naming two frames, and the target frame in the parent’s representation.
+Position is separate: a `PRODUCT_DEFINITION_SHAPE` on the NAUO, a `CONTEXT_DEPENDENT_SHAPE_REPRESENTATION`, a three-way relationship record, an `ITEM_DEFINED_TRANSFORMATION` naming two frames, and the target frame in the parent's representation.
 The frame is the transform.
 `MAPPED_ITEM` is the alternative route, and a reader must handle both.
 :::

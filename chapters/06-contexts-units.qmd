@@ -100,11 +100,11 @@ Angles are treated the same way.
 A file that measures angles in degrees carries (this excerpt written to the same pattern rather than exported)
 
 ```step
-#170 = ( CONVERSION_BASED_UNIT('DEGREE',#174) NAMED_UNIT(#175)
-PLANE_ANGLE_UNIT() );
-#174 = PLANE_ANGLE_MEASURE_WITH_UNIT(PLANE_ANGLE_MEASURE(0.01745329252),#176);
-#175 = DIMENSIONAL_EXPONENTS(0.,0.,0.,0.,0.,0.,0.);
-#176 = ( NAMED_UNIT(*) PLANE_ANGLE_UNIT() SI_UNIT($,.RADIAN.) );
+#900 = ( CONVERSION_BASED_UNIT('DEGREE',#901) NAMED_UNIT(#902)
+         PLANE_ANGLE_UNIT() );
+#901 = PLANE_ANGLE_MEASURE_WITH_UNIT(PLANE_ANGLE_MEASURE(0.01745329252),#903);
+#902 = DIMENSIONAL_EXPONENTS(0.,0.,0.,0.,0.,0.,0.);
+#903 = ( NAMED_UNIT(*) PLANE_ANGLE_UNIT() SI_UNIT($,.RADIAN.) );
 ```
 
 — a degree is 0.0174533 radians, and an angle is dimensionless, so every exponent is zero.

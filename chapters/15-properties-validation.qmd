@@ -55,26 +55,26 @@ The reader, after importing, computes the same numbers from what it built and co
 If they match to within tolerance, the geometry survived; if the volume is off by a face's worth, a face was lost; if the centroid moved, a component is misplaced.
 
 ```step
-#400 = PROPERTY_DEFINITION('geometric validation property','volume of
-part',#4);
+#400 = PROPERTY_DEFINITION('geometric validation property',
+  'volume of part',#4);
 #401 = PROPERTY_DEFINITION_REPRESENTATION(#400,#402);
 #402 = REPRESENTATION('volume',(#403),#165);
-#403 = MEASURE_REPRESENTATION_ITEM('volume
-measure',VOLUME_MEASURE(12000.),#404);
+#403 = MEASURE_REPRESENTATION_ITEM('volume measure',
+  VOLUME_MEASURE(12000.),#404);
 #404 = DERIVED_UNIT((#405));
 #405 = DERIVED_UNIT_ELEMENT(#166,3.);
 
-#406 = PROPERTY_DEFINITION('geometric validation property','surface area of
-part',#4);
+#406 = PROPERTY_DEFINITION('geometric validation property',
+  'surface area of part',#4);
 #407 = PROPERTY_DEFINITION_REPRESENTATION(#406,#408);
 #408 = REPRESENTATION('surface area',(#409),#165);
-#409 = MEASURE_REPRESENTATION_ITEM('surface area
-measure',AREA_MEASURE(4000.),#410);
+#409 = MEASURE_REPRESENTATION_ITEM('surface area measure',
+  AREA_MEASURE(4000.),#410);
 #410 = DERIVED_UNIT((#411));
 #411 = DERIVED_UNIT_ELEMENT(#166,2.);
 
-#412 = PROPERTY_DEFINITION('geometric validation property','centroid of
-part',#4);
+#412 = PROPERTY_DEFINITION('geometric validation property',
+  'centroid of part',#4);
 #413 = PROPERTY_DEFINITION_REPRESENTATION(#412,#414);
 #414 = REPRESENTATION('centroid',(#415),#165);
 #415 = CARTESIAN_POINT('centre point',(30.,10.,5.));

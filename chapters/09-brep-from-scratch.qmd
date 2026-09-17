@@ -2,11 +2,11 @@
 
 ::: {.chapter-abstract}
 Before reading a solid, what a solid is.
-Why the file keeps “what touches what” and “where it is” in separate records, what orientation means and why it is stored three times over, and the arithmetic that tells you a shell is closed.
+Why the file keeps "what touches what" and "where it is" in separate records, what orientation means and why it is stored three times over, and the arithmetic that tells you a shell is closed.
 :::
 
 The 150 records of geometry in the block file describe a rectangular box.
-They do it in a way that seems, at first, absurdly indirect: the box’s eight corners appear as sixteen records, its twelve edges as sixty, and no record anywhere says “box” or gives its dimensions.
+They do it in a way that seems, at first, absurdly indirect: the box's eight corners appear as sixteen records, its twelve edges as sixty, and no record anywhere says "box" or gives its dimensions.
 To see why it is done this way, and why the same scheme scales to a turbine blade, you need the idea the whole of Part 42 is built on.
 
 ::: {.callout-note title="Engineering background: Boundary representation"}
@@ -14,7 +14,7 @@ There are two broad ways to describe a solid object to a computer.
 **Constructive** methods describe the operations that made it: a box, minus a cylinder, plus a fillet.
 **Boundary** methods describe its skin: the set of surfaces that separate inside from outside.
 STEP, like every major CAD kernel, exchanges solids as boundary representations — *B-rep* — because the skin is what two systems can agree on.
-A system that has no “fillet” operation can still accept a torus patch.
+A system that has no "fillet" operation can still accept a torus patch.
 
 A B-rep has two layers.
 **Geometry** is the set of infinite, unbounded shapes the skin is made of: this plane, that cylinder, this line, that circle.
@@ -47,7 +47,7 @@ Shells, loops and solids have no geometry of their own; they are pure connectivi
 
 The block: one solid, one shell, six faces, six loops (one per face), twelve edges, eight vertices.
 Every face is bounded by exactly one loop because a box has no holes.
-The bracket’s top and bottom faces each have two loops — an outer rectangle and an inner circle.
+The bracket's top and bottom faces each have two loops — an outer rectangle and an inner circle.
 That is not the only structural difference a hole makes: it also brings a cylindrical face whose seam edge is traversed twice within one loop, two circular edges that start and end at the same vertex, and an Euler count of 0 rather than 2.
 
 ## Sharing {#sec-brep-sharing}
@@ -57,31 +57,31 @@ The first thing to understand about the connectivity is that it is achieved by *
 The block has twelve edges and each edge belongs to two faces.
 There are therefore twenty-four *appearances* of edges in loops, but only twelve `EDGE_CURVE` records.
 Each appearance is an `ORIENTED_EDGE` — a thin record that points at an `EDGE_CURVE` and adds a direction.
-Two faces that meet along an edge each have an `ORIENTED_EDGE` pointing at the same `EDGE_CURVE`, one saying “forwards” and the other “backwards.”
+Two faces that meet along an edge each have an `ORIENTED_EDGE` pointing at the same `EDGE_CURVE`, one saying "forwards" and the other "backwards."
 
 Likewise, each vertex of the block is the meeting point of three edges, and all three `EDGE_CURVE`s point at the same `VERTEX_POINT`.
 There are eight vertex records, not twenty-four.
 
 This is what makes a B-rep *watertight* by construction.
-The question “do these two faces actually meet?” is answered by the graph, not by comparing numbers.
-Geometry that does not quite line up — a plane that misses its edge’s line by $10^{-9}$ — does not break connectivity; it is what the uncertainty of @sec-contexts-units exists to tolerate.
+The question "do these two faces actually meet?" is answered by the graph, not by comparing numbers.
+Geometry that does not quite line up — a plane that misses its edge's line by $10^{-9}$ — does not break connectivity; it is what the uncertainty of @sec-contexts-units exists to tolerate.
 
 ## Orientation {#sec-brep-orientation}
 
 The second thing to understand is that nearly everything in the topology has a direction, and the directions have to agree.
 
-A **surface** has a normal: the plane through the origin with axis (0, 0, 1) has “up” as its positive side.
+A **surface** has a normal: the plane through the origin with axis (0, 0, 1) has "up" as its positive side.
 A **face** must know which side of its surface is *outside the solid*.
 The face record carries a Boolean, `same_sense`: `.T.` if the surface normal already points outward, `.F.` if the outward normal is the reverse.
 
 A **curve** has a direction: a line from a point along a vector, a circle counter-clockwise about its axis.
-An **edge** is a piece of a curve between two vertices, and `EDGE_CURVE` carries its own `same_sense`: whether the edge runs from its start vertex to its end vertex in the curve’s direction or against it.
+An **edge** is a piece of a curve between two vertices, and `EDGE_CURVE` carries its own `same_sense`: whether the edge runs from its start vertex to its end vertex in the curve's direction or against it.
 
-A **loop** is a cycle of edges, and the cycle has a direction: it is traversed counter-clockwise when viewed from outside the solid — equivalently, walking the loop with the outward normal as “up,” the face is on your left.
+A **loop** is a cycle of edges, and the cycle has a direction: it is traversed counter-clockwise when viewed from outside the solid — equivalently, walking the loop with the outward normal as "up," the face is on your left.
 Each `ORIENTED_EDGE` in the loop says whether the edge is to be traversed forwards or backwards to make that true.
 And each `FACE_BOUND` carries one more Boolean that can reverse the whole loop.
 
-Three layers of direction on an edge alone — the curve’s, the edge’s, the oriented edge’s — plus one on the loop and one on the face.
+Three layers of direction on an edge alone — the curve's, the edge's, the oriented edge's — plus one on the loop and one on the face.
 The redundancy is deliberate: it lets records be shared.
 One `EDGE_CURVE` serves two faces because each face wraps it in its own `ORIENTED_EDGE`; one `PLANE` could serve two faces on opposite sides of a slab because each face has its own `same_sense`.
 The cost is that a reader must compose the flags correctly, and a writer that gets one wrong produces a solid whose faces point inwards — which renders as black, meshes inside-out, and reports a negative volume.
@@ -108,13 +108,13 @@ A torus gives 0; so does the bracket, once its two ring-shaped faces are account
 A B-rep in STEP is *evaluated* geometry.
 There is no record of how the box was made, no parameters, no features, no dimensions in the engineering sense.
 The 60, 20 and 10 of the block appear only as point coordinates — in vertices, in line base points, in plane origins — never as a length.
-If the designer had constrained the block’s length to twice its width, that fact is gone.
+If the designer had constrained the block's length to twice its width, that fact is gone.
 This is a limitation and a strength: it is why STEP files from any CAD system can be read by any other, and why they cannot be edited the way the original model could.
-Design intent lives in the CAD system’s native format, or — for tolerances and dimensions specifically — in the PMI of @sec-pmi.
+Design intent lives in the CAD system's native format, or — for tolerances and dimensions specifically — in the PMI of @sec-pmi.
 
 ::: {.callout-important title="In brief"}
 A B-rep is a skin described in two layers: geometry (infinite surfaces, curves, points) and topology (finite faces, edges, vertices connected to each other).
 Connectivity is by shared records, not shared coordinates.
-Everything has a direction and the directions must compose to “outward normal, counter-clockwise loops.”
+Everything has a direction and the directions must compose to "outward normal, counter-clockwise loops."
 A closed shell of a solid without holes satisfies $V - E + F = 2$.
 :::

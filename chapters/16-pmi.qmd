@@ -56,7 +56,7 @@ The CAx Implementor Forum's PMI recommended practice specifies how to write all 
 A callout is drawn with curves collected under an annotation occurrence:
 
 ```step
-#600 = ANNOTATION_CURVE_OCCURRENCE('flatness callout',(#601),#605);
+#600 = ANNOTATION_CURVE_OCCURRENCE('position callout',(#601),#605);
 #601 = PRESENTATION_STYLE_ASSIGNMENT((#602));
 #602 = CURVE_STYLE('',#603,POSITIVE_LENGTH_MEASURE(0.13),#604);
 #603 = DRAUGHTING_PRE_DEFINED_CURVE_FONT('continuous');
@@ -189,8 +189,8 @@ A diameter with a plus/minus tolerance:
 #762 = SHAPE_DIMENSION_REPRESENTATION('',(#763),#165);
 #763 = ( LENGTH_MEASURE_WITH_UNIT() MEASURE_REPRESENTATION_ITEM()
          MEASURE_WITH_UNIT(LENGTH_MEASURE(6.),#166)
-         QUALIFIED_REPRESENTATION_ITEM((#764)) REPRESENTATION_ITEM('nominal
-         value') );
+         QUALIFIED_REPRESENTATION_ITEM((#764))
+         REPRESENTATION_ITEM('nominal value') );
 #764 = VALUE_FORMAT_TYPE_QUALIFIER('NR2 1.2');
 #765 = PLUS_MINUS_TOLERANCE(#766,#760);
 #766 = TOLERANCE_VALUE(#767,#768);

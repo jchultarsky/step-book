@@ -14,7 +14,7 @@ This chapter reads the analytic shapes, and the topology they force on a solid.
 ## The pin {#sec-curves-surfaces-pin}
 
 Six millimetres in diameter, thirty long, standing on the origin.
-Here is its entire solid, 55 records, with the placements' points and directions elided where they are obvious:
+Here is its entire solid, 53 records, with the placements' points and directions elided where they are obvious:
 
 ```step
 #15 = MANIFOLD_SOLID_BREP('',#16);

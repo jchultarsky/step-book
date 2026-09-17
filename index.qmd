@@ -63,7 +63,7 @@ Each chapter closes with a short summary headed *In brief*.
 ## About this book {.unnumbered}
 
 This book was written as a companion to a series of one-to-one lessons on the STEP format.
-Every file excerpt in it is real unless the surrounding text says otherwise: the records were written by Open CASCADE Technology 7.9, exporting small parts built for the purpose, and have been edited only to rename products and shorten the header.
+Every file excerpt in it is real unless the surrounding text says otherwise: the records were written by Open CASCADE Technology 7.9, exporting small parts built for the purpose, and have been edited only to rename products and to replace the author and organisation fields in the header.
 The excerpts for degree units, properties, validation properties, PMI, tessellation and edition-3 sections are written to the published patterns rather than exported, and are marked as such where they appear.
 The block file is reproduced complete in @sec-block-file.
 

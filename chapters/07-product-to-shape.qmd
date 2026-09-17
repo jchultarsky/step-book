@@ -39,7 +39,7 @@ Drawn with the arrows as the references actually point:
 
 From the part, the first two hops go *against* the references — `#4` points at `#5`, `#3` points at `#4` — and from `#3` on they run forward.
 Every walk from a product to its geometry has this shape: two steps backward, then forward all the way down.
-It is the concrete reason a reader needs an index of “who points at me,” because the file offers no other way to get from `#5` to `#3`.
+It is the concrete reason a reader needs an index of "who points at me," because the file offers no other way to get from `#5` to `#3`.
 
 ## `PRODUCT_DEFINITION_SHAPE` {#sec-product-to-shape-pds}
 
@@ -47,7 +47,7 @@ It is the concrete reason a reader needs an index of “who points at me,” bec
 #4 = PRODUCT_DEFINITION_SHAPE('','',#5);
 ```
 
-The record looks like pure bureaucracy — a name, a description, and “the thing this is the shape of” — and it is, but it is a hook that a surprising amount hangs from.
+The record looks like pure bureaucracy — a name, a description, and "the thing this is the shape of" — and it is, but it is a hook that a surprising amount hangs from.
 Its schema:
 
 ```express
@@ -62,10 +62,10 @@ ENTITY product_definition_shape
 END_ENTITY;
 ```
 
-`PRODUCT_DEFINITION_SHAPE` is a *property definition* — the same entity family that carries mass, material and user-defined attributes in @sec-properties-validation — specialised to mean “the shape property.”
+`PRODUCT_DEFINITION_SHAPE` is a *property definition* — the same entity family that carries mass, material and user-defined attributes in @sec-properties-validation — specialised to mean "the shape property."
 Its `definition` is a SELECT that may point at a `product_definition`, as here, or at a `next_assembly_usage_occurrence`, which is how a *placement* becomes a shape property of an assembly relationship in the next chapter.
 When PMI is present, the tolerance features are `shape_aspects` whose `of_shape` points back at this record.
-It is the one node in the product graph that stands for “the geometry of this part, abstractly,” and everything that needs to talk about that geometry without naming a specific face attaches here.
+It is the one node in the product graph that stands for "the geometry of this part, abstractly," and everything that needs to talk about that geometry without naming a specific face attaches here.
 
 ## `SHAPE_DEFINITION_REPRESENTATION` {#sec-product-to-shape-sdr}
 
@@ -78,7 +78,7 @@ It says: *the shape of this part is represented by `#10`*.
 
 The word *one* matters.
 A part may have several `SHAPE_DEFINITION_REPRESENTATION`s, each pointing at the same `PRODUCT_DEFINITION_SHAPE` and at a different representation: a precise B-rep, a tessellated mesh of the same body, a simplified envelope, or — commonly — a representation containing nothing but an axis placement, so that the part has a coordinate frame even when its geometry is elsewhere.
-Readers that take “the first SDR” get the first one the exporter happened to write, which is not always the one wanted.
+Readers that take "the first SDR" get the first one the exporter happened to write, which is not always the one wanted.
 
 ## The shape representation {#sec-product-to-shape-shape-rep}
 
@@ -86,7 +86,7 @@ Readers that take “the first SDR” get the first one the exporter happened to
 #10 = ADVANCED_BREP_SHAPE_REPRESENTATION('',(#11,#15),#165);
 ```
 
-Three attributes, inherited unchanged from Part 43’s `representation`: a `name`, the set of `items`, and the `context_of_items`.
+Three attributes, inherited unchanged from Part 43's `representation`: a `name`, the set of `items`, and the `context_of_items`.
 This is a **shape representation** — a representation whose items are geometry — and specifically an `ADVANCED_BREP_SHAPE_REPRESENTATION`, a subtype that promises its items are B-rep solids built from *advanced* faces (the well-behaved kind, with analytic or B-spline surfaces and fully specified edges).
 
 The subtypes of `SHAPE_REPRESENTATION` are a vocabulary for what kind of geometry to expect:
@@ -102,7 +102,7 @@ The subtypes of `SHAPE_REPRESENTATION` are a vocabulary for what kind of geometr
 | `FACETED_BREP_SHAPE_REPRESENTATION` | solids with planar faces only |
 
 Each subtype has rules about what may appear in `items`; none adds attributes.
-For the purposes of walking the file they are all `SHAPE_REPRESENTATION`s, and a reader that wants “the solid” looks for a representation whose items include a `MANIFOLD_SOLID_BREP`, whatever the record’s type name.
+For the purposes of walking the file they are all `SHAPE_REPRESENTATION`s, and a reader that wants "the solid" looks for a representation whose items include a `MANIFOLD_SOLID_BREP`, whatever the record's type name.
 
 ## The items {#sec-product-to-shape-items}
 
@@ -116,10 +116,10 @@ For the purposes of walking the file they are all `SHAPE_REPRESENTATION`s, and a
 ```
 
 `#11` is an **axis placement**: a point and two directions defining a coordinate frame — origin, Z axis, X axis.
-It is the part’s own frame, sitting here at the world origin with the identity orientation.
+It is the part's own frame, sitting here at the world origin with the identity orientation.
 Nearly every shape representation carries one as its first item.
-It does not move the geometry; the solid’s coordinates are already in this frame.
-It exists so that an assembly can say “put the frame of this part at *that* position,” and it is what the placement transforms in @sec-assemblies refer to.
+It does not move the geometry; the solid's coordinates are already in this frame.
+It exists so that an assembly can say "put the frame of this part at *that* position," and it is what the placement transforms in @sec-assemblies refer to.
 
 ```step
 #15 = MANIFOLD_SOLID_BREP('',#16);
@@ -131,11 +131,11 @@ The shell lists six faces.
 From here down is Part II.
 
 A shape representation can have more than one solid in its items — a part modelled as several disjoint bodies, or a body plus reference geometry.
-The clamp’s assembly representation in the next chapter has four items and no solids at all: an origin and three placements for the three children.
+The clamp's assembly representation in the next chapter has four items and no solids at all: an origin and three placements for the three children.
 
 ## Reading the whole path {#sec-product-to-shape-whole-path}
 
-Putting the chapter together, the complete route from “a part called BLOCK” to “a closed shell with six faces” in this file is:
+Putting the chapter together, the complete route from "a part called BLOCK" to "a closed shell with six faces" in this file is:
 
 ```default
 #7  PRODUCT ('BLOCK')
@@ -156,6 +156,6 @@ But every one of the joints is a place where something else can attach — a sec
 ::: {.callout-important title="In brief"}
 `PRODUCT_DEFINITION_SHAPE` points up at the product definition and stands for its shape abstractly.
 `SHAPE_DEFINITION_REPRESENTATION` points up at that and down at a shape representation — one of possibly several.
-The shape representation’s subtype names the kind of geometry; its items are the geometry plus, almost always, an axis placement that is the part’s own frame.
+The shape representation's subtype names the kind of geometry; its items are the geometry plus, almost always, an axis placement that is the part's own frame.
 Two hops against the arrows, then forward.
 :::
