@@ -15,6 +15,6 @@ Open-source book on the STEP file format (ISO 10303), published as an HTML site 
 - Boxed sections: `callout-note` titled "Engineering background: …" and `callout-warning` titled "In the wild: …".
 - Part 21 listings use ```` ```step ````, EXPRESS uses ```` ```express ```` (definitions in `syntax/`). Entity names in prose are upper case in backticks.
 - Appendix A embeds `examples/block.step` via the include-code-files extension; never paste the file into the chapter.
-- Citations go in `references.bib` (IEEE style via `ieee.csl`); cite with `[@key]`.
+- There is no citation apparatus. Sources are named in the text by part and edition, and collected as prose in `appendices/c-sources.qmd`.
 - Example STEP files live in `examples/`; listings in the text should be complete, valid files.
 - Check both HTML and PDF output after structural changes; tables and callouts are the usual sources of divergence.

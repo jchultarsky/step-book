@@ -16,7 +16,7 @@ Every page of the published book has an **Edit this page** link that opens the s
 ## Writing guidelines
 
 - **One sentence per line.** Start each sentence on a new line in the source. Paragraphs are still separated by blank lines. This keeps diffs readable and reviews focused.
-- **Cite the standard.** Add sources to `references.bib` and cite them with `[@key]`. Prefer the current edition of each ISO 10303 part.
+- **Cite the standard by part and edition.** Write "ISO 10303-21" or "Part 21" in the text and name the edition where it matters. New sources go in Appendix C, which is prose rather than a citation list.
 - **Use the standard's terminology.** Write entity names exactly as they appear in a Part 21 file, in backticks: `AXIS2_PLACEMENT_3D`.
 - **Keep examples real.** Listings are excerpts of the files in `examples/`, which were exported by Open CASCADE. If a listing is written to a published pattern rather than exported, the text must say so.
 - **Cross-reference, don't repeat.** Give sections, figures, tables, and listings an identifier (`{#sec-...}`, `{#tbl-...}`, `{#lst-...}`) and refer to them with `@sec-...`.

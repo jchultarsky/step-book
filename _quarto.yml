@@ -53,9 +53,6 @@ book:
     - appendices/c-sources.qmd
     - appendices/d-glossary.qmd
 
-bibliography: references.bib
-csl: ieee.csl
-
 syntax-definitions:
   - syntax/step.xml
   - syntax/express.xml
