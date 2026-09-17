@@ -21,3 +21,18 @@
     it
   }
 }
+
+// Entity names in tables.
+//
+// Names like SURFACE_OF_LINEAR_EXTRUSION are a single unbreakable word in a
+// monospaced face, so in a narrow table column Typst lets them run past the
+// column and collide with the next one.  Give them a break opportunity after
+// each underscore, inside tables only, so they wrap instead.  Code listings
+// are untouched.
+#show table: it => {
+  show raw: r => {
+    show "_": "_" + "\u{200B}"
+    r
+  }
+  it
+}
