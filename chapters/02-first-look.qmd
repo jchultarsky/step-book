@@ -43,7 +43,7 @@ DATA;
 #21 = EDGE_CURVE('',#22,#24,#26,.T.);
 #22 = VERTEX_POINT('',#23);
 #23 = CARTESIAN_POINT('',(0.,0.,0.));
-    /* ... 140 records of faces, edges, vertices and points ... */
+    /* ... 141 records of faces, edges, vertices and points ... */
 #165 = ( GEOMETRIC_REPRESENTATION_CONTEXT(3)
   GLOBAL_UNCERTAINTY_ASSIGNED_CONTEXT((#169))
   GLOBAL_UNIT_ASSIGNED_CONTEXT((#166,#167,#168))

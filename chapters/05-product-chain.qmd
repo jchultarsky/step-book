@@ -1,7 +1,7 @@
 # Identity: The Product Chain {#sec-product-chain}
 
 ::: {.chapter-abstract}
-Nine records that say "there is a part called BLOCK" — and why a CAD file needs the version-and-view structure of a product lifecycle system to say it.
+Eight records that say "there is a part called BLOCK" — and why a CAD file needs the version-and-view structure of a product lifecycle system to say it.
 :::
 
 Strip the geometry out of the block file and what remains is this:
@@ -98,7 +98,9 @@ Two records exist only to anchor the chain in a domain:
 
 `PRODUCT_CONTEXT` says what discipline the product belongs to; its `discipline_type` is `'mechanical'` and its `frame_of_reference` is the application context `#2`.
 `PRODUCT_DEFINITION_CONTEXT` says what life-cycle stage the definition is in; `life_cycle_stage` is `'design'`, again pointing at `#2`.
-Both strings are prescribed by the AP — AP214 and AP242 specify `'mechanical'` and `'design'` for ordinary part data — and both records are boilerplate that you will learn to skim.
+Both strings are convention rather than rule on these two records: the schema fixes them only on the subtypes `MECHANICAL_CONTEXT` and `DESIGN_CONTEXT`, which exporters rarely write.
+AP214 does constrain the `name` of a `PRODUCT_DEFINITION_CONTEXT` to `'part definition'` or `'part occurrence'`, which is the value `#9` carries.
+Both records are boilerplate that you will learn to skim.
 Some exporters write one pair per product, as OCCT does; others share one pair across every product in the file.
 Both are legal.
 
@@ -111,8 +113,10 @@ The last non-geometric record in the file classifies the product:
 ```
 
 A `PRODUCT_RELATED_PRODUCT_CATEGORY` has a `name`, an optional `description`, and a list of the products in the category.
-The names are prescribed: `'part'` for a component, `'assembly'` for something with children, occasionally `'tool'` or `'raw material'`.
-This is how a reader that has not yet walked the assembly structure can tell a leaf from an assembly, and it is one of the few places the AP requires a specific string rather than leaving it to the writer.
+The name comes from a fixed list, and this is one of the few places the AP requires a specific string rather than leaving it to the writer.
+AP214 allows `'part'`, `'raw material'`, `'tool'`, `'document'` and a handful of lifecycle categories; AP203 and AP242 add `'assembly'`.
+It is tempting to read the category as telling a leaf from an assembly, but it does not: OCCT writes `'part'` for the assembly as well as for its components, and AP214 has no `'assembly'` category to write.
+The assembly structure is in the `NEXT_ASSEMBLY_USAGE_OCCURRENCE` records of @sec-assemblies, and nowhere else.
 
 Notice the reference direction: the *category* points at the *product*.
 A product does not know its own category; you find it by looking for categories that list it.
@@ -158,6 +162,6 @@ The shape is attached from the other side, by records that point *at* `#5`, and 
 ::: {.callout-important title="In brief"}
 `PRODUCT` → `PRODUCT_DEFINITION_FORMATION` → `PRODUCT_DEFINITION` is item → revision → view, the PLM model built into the format.
 Each level points at the one above.
-`PRODUCT_CONTEXT` and `PRODUCT_DEFINITION_CONTEXT` anchor the chain in a discipline and life-cycle stage with prescribed strings.
-`PRODUCT_RELATED_PRODUCT_CATEGORY` says `'part'` or `'assembly'` and points at the product, not the other way round.
+`PRODUCT_CONTEXT` and `PRODUCT_DEFINITION_CONTEXT` anchor the chain in a discipline and life-cycle stage with conventional strings.
+`PRODUCT_RELATED_PRODUCT_CATEGORY` classifies the product and points at it, not the other way round, and it does not tell you whether the product is an assembly.
 :::

@@ -1,7 +1,7 @@
 # Measuring Things: Contexts and Units {#sec-contexts-units}
 
 ::: {.chapter-abstract}
-Six records that say "millimetres, radians, and anything closer than a ten-millionth is the same point." Why a millimetre is three types at once, how an inch file smuggles in a millimetre anyway, and what a kernel's tolerance is doing in an exchange file.
+Five records that say "millimetres, radians, and anything closer than a ten-millionth is the same point." Why a millimetre is three types at once, how an inch file smuggles in a millimetre anyway, and what a kernel's tolerance is doing in an exchange file.
 :::
 
 Every number in the geometry of the block file — the `60.` in a corner point, the `1.` in a direction, the `3.` in a circle's radius later on — is a bare real.
@@ -47,8 +47,9 @@ A reader that assumes one context per file will be right most of the time and wr
 - `GLOBAL_UNIT_ASSIGNED_CONTEXT((#166,#167,#168))` — the units in force for every item in this context.
 - `GLOBAL_UNCERTAINTY_ASSIGNED_CONTEXT((#169))` — the tolerance in force.
 
-Part 42 requires a geometric context to carry three units: a length unit, a plane angle unit and a solid angle unit.
-Nothing in a mechanical file ever measures a solid angle; `#168` is there because the rule says so, and you will see the steradian in nearly every file.
+The schema requires the unit set to hold exactly one length unit and exactly one plane angle unit.
+It says nothing about solid angle.
+Nothing in a mechanical file ever measures one either, but exporters write a steradian anyway, so you will see `#168` in nearly every file.
 
 ## The millimetre {#sec-contexts-units-millimetre}
 
@@ -79,7 +80,8 @@ The block, exported by the same OCCT build with its output unit set to inches:
   'distance_accuracy_value','confusion accuracy');
 ```
 
-`#166` is still a length unit and still a named unit, but the third block is now `CONVERSION_BASED_UNIT` with a `name` and a `conversion_factor`.
+`#166` is still a length unit and still a named unit, but `SI_UNIT` has been replaced by `CONVERSION_BASED_UNIT`, which carries a `name` and a `conversion_factor`.
+Because the blocks are alphabetical it now sorts first.
 The factor, `#168`, is a *measure with unit*: 25.4 of unit `#169`.
 And `#169` is the millimetre.
 So an inch file contains the millimetre after all — as the thing the inch is defined in terms of — and every coordinate in the file is then in inches: the block's far corner is at `(2.362204724409,0.787401574803,0.393700787402)`, and the uncertainty has been converted too, to $3.9 \times 10^{-9}$ inches.
@@ -116,7 +118,7 @@ PLANE_ANGLE_UNIT() );
 
 Four attributes: a value (wrapped, because `measure_value` is a SELECT), a unit (bare, because it is an entity), a name, and a description.
 The name is the important one.
-`'distance_accuracy_value'` is a string the standard prescribes, and it means: *two points closer together than this value are to be treated as coincident.*
+`'distance_accuracy_value'` is the string the recommended practices call for, and it means: *two points closer together than this value are to be treated as coincident.*
 Here that is one ten-millionth of a millimetre.
 
 ::: {.callout-note title="Engineering background: Why a tolerance travels with the geometry"}
@@ -158,7 +160,7 @@ Follow the reference from each representation to its context; never cache "the" 
 
 ::: {.callout-important title="In brief"}
 Units live in the representation context, which every geometric representation references.
-A geometric context carries three units — length, plane angle, solid angle — each a complex instance.
+A geometric context must carry a length unit and a plane angle unit, and by convention carries a solid angle unit too; each is a complex instance.
 SI units derive their dimensions; conversion-based units (inch, degree) state them and define themselves as a multiple of an SI unit, so inch files contain the millimetre.
 The uncertainty is the writing kernel's coincidence tolerance, named `'distance_accuracy_value'`.
 A file can have several contexts; units belong to representations, not files.

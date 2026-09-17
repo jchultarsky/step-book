@@ -7,7 +7,7 @@ The schema does — and reading enough of the schema language to look them up is
 :::
 
 Every entity type in a STEP file — `PRODUCT`, `ADVANCED_FACE`, `SI_UNIT` — is defined in a **schema** written in a language called **EXPRESS**, which is ISO 10303-11.
-The schema for AP214 is a single text file of about 15,000 lines; AP242's is larger.
+The schema for AP214 is a single text file of about 19,000 lines; AP242's is nearly three times that.
 It lists every entity, its attributes in order, its relationship to other entities, and a body of constraints.
 The Part 21 file is a dump of instances of those entities, and it deliberately omits everything the schema already says: attribute names, attribute types, inheritance.
 To read a record you look its type up in the schema and lay the parameters against the attributes.
@@ -182,7 +182,7 @@ END_ENTITY;
 ```
 
 A supertype clause constrains how an entity's subtypes may be combined in a single instance.
-`ONEOF (a, b, c)` means exactly one of them.
+`ONEOF (a, b, c)` means at most one of them: they are mutually exclusive, and only if the supertype is declared `ABSTRACT` must one of them be chosen.
 `a ANDOR b` means either, or both.
 `a AND b` means both.
 An entity with no supertype clause allows any combination, as if every pair were `ANDOR`.

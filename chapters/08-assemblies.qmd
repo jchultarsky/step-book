@@ -5,8 +5,8 @@ A bracket and two pins, exported as one file of 335 records.
 Where the tree is, where the positions are, why they are kept apart, and the second way exporters do it.
 :::
 
-The clamp is the bracket of @sec-product-chain with two pins standing on it: one at x = 15, one at x = 45, both on the top face.
-As a STEP file it has three products, three solids’ worth of geometry — the pin’s geometry appears once, not twice — and about forty records of structure that say how they fit together.
+The clamp is the bracket of @sec-curves-surfaces-hole-in-bracket with two pins standing on it: one at x = 15, one at x = 45, both on the top face.
+As a STEP file it has three products but only two solids’ worth of geometry — the pin’s geometry appears once, not twice — and about forty records of structure that say how they fit together.
 This chapter is about those forty.
 
 ## Three product chains {#sec-assemblies-product-chains}
@@ -62,7 +62,7 @@ The parent–child relationships are three records:
 #317 = NEXT_ASSEMBLY_USAGE_OCCURRENCE('3','pin-2','',#5,#243,$);
 ```
 
-The schema, through two levels of inheritance:
+The schema, through three levels of inheritance:
 
 ```express
 ENTITY product_definition_relationship;
@@ -77,12 +77,17 @@ ENTITY product_definition_usage
   SUBTYPE OF (product_definition_relationship);
 END_ENTITY;
 
-ENTITY next_assembly_usage_occurrence
+ENTITY assembly_component_usage
   SUBTYPE OF (product_definition_usage);
   reference_designator : OPTIONAL identifier;
 END_ENTITY;
+
+ENTITY next_assembly_usage_occurrence
+  SUBTYPE OF (assembly_component_usage);
+END_ENTITY;
 ```
 
+`NEXT_ASSEMBLY_USAGE_OCCURRENCE` declares nothing of its own; all six parameters are inherited.
 Six parameters: an id, a name, a description, the **relating** (parent) definition, the **related** (child) definition, and an optional reference designator.
 One record is one **occurrence** of one child inside one parent.
 That is the entire assembly tree: a set of directed edges between product definitions.
@@ -134,7 +139,8 @@ It ties the occurrence-shape `#238` to a relationship between two representation
 
 **`#236`** is a complex instance you can now read.
 It is a `REPRESENTATION_RELATIONSHIP` between `#40` (the bracket’s shape representation) and `#10` (the assembly’s); it is *with a transformation*, `#237`; and it is specifically a *shape representation relationship*.
-The three types are siblings under `representation_relationship`, no single leaf names the combination, so it is written externally, alphabetically.
+`REPRESENTATION_RELATIONSHIP_WITH_TRANSFORMATION` and `SHAPE_REPRESENTATION_RELATIONSHIP` are sibling subtypes of `REPRESENTATION_RELATIONSHIP`, and no single leaf names the pair.
+So the instance is written externally, with their shared supertype listed as well, and the blocks in alphabetical order.
 
 **`#237`** is the transformation, and it contains no numbers.
 `ITEM_DEFINED_TRANSFORMATION` has two attributes beyond name and description: `transform_item_1` and `transform_item_2`, both representation items.
@@ -191,13 +197,14 @@ For the clamp: bracket × 1, pin × 2.
 
 Two sharings in this file are worth noticing because they are typical and because they catch tools that copy records around.
 The origin frame `#11` is an item of *all three* shape representations — `#10`, `#40` and `#248` — and is `transform_item_1` in all three transformations.
-One record, five roles.
+One record, six roles.
 And the three geometric contexts (`#27`, `#230`, `#302`) are textually identical but distinct records, one per product; each representation points at its own.
 
 ::: {.callout-warning title="In the wild: The category that says 'part'"}
-@sec-product-chain said `PRODUCT_RELATED_PRODUCT_CATEGORY` tells you whether a product is a `'part'` or an `'assembly'`.
 This exporter writes `'part'` for all three products, including the assembly (`#32` points at `#7`, CLAMP-ASSY).
-Other exporters get it right; some omit the category entirely.
+That is not a defect: these are AP214 files, and AP214's category list has no `'assembly'` in it.
+Exporters writing AP203 or AP242 may write `'assembly'`, which those schemas allow; some omit the category entirely.
+Either way the category is no substitute for walking the `NEXT_ASSEMBLY_USAGE_OCCURRENCE` records.
 The NAUOs are the truth: a definition with children is an assembly whatever its category says.
 :::
 

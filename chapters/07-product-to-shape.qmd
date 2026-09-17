@@ -149,8 +149,8 @@ Putting the chapter together, the complete route from “a part called BLOCK” 
 #17 ... ADVANCED_FACE x 6
 ```
 
-Ten records from the part number to the first face, five of which exist only to connect the other five.
-It is a lot of indirection for a single block, and the same ten records appear, once per part, in a file with a thousand parts.
+Nine records from the part number to the first face, four of which exist only to connect the other five.
+It is a lot of indirection for a single block, and the same nine records appear, once per part, in a file with a thousand parts.
 But every one of the joints is a place where something else can attach — a second version, a manufacturing view, a tessellated alternative, an assembly placement — and the format pays for that flexibility on every part whether it is used or not.
 
 ::: {.callout-important title="In brief"}
