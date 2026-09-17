@@ -40,7 +40,7 @@ Writing AP214 for colour is still common and still works; writing AP203 for anyt
 
 An AP is large, and no implementation supports all of it.
 The standard therefore defines **conformance classes**: named subsets an implementation can claim.
-AP203's original six classes ranged from "configuration-controlled design without shape" up through wireframe, surface, faceted B-rep and advanced B-rep.
+AP203's original classes were six shape levels — configuration-controlled design without shape, then wireframe, wireframe with topology, manifold surfaces, faceted B-rep and advanced B-rep — each in two variants, twelve in all.
 AP214 has twenty.
 AP242's are organised by capability — geometry, assembly, PMI, tessellation — and a vendor's export dialog often exposes them as options.
 
@@ -97,10 +97,10 @@ These are the errors that matter and the only ones the format cannot catch by in
 They are why validation properties exist, why validators such as NIST's STEP File Analyzer exist, and why "opens fine in my CAD system" is not the same as "correct."
 
 ::: {.callout-warning title="In the wild: Test files"}
-Two public collections are worth knowing.
-The **CAx-IF test rounds** produce files for each capability from each participating vendor, with results published; they are the reference for what a given exporter does.
-**NIST's MBE PMI validation models** are a set of parts designed to exercise semantic PMI, with published drawings and expected results, and exports of each from several CAD systems.
-Both are free, and between them they answer most "does system X write Y correctly?" questions without guesswork.
+Two public resources are worth knowing.
+The **CAx-IF** publishes its test suite definitions and, per release, an implementation coverage matrix saying which capabilities each participating CAD system supports; the test files themselves stay inside the Implementor Group.
+**NIST's MBE PMI validation models** are a set of parts designed to exercise semantic PMI, with published drawings, expected results, and exports of each from several CAD systems, and they are free to download.
+Between them they answer most "does system X write Y correctly?" questions without guesswork.
 :::
 
 ::: {.callout-important title="In brief"}

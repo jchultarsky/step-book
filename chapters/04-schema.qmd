@@ -300,7 +300,7 @@ EXPRESS identifiers are case-insensitive, and published schemas are written in l
 Part 21 keywords — entity names, enumeration values, the wrapper names — are required to be **upper case**; the grammar admits nothing else.
 So the mapping from schema to file is "upper-case the name," and the mapping back is the reverse.
 With one caveat: Part 21 also lets an AP define **short names**, abbreviations that a file may use in place of entity type names and enumeration values.
-Nothing in mechanical CAD writes them, and a file declaring `'2;1'` is promising it has not, but the abbreviation cannot be derived from the name, so a reader that meets one needs the AP's short-name table.
+Nothing in mechanical CAD writes them, and a file declaring `'2;1'` is promising it has not used them for enumeration values, but the abbreviation cannot be derived from the name, so a reader that meets one needs the AP's short-name table.
 Strings, being data, keep their case: `'BLOCK'` and `'block'` are different values.
 
 ## What to skip, and where to find the rest {#sec-schema-what-to-skip}

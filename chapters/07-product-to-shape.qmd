@@ -95,7 +95,7 @@ The subtypes of `SHAPE_REPRESENTATION` are a vocabulary for what kind of geometr
 |---|---|
 | `SHAPE_REPRESENTATION` | anything — often just an axis placement |
 | `ADVANCED_BREP_SHAPE_REPRESENTATION` | `MANIFOLD_SOLID_BREP` solids |
-| `MANIFOLD_SURFACE_SHAPE_REPRESENTATION` | open shells — surface models |
+| `MANIFOLD_SURFACE_SHAPE_REPRESENTATION` | shells, open or closed, with no solid semantics |
 | `GEOMETRICALLY_BOUNDED_SURFACE_SHAPE_REPRESENTATION` | surfaces trimmed by curves, no topology |
 | `GEOMETRICALLY_BOUNDED_WIREFRAME_SHAPE_REPRESENTATION` | curves only |
 | `TESSELLATED_SHAPE_REPRESENTATION` | triangle meshes (AP242) |

@@ -1,8 +1,8 @@
 # The Block File, Complete {#sec-block-file}
 
-The running example of Part I and @sec-reading-the-block, exactly as written by Open CASCADE Technology 7.9 with parameter curves suppressed, apart from the product name and the author and organisation fields in the header.
+The running example of Part I and @sec-reading-the-block, exactly as written by Open CASCADE Technology 7.9 with parameter curves suppressed, apart from the product id and name, and the file name, author and organisation fields in the header.
 One hundred and seventy records.
-Long records are wrapped at commas for the page; the file itself wraps them at 72 columns.
+Open CASCADE wraps long records at commas to keep lines within 72 columns, except in the header, where the `FILE_NAME` strings leave it no break point.
 
 ```{.step include="../examples/block.step"}
 ```

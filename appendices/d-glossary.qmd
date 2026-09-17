@@ -1,7 +1,7 @@
 # Glossary {#sec-glossary}
 
 Aggregate
-:   a collection-valued attribute: `SET` (unordered), `BAG` (unordered, duplicates allowed), `LIST` (ordered) or `ARRAY` (ordered, fixed bounds).
+:   a collection-valued type: `SET` (unordered, no duplicates), `BAG` (unordered, duplicates allowed), `LIST` (ordered) or `ARRAY` (ordered, fixed bounds).
     The file writes all four as a parenthesised list.
 
 AIM
@@ -40,14 +40,16 @@ Defined type
     The file does not distinguish them; a string is a string.
 
 Derived attribute
-:   one whose value is computed from others; written `*`.
+:   one whose value is computed from others rather than stored.
+    An attribute a subtype redeclares as derived keeps its slot and is written `*`; one the entity declares itself takes no slot and is not written at all.
 
 Entity
 :   a type declared in the schema, with an ordered list of attributes.
-    One record in the data section is one instance of one entity.
+    One record in the data section is one instance, of one entity or — in the complex form — of several at once.
 
 Enumeration
-:   an attribute whose value comes from a fixed set of names, written in the file between full stops: `.MILLI.`, `.T.`.
+:   a type whose values are a fixed set of names, written in the file between full stops: `.MILLI.`, `.METRE.`.
+    `BOOLEAN` and `LOGICAL` are written the same way but are base types, not enumerations.
 
 EXPRESS
 :   the schema language of ISO 10303 (Part 11).
@@ -66,7 +68,7 @@ Instance name
 :   the `#n` identifier of a record; file-local.
 
 Integrated resources
-:   the shared library of entity definitions (Parts 41–59, 101–112) from which every AP is built.
+:   the shared library of entity definitions (Parts 41–61 and 101–112) from which every AP is built.
 
 Internal mapping
 :   the ordinary one-type record form with all inherited attributes flattened.

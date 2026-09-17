@@ -32,7 +32,7 @@ A **representation** is a bag of **representation items** together with a **repr
 Every point, curve, surface, face and solid in the file is a representation item, and every one belongs to some representation, and every representation has exactly one context.
 
 The context is where units live.
-It is shared: in a single-part file there is one, and every representation in the file points at it.
+It is shared: in a single-part file one context carries the units and every geometric representation points at it — though the file may still hold a unitless 2D context per pcurve, as @sec-pcurves-meshes shows.
 In an assembly file there may be several — OCCT writes one per product, all identical — and each representation points at its own.
 A reader that assumes one context per file will be right most of the time and wrong in ways that are hard to notice.
 
@@ -47,7 +47,7 @@ A reader that assumes one context per file will be right most of the time and wr
 - `GLOBAL_UNIT_ASSIGNED_CONTEXT((#166,#167,#168))` — the units in force for every item in this context.
 - `GLOBAL_UNCERTAINTY_ASSIGNED_CONTEXT((#169))` — the tolerance in force.
 
-The schema requires the unit set to hold exactly one length unit and exactly one plane angle unit.
+AP214 requires the unit set to hold exactly one length unit and exactly one plane angle unit; AP203 and AP242 leave the combination to the recommended practices.
 It says nothing about solid angle.
 Nothing in a mechanical file ever measures one either, but exporters write a steradian anyway, so you will see `#168` in nearly every file.
 
@@ -88,7 +88,9 @@ So an inch file contains the millimetre after all — as the thing the inch is d
 
 Three details.
 First, `NAMED_UNIT(#167)` is an explicit reference where the SI record had `*`.
-An SI unit can derive its dimensions from its name; a conversion-based unit cannot, so `dimensions` must be stored, and `DIMENSIONAL_EXPONENTS(1.,0.,0.,0.,0.,0.,0.)` says length$^{1}$ mass$^{0}$ time$^{0}$ current$^{0}$ temperature$^{0}$ substance$^{0}$ luminosity$^{0}$ — a length.
+An SI unit's dimensions are always derived from its name, so that slot is `*`.
+For a conversion-based unit AP203 and AP242 require the exponents to be written out and to agree with the factor's unit, which is what this file does; AP214 edition 3 derives them instead, so a file written to that edition would carry `NAMED_UNIT(*)` and no `DIMENSIONAL_EXPONENTS` record.
+Here `DIMENSIONAL_EXPONENTS(1.,0.,0.,0.,0.,0.,0.)` says length$^{1}$ mass$^{0}$ time$^{0}$ current$^{0}$ temperature$^{0}$ substance$^{0}$ luminosity$^{0}$ — a length.
 Second, the string `'INCH'` is a label.
 What makes it an inch is the `25.4`.
 A reader that keys on the name will meet `'inch'`, `'IN'` and `'Inch'` before long; the factor is the reliable part.
@@ -153,14 +155,15 @@ These appear with validation properties in @sec-properties-validation and almost
 
 The clamp assembly of @sec-assemblies has three geometric contexts, one per product, all textually identical to `#165`.
 Each product's shape representation points at its own.
-This is legal and common, and it has a consequence that is easy to state and easy to forget: **units are a property of the representation, not of the file.**
+This is not merely common but forced: the transformation record that places a component requires its two representations to sit in different context records, so an assembly written that way cannot share one.
+It has a consequence that is easy to state and easy to forget: **units are a property of the representation, not of the file.**
 A file may, in principle, hold one part in millimetres and another in inches, each in its own context, and an assembly that places both.
 Readers that read the first context they find and apply it to everything will get the second part wrong by a factor of 25.4.
 Follow the reference from each representation to its context; never cache "the" unit.
 
 ::: {.callout-important title="In brief"}
 Units live in the representation context, which every geometric representation references.
-A geometric context must carry a length unit and a plane angle unit, and by convention carries a solid angle unit too; each is a complex instance.
+A geometric context carries a length unit and a plane angle unit — required by AP214, conventional elsewhere — and by convention a solid angle unit too; each is a complex instance.
 SI units derive their dimensions; conversion-based units (inch, degree) state them and define themselves as a multiple of an SI unit, so inch files contain the millimetre.
 The uncertainty is the writing kernel's coincidence tolerance, named `'distance_accuracy_value'`.
 A file can have several contexts; units belong to representations, not files.

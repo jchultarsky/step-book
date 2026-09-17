@@ -98,8 +98,9 @@ Two records exist only to anchor the chain in a domain:
 
 `PRODUCT_CONTEXT` says what discipline the product belongs to; its `discipline_type` is `'mechanical'` and its `frame_of_reference` is the application context `#2`.
 `PRODUCT_DEFINITION_CONTEXT` says what life-cycle stage the definition is in; `life_cycle_stage` is `'design'`, again pointing at `#2`.
-Both strings are convention rather than rule on these two records: the schema fixes them only on the subtypes `MECHANICAL_CONTEXT` and `DESIGN_CONTEXT`, which exporters rarely write.
-AP214 does constrain the `name` of a `PRODUCT_DEFINITION_CONTEXT` to `'part definition'` or `'part occurrence'`, which is the value `#9` carries.
+Both strings are convention rather than rule.
+AP203 and AP242 fix them on the subtypes `MECHANICAL_CONTEXT` and `DESIGN_CONTEXT`, which exporters rarely write; AP214, the schema of this file, does not define those subtypes at all, and leaves both values as unconstrained labels.
+What AP214 does say runs the other way: a definition whose context is named `'part definition'` or `'part occurrence'` must belong to a product categorised `'part'`, `'raw material'` or `'tool'`.
 Both records are boilerplate that you will learn to skim.
 Some exporters write one pair per product, as OCCT does; others share one pair across every product in the file.
 Both are legal.
@@ -113,9 +114,10 @@ The last non-geometric record in the file classifies the product:
 ```
 
 A `PRODUCT_RELATED_PRODUCT_CATEGORY` has a `name`, an optional `description`, and a list of the products in the category.
-The name comes from a fixed list, and this is one of the few places the AP requires a specific string rather than leaving it to the writer.
-AP214 allows `'part'`, `'raw material'`, `'tool'`, `'document'` and a handful of lifecycle categories; AP203 and AP242 add `'assembly'`.
-It is tempting to read the category as telling a leaf from an assembly, but it does not: OCCT writes `'part'` for the assembly as well as for its components, and AP214 has no `'assembly'` category to write.
+The name is an unconstrained string, but the APs constrain it from outside, and differently.
+AP214 requires every product to carry exactly one category named from a fixed list: `'part'`, `'raw material'`, `'tool'`, `'document'` and five more for requirements, functions and conceptual products.
+AP203 and AP242 impose no such list; they only require `'assembly'` on a product whose definition is declared an assembly definition, and `'part'`, `'raw material'` or `'tool'` on a part occurrence.
+Either way the category does not tell a leaf from an assembly: OCCT writes `'part'` for the assembly as well as for its components.
 The assembly structure is in the `NEXT_ASSEMBLY_USAGE_OCCURRENCE` records of @sec-assemblies, and nowhere else.
 
 Notice the reference direction: the *category* points at the *product*.
@@ -126,6 +128,7 @@ This is the pattern from @sec-first-look again — specific to general — and i
 
 The schema says what the slots are for.
 It does not say what a CAD system should write in them, and they differ.
+What follows is what these exporters have been seen to write, not what their vendors promise.
 
 - **`product.id`** is meant to be the part number.
   OCCT writes whatever name it was given; SolidWorks writes the document's filename without extension; NX and Creo write the part name, which in a well-run shop *is* the part number; CATIA writes the part number field from the part's properties, which is often the same string as the name.
@@ -141,8 +144,8 @@ The practical rule for finding "the name of this part" is: `product.name`, falli
 The practical rule for finding the part *number* is `product.id`, and it is only as good as the exporter's mapping.
 
 ::: {.callout-warning title="In the wild: Formations with a source"}
-AP214 and AP242 define a subtype, `PRODUCT_DEFINITION_FORMATION_WITH_SPECIFIED_SOURCE`, which adds a `make_or_buy` enumeration: `.MADE.`, `.BOUGHT.` or `.NOT_KNOWN.`.
-Some exporters — notably older Dassault and Siemens translators — write this subtype for every product with `.NOT_KNOWN.`, so a file's formation records look like `PRODUCT_DEFINITION_FORMATION_WITH_SPECIFIED_SOURCE('','',#7,.NOT_KNOWN.)`.
+All three protocols define a subtype, `PRODUCT_DEFINITION_FORMATION_WITH_SPECIFIED_SOURCE`, which adds a `make_or_buy` enumeration: `.MADE.`, `.BOUGHT.` or `.NOT_KNOWN.`.
+It is written mostly in AP203 exports, almost always with `.NOT_KNOWN.`, so a file's formation records look like `PRODUCT_DEFINITION_FORMATION_WITH_SPECIFIED_SOURCE('','',#7,.NOT_KNOWN.)`.
 It is the same record with one more attribute, and a reader should treat it as a formation.
 :::
 

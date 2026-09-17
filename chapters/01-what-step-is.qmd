@@ -55,14 +55,14 @@ Learn the ranges once and you can find anything.
 | 11–14 | Description methods | **11**, the EXPRESS language |
 | 21–28 | Implementation methods | **21**, the clear-text file; 26, 28 |
 | 31–35 | Conformance testing | rarely |
-| 41–59 | Integrated generic resources | **41, 42, 43, 44, 46, 47** |
+| 41–61 | Integrated generic resources | **41, 42, 43, 44, 46, 47** |
 | 101–112 | Integrated application resources | 101 (draughting), 105 (kinematics) |
 | 2xx | Application protocols | **203, 214, 242** |
 | 3xx | Abstract test suites | rarely |
 | 4xx, 1xxx | Application modules | the building blocks of AP242 |
 | 5xx | Application interpreted constructs | when tracing where an entity came from |
 
-The *integrated resources* in the 41–59 and 101–112 ranges are the heart of it.
+The *integrated resources* in the 41–61 and 101–112 ranges are the heart of it.
 Part 41 defines products, versions and contexts; Part 42 geometry and topology; Part 43 the notion of a *representation*; Part 44 product structure and assemblies; Part 46 visual presentation; Part 47 shape tolerances.
 Every entity in a mechanical STEP file comes from one of these.
 The application protocols do not define geometry; they *use* Part 42's.
@@ -111,7 +111,7 @@ Editions 2 (2020), 3 (2022) and 4 (2025) extended it further.
 A file claiming AP242 can carry everything an AP214 file can and more; a reader that handles AP242 handles the older two almost for free, since the geometry and product-structure entities are the same.
 
 For the purposes of this book the differences are small until Part III.
-The block, the cylinder and the clamp assembly are written as AP214 files because that is what the exporter chose; the same records, with a different header and two extra strings, would be AP242.
+The block, the cylinder and the clamp assembly are written as AP214 files because that is what the exporter chose; the same records, with a different header and three changed values in the two opening records, would be AP242.
 
 ## What "conforming" means {#sec-what-step-is-conforming}
 
@@ -124,7 +124,8 @@ It claims to follow a *schema*: the `FILE_SCHEMA` header names the AP.
 Every record must be an entity type in that schema, with the right number of attributes of the right types.
 Exporters get this wrong more often than you would expect, usually by naming one AP and writing entities from another.
 
-And it claims to satisfy the schema's *rules*: the constraints that say, for instance, that a closed shell's faces must actually enclose a volume, or that a `PRODUCT_DEFINITION` must have exactly one shape.
+And it claims to satisfy the schema's *rules*: constraints such as AP214's requirement that every application context be named by an `APPLICATION_PROTOCOL_DEFINITION` carrying the right schema string, or that a geometric context be two- or three-dimensional.
+Some things you would expect to be rules are not: that a closed shell encloses a volume is stated in Part 42's prose as an informal proposition, and no EXPRESS constraint checks it.
 Almost no writer checks these, almost no reader enforces them, and the tools that do — validators such as NIST's STEP File Analyzer — exist precisely because they are so often violated.
 
 None of this makes the format unreliable.

@@ -25,12 +25,12 @@ A **datum reference frame** is an ordered set of datums — primary, secondary, 
 *A|B|C* means: sit the part on A, slide it against B, then against C.
 Order matters because it decides which contact takes precedence.
 
-A **feature control frame** is the rectangular box on a drawing that states one tolerance: a **characteristic symbol** (position, flatness, perpendicularity, and eleven others, each with its own glyph), a **tolerance zone** (a width or a diameter within which the feature's real surface or axis must lie), optional **modifiers** (the circled M, "maximum material condition," changes how the zone grows as the feature departs from its largest permitted size), and the **datum references** the tolerance is measured against.
+A **feature control frame** is the rectangular box on a drawing that states one tolerance: a **characteristic symbol** (position, flatness, perpendicularity, and eleven others, each with its own glyph), a **tolerance zone** (a width or a diameter within which the feature's real surface or axis must lie), optional **modifiers** (the circled M, "maximum material condition," lets the zone grow as the feature departs from the size at which it holds the most material — largest for a shaft, smallest for a hole), and the **datum references** the tolerance is measured against.
 
 **Dimensions** give sizes and locations, each with a plus/minus tolerance or a fit class.
 
 Two standards say how to write all this: ASME Y14.5 in North America and the ISO GPS family (ISO 1101 and its neighbours) elsewhere.
-They agree on most symbols and differ in some default rules, which is why a semantic PMI record carries a flag saying which system it follows.
+They agree on most symbols and differ in some default rules, which is why a file with semantic PMI names the standard it follows, in an `APPLIED_DOCUMENT_REFERENCE` attached to the part's product definition.
 :::
 
 ## Two kinds of PMI {#sec-pmi-two-kinds}
@@ -80,7 +80,8 @@ Several occurrences making one callout are grouped:
 
 — the frame, its leader line, its arrowhead.
 The callout lies on an annotation plane, which fixes the plane in 3D that the 2D-looking symbol is drawn in.
-The plane carries a style of its own, in practice a null style meaning *draw this however you like*, because a rule pairs a `PLANE` with a fill-area style and a `PLANAR_BOX` with a curve style:
+The plane carries a style of its own, in practice a null style meaning *draw this however you like*.
+A rule in the schema asks for a fill-area style with a `PLANE` and a curve style with a `PLANAR_BOX`; the null style the recommended practice prescribes satisfies neither, so files that follow the practice fail that rule:
 
 ```step
 #615 = ANNOTATION_PLANE('',(#618),#616,(#610));
@@ -119,7 +120,8 @@ A feature spanning several faces is written either as one shape aspect per face,
 This is the record that connects a tolerance's *target* to a specific face in the B-rep, and it is where semantic PMI most often goes wrong in practice — a tolerance whose shape aspect has no `GEOMETRIC_ITEM_SPECIFIC_USAGE`, or one pointing at a face that was re-numbered, is a tolerance on nothing.
 
 A feature made of several faces (the two halves of a slot, a pattern of holes) is a `COMPOSITE_SHAPE_ASPECT` or a `COMPOSITE_GROUP_SHAPE_ASPECT` with `SHAPE_ASPECT_RELATIONSHIP`s to its members.
-A hole's axis, as opposed to its wall, is a `DERIVED_SHAPE_ASPECT` with `product_definitional` `.F.`, related to the wall's shape aspect by a `SHAPE_ASPECT_RELATIONSHIP`.
+A hole's axis, as opposed to its wall, is a `DERIVED_SHAPE_ASPECT` with `product_definitional` `.F.`, tied to the wall's shape aspect by a `SHAPE_ASPECT_DERIVING_RELATIONSHIP` whose *relating* aspect is the axis.
+The schema requires at least one such relationship for every derived shape aspect.
 Particular derivations have their own subtypes — `APEX`, `CENTRE_OF_SYMMETRY`, `TANGENT` and others — and the recommended practices ask for a meaningful `name` string without fixing one.
 The vocabulary is the standard's usual: general entities, fixed strings.
 
@@ -159,7 +161,7 @@ A flatness tolerance on the top face:
 
 `GEOMETRIC_TOLERANCE`, the supertype, has `name`, `description`, `magnitude` (a measure with unit: the zone width) and `toleranced_shape_aspect`.
 `FLATNESS_TOLERANCE` adds nothing; it is the *type* that says which characteristic this is.
-There are fifteen subtypes, roughly one per symbol: the schema keeps coaxiality and concentricity apart where ASME Y14.5 merges them into one.
+There are fifteen subtypes, roughly one per symbol: the schema keeps coaxiality and concentricity apart where ISO 1101 gives them a single symbol and ASME Y14.5 has only concentricity.
 
 A position tolerance on the hole, referred to datums, with a modifier and a cylindrical zone, is where the complex instance returns:
 
@@ -230,7 +232,7 @@ looking along its axis */
 ```
 
 A saved view is a `DRAUGHTING_MODEL` paired with a `CAMERA_MODEL_D3` among its items: the model says what is shown, the camera says from where.
-The view's *name* lives on the camera, not on the model, and from AP242 second edition a `MODEL_GEOMETRIC_VIEW` carries it as well.
+Since AP242 second edition the view's *name* lives on a `MODEL_GEOMETRIC_VIEW` tying the model and the camera together; older files put it on the camera, and a reader should look there second.
 The camera's `view_reference_system` is an axis placement giving position and direction.
 The same callout may appear in several views.
 This is why a viewer sometimes shows six annotations out of ninety: it has opened the first view.

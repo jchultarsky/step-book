@@ -92,7 +92,7 @@ The `definition` points at the `PRODUCT_DEFINITION_SHAPE` (`#4`) — these are p
 The centroid is an ordinary `CARTESIAN_POINT` in the geometric context, so it is in millimetres automatically.
 
 Validation properties extend well beyond solids, as separate families rather than as extensions of this one.
-`'assembly validation property'` with `'number of children'` (a `COUNT_MEASURE`) records how many components an assembly should have, and `'notional solids centroid'` checks that placements composed correctly.
+`'assembly validation property'` with `'number of children'` (an `INTEGER_REPRESENTATION_ITEM` in AP242, a `COUNT_MEASURE` in AP214) records how many components an assembly should have, and `'notional solids centroid'` checks that placements composed correctly.
 The same pattern with a different `PROPERTY_DEFINITION` name gives `'tessellated validation property'`, `'attribute validation property'`, `'composite validation property'` and `'pmi validation property'`, the last with items named `'number of annotations'`, `'number of views'` and `'affected area'`, so that a receiver can confirm that not just the shape but the annotations arrived.
 
 ::: {.callout-note title="Engineering background: Why an exchange format needs a checksum"}

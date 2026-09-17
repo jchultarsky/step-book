@@ -80,7 +80,9 @@ The `HEADER` says what the file is: who wrote it, when, and — crucially — wh
 It has its own chapter.
 The `DATA` section is the payload: a set of records, each with a number, that reference one another to form a graph.
 There is nothing else.
-Whitespace and line breaks are insignificant except inside strings; the exporter above wraps long records at 72 columns because an old convention says so, and many do not.
+Line breaks and tabs are ignored everywhere, even inside a string, so a long record or a long string may be split across lines without changing what it means.
+The space character is the only whitespace that separates tokens, and inside a string it is data.
+The exporter above wraps long records at 72 columns because an old convention says so, and many do not.
 
 Comments are allowed anywhere whitespace is, delimited `/* ... */`.
 Real files almost never contain them; the ones above were added for the listing.
@@ -118,11 +120,13 @@ Same slots, seen from the two ends.
 ## The kinds of value {#sec-first-look-kinds-of-value}
 
 Every parameter is one of a small number of things.
-The block file contains all of them but one.
+The block file contains all of them but the binary.
 
 **Strings** are single-quoted: `'BLOCK'`, `'design'`, `''`.
 An apostrophe inside a string is doubled: `'Julian''s bracket'`.
-Anything outside plain ASCII is, strictly, spelled with an escape sequence — `\X2\00C5\X0\` for Å — though many exporters write raw UTF-8 and most readers accept it.
+A file declaring `'2;1'` or `'3;1'` must spell anything above ASCII with an escape sequence — `\X2\00C5\X0\` for Å.
+Edition 3 made UTF-8 the encoding of the whole file, so a file declaring `'4;1'` may write Å directly.
+Many exporters write raw UTF-8 while still declaring `'2;1'`, and most readers accept it.
 Nearly every entity in a mechanical file begins with a `name` attribute, and nearly every exporter leaves it empty, which is why `''` opens so many records.
 
 **References** are instance names used as values: the `#8` in `(#8)`, the `#16` in `MANIFOLD_SOLID_BREP('',#16)`.
@@ -145,10 +149,15 @@ A parameter that is a real is *never* written as an integer, so `3` and `3.` are
 **Enumerations** are upper-case names between dots: `.T.`, `.F.`, `.MILLI.`, `.METRE.`, `.RADIAN.`.
 The two most common are the Booleans, `.T.` and `.F.`.
 Part 21 is strict here: a `BOOLEAN` is encoded by the single character `T` or `F` between the dots, so `.TRUE.` is not a legal spelling of one.
-Enumeration values come from a fixed list in the schema — `.MILLI.` is one of about twenty SI prefixes.
+Enumeration values come from a fixed list in the schema — `.MILLI.` is one of the sixteen SI prefixes the schema defines.
 
-**Binary** values are hexadecimal in double quotes: `"0F3A"`.
+**Binary** values are hexadecimal in double quotes, with one extra leading digit: `"0F3A"`.
+That first digit is not data — it says how many zero bits were added on the left to fill the last group of four, so `"0F3A"` is the twelve bits `F3A`.
 They do not occur in this file, and are rare in mechanical files generally; you meet them in PMI for encoded text and in a few presentation entities.
+
+**Wrapped values** are a type name with one value in parentheses: the `LENGTH_MEASURE(1.E-07)` in `#169`.
+Part 21 requires the wrapper whenever an attribute's schema type is a choice and the value chosen is a number, a string or an enumeration rather than a reference, so that a reader knows which choice was taken.
+@sec-schema gives the rule.
 
 Two symbols remain, and they are the ones that trip people up.
 
@@ -156,10 +165,11 @@ Two symbols remain, and they are the ones that trip people up.
 
 `$` means **no value**.
 The attribute is optional in the schema and this record does not supply it.
-In `SI_UNIT($,.RADIAN.)` the first attribute is the prefix — `.MILLI.` in the millimetre record two lines above — and a plain radian has none.
+In `SI_UNIT($,.RADIAN.)` the first attribute is the prefix — `.MILLI.` in the millimetre record on the line above — and a plain radian has none.
 In `PRODUCT_RELATED_PRODUCT_CATEGORY('part',$,(#7))` the description is absent.
 
-`*` means **derived**: the attribute exists, but the schema says its value is *computed* from other attributes rather than stored, and the file writes `*` to hold the slot.
+`*` holds the place of an attribute that the entity inherited as a stored value but that its own type recomputes.
+An attribute that is derived from the start takes no slot at all and is simply not written; it is only a *redeclared* one that leaves a gap to fill.
 In `NAMED_UNIT(*)` the attribute is `dimensions`, and an SI unit knows its own dimensions from its name.
 In `ORIENTED_EDGE('',*,*,#21,.F.)` the second and third attributes — the edge's start and end vertices — are derived from the edge it refers to and the orientation flag.
 

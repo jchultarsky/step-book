@@ -34,7 +34,7 @@ Nothing reads it.
 The second is the **implementation level**, and it matters, though not in the way the digits suggest.
 The first number is the registered version of Part 21 whose features the file uses; the second is the syntactical conformance class.
 It is not the edition of the document the writer worked from.
-`'2;1'` says the file stays inside what edition 1 defined: one data section, no optional header records, no short names.
+`'2;1'` says the file stays inside what edition 1 defined: one data section, no optional header records, no short names for enumeration values.
 That is what virtually every file in existence declares, including files written long after edition 2 appeared in 2002.
 A file that uses edition 2's multiple data sections or optional header records declares `'3;1'`, and a file that uses anything edition 3 added declares `'4;1'`, `'4;2'` or `'4;3'` according to which of the three conformance classes it needs.
 @sec-beyond-edition-2 covers what changed; until then, `'2;1'`.
@@ -113,8 +113,8 @@ DATA;
 #2 = APPLICATION_CONTEXT('Managed model based 3d engineering');
 ```
 
-Every other data record is identical, apart from the product name, which was not edited in this export.
-For a plain solid there is no difference between an AP214 and an AP242 file beyond the header and these two strings, which is why a reader that handles one handles the other with little extra work.
+Every other data record is identical, apart from `#7`, whose identifier and name were left as the exporter wrote them in this file.
+For a plain solid there is no difference between an AP214 and an AP242 file beyond the header and the three values in `#1` and `#2` — the schema name, the year and the context text — which is why a reader that handles one handles the other with little extra work.
 The differences begin with colours, PMI and tessellation.
 
 ::: {.callout-warning title="In the wild: When the schema lies"}
@@ -130,12 +130,12 @@ There is no rule in the standard that permits this, and it is what every widely 
 Edition 2 defines three more header entities that may follow `FILE_SCHEMA`:
 
 ```step
-FILE_POPULATION('AUTOMOTIVE_DESIGN','section boundary',$);
-SECTION_LANGUAGE($,'en');
+FILE_POPULATION('AUTOMOTIVE_DESIGN','SECTION_BOUNDARY',$);
+SECTION_LANGUAGE($,'eng');
 SECTION_CONTEXT($,('...'));
 ```
 
-`FILE_POPULATION` describes which subset of the schema is actually used; `SECTION_LANGUAGE` declares the natural language of the strings; `SECTION_CONTEXT` is a free-form context list.
+`FILE_POPULATION` says which instances, gathered from which data sections and by which of three named methods, are to be checked against a schema; `SECTION_LANGUAGE` declares the natural language of the strings, as a three-letter ISO 639-2 code; `SECTION_CONTEXT` is a free-form context list.
 They are rare enough that many readers do not implement them and a few reject files that contain them.
 Edition 3 adds more.
 The standard allows user-defined header records as well, provided the keyword begins with an exclamation mark, as in `!A_SPECIAL_ENTITY('ABC',123);`.
@@ -162,8 +162,11 @@ A file might in principle carry data from several contexts; and when data is mov
 In practice there is one application context per file and it agrees with the header.
 When it does not, believe the header, and note that the exporter was careless.
 
-The strings inside `#1` and `#2` are prescribed by each AP and are exactly the ones above for AP214.
-AP203 writes `'config_control_design'` and `1994`; AP242 writes the strings shown earlier and `2013` or later.
+Each AP's schema has a global rule fixing the schema-name string in `#1`, and it differs by edition.
+AP203 edition 1 writes `'config_control_design'`; edition 2 requires the long modular name.
+AP214 edition 1 files write `'automotive_design'`, as above, while the edition 3 schema requires `'AUTOMOTIVE_DESIGN_LF'`.
+AP242 requires `'ap242_managed_model_based_3d_engineering_mim_lf'` — and the export shown earlier writes it without the `_mim_lf`, which is a rule violation of exactly the kind @sec-what-step-is warned about.
+The year and the `APPLICATION_CONTEXT` text are convention: nothing in the schema checks either.
 They are the second place, after the header, where you can identify the protocol — and a place where files that have been converted between protocols often still show their origin.
 
 ::: {.callout-important title="In brief"}
