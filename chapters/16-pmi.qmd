@@ -44,7 +44,8 @@ Every CAD system can export this, and every viewer can show it, and it carries e
 
 **Semantic (representation) PMI** is the tolerance as *data*: a `POSITION_TOLERANCE` record with a magnitude of 0.2 millimetres, referring to a `SHAPE_ASPECT` that is linked to a specific face, with a datum system whose datums are linked to other faces.
 A program can read it, check it, feed it to an inspection planner.
-Only some systems export it, only some readers consume it, and it is the reason AP242 is different from AP214.
+Only some systems export it and only some readers consume it.
+AP214 and AP203 second edition already carry the basic tolerance records; what AP242 adds is the datum system — `DATUM_SYSTEM` and its compartments — along with tolerance modifiers and the machinery for linking the semantic data to the drawn callout.
 
 A file may have either, both, or — best — both with a link from each graphical callout to the semantic data it depicts.
 The CAx Implementor Forum's PMI recommended practice specifies how to write all three, and the records below follow it.
@@ -78,22 +79,24 @@ Several occurrences making one callout are grouped:
 ```
 
 — the frame, its leader line, its arrowhead.
-The callout lies on an annotation plane, which fixes the plane in 3D that the 2D-looking symbol is drawn in:
+The callout lies on an annotation plane, which fixes the plane in 3D that the 2D-looking symbol is drawn in.
+The plane carries a style of its own, in practice a null style meaning *draw this however you like*, because a rule pairs a `PLANE` with a fill-area style and a `PLANAR_BOX` with a curve style:
 
 ```step
-#615 = ANNOTATION_PLANE('',(#601),#616,(#610));
+#615 = ANNOTATION_PLANE('',(#618),#616,(#610));
 #616 = PLANE('',#617);
+#618 = PRESENTATION_STYLE_ASSIGNMENT((NULL_STYLE(.NULL.)));
 ```
 
 And all annotations, planes and callouts are collected in a **`DRAUGHTING_MODEL`**, a representation in the same geometric context as the part:
 
 ```step
 #630 = DRAUGHTING_MODEL('',(#615,#610, /* ... */ ),#165);
-#631 = MECHANICAL_DESIGN_AND_DRAUGHTING_RELATIONSHIP('','',#630,#10);
+#631 = MECHANICAL_DESIGN_AND_DRAUGHTING_RELATIONSHIP('','',#10,#630);
 ```
 
-The relationship record ties the draughting model to the shape representation it annotates.
-A reader looking for "all the PMI drawn on this part" finds the draughting models related to its shape representation and walks their items.
+The relationship record puts the shape representation and the draughting model side by side; by convention the global container goes in `rep_2`.
+A reader looking for "all the PMI drawn on this part" finds the draughting models that share the part's geometric context and walks their items.
 
 That is graphical PMI: geometry that happens to look like symbols, organised so a viewer knows to draw it and where.
 
@@ -103,26 +106,28 @@ Semantic PMI is built on **shape aspects** — named regions of a part's shape t
 
 ```step
 #700 = SHAPE_ASPECT('top face','',#4,.T.);
-#701 = GEOMETRIC_ITEM_SPECIFIC_USAGE('','',#700,#10,(#153));
+#701 = GEOMETRIC_ITEM_SPECIFIC_USAGE('','',#700,#10,#153);
 ```
 
 `SHAPE_ASPECT` has a `name`, a `description`, `of_shape` (the part's `PRODUCT_DEFINITION_SHAPE` — the abstract shape from @sec-product-to-shape, now earning its keep) and a `product_definitional` flag.
 It says "there is a feature of this part's shape called *top face*."
 It does not, by itself, say which geometry that is.
 
-`GEOMETRIC_ITEM_SPECIFIC_USAGE` does: its `definition` is the shape aspect, its `used_representation` is the shape representation, and its `identified_item` is the set containing face `#153` (a set, so that one shape aspect can span several faces).
+`GEOMETRIC_ITEM_SPECIFIC_USAGE` does: its `definition` is the shape aspect, its `used_representation` is the shape representation, and its `identified_item` is face `#153`.
+One usage record names one item.
+A feature spanning several faces is written either as one shape aspect per face, or with the supertype `ITEM_IDENTIFIED_REPRESENTATION_USAGE` and a typed `SET_REPRESENTATION_ITEM(...)` holding them all.
 This is the record that connects a tolerance's *target* to a specific face in the B-rep, and it is where semantic PMI most often goes wrong in practice — a tolerance whose shape aspect has no `GEOMETRIC_ITEM_SPECIFIC_USAGE`, or one pointing at a face that was re-numbered, is a tolerance on nothing.
 
 A feature made of several faces (the two halves of a slot, a pattern of holes) is a `COMPOSITE_SHAPE_ASPECT` or a `COMPOSITE_GROUP_SHAPE_ASPECT` with `SHAPE_ASPECT_RELATIONSHIP`s to its members.
-A hole's axis, as opposed to its wall, is a shape aspect with `description` `'centre axis'`, related to the wall's shape aspect by a relationship named `'derived'`.
+A hole's axis, as opposed to its wall, is a `DERIVED_SHAPE_ASPECT` with `product_definitional` `.F.`, related to the wall's shape aspect by a `SHAPE_ASPECT_RELATIONSHIP`.
+Particular derivations have their own subtypes — `APEX`, `CENTRE_OF_SYMMETRY`, `TANGENT` and others — and the recommended practices ask for a meaningful `name` string without fixing one.
 The vocabulary is the standard's usual: general entities, fixed strings.
 
 ## Semantic PMI: datums {#sec-pmi-datums}
 
 ```step
 #710 = DATUM_FEATURE('','',#4,.T.);
-#711 = GEOMETRIC_ITEM_SPECIFIC_USAGE('','',#710,#10,(#141));        /* the bottom
-face */
+#711 = GEOMETRIC_ITEM_SPECIFIC_USAGE('','',#710,#10,#141);   /* the bottom face */
 #712 = DATUM('','',#4,.F.,'A');
 #713 = SHAPE_ASPECT_RELATIONSHIP('','',#710,#712);
 ```
@@ -136,8 +141,8 @@ A datum reference frame collects them in order:
 
 ```step
 #720 = DATUM_SYSTEM('','',#4,.F.,(#721,#722));
-#721 = DATUM_REFERENCE_COMPARTMENT('','',#4,.F.,#712,$);       /* A */
-#722 = DATUM_REFERENCE_COMPARTMENT('','',#4,.F.,#714,$);       /* B */
+#721 = DATUM_REFERENCE_COMPARTMENT('',$,#4,.F.,#712,$);       /* A */
+#722 = DATUM_REFERENCE_COMPARTMENT('',$,#4,.F.,#714,$);       /* B */
 ```
 
 Each compartment refers to one datum (or a common datum, A–B) and carries optional modifiers; the system lists its compartments in precedence order — primary first — in its `constituents` attribute.
@@ -154,7 +159,7 @@ A flatness tolerance on the top face:
 
 `GEOMETRIC_TOLERANCE`, the supertype, has `name`, `description`, `magnitude` (a measure with unit: the zone width) and `toleranced_shape_aspect`.
 `FLATNESS_TOLERANCE` adds nothing; it is the *type* that says which characteristic this is.
-There are fourteen subtypes, one per symbol.
+There are fifteen subtypes, roughly one per symbol: the schema keeps coaxiality and concentricity apart where ASME Y14.5 merges them into one.
 
 A position tolerance on the hole, referred to datums, with a modifier and a cylindrical zone, is where the complex instance returns:
 
@@ -170,7 +175,7 @@ A position tolerance on the hole, referred to datums, with a modifier and a cyli
 
 `GEOMETRIC_TOLERANCE_WITH_DATUM_REFERENCE` adds the datum system; `GEOMETRIC_TOLERANCE_WITH_MODIFIERS` adds the circled-M modifier; `POSITION_TOLERANCE` names the characteristic.
 Three siblings under `geometric_tolerance`, no leaf name for the combination, external mapping, alphabetical — exactly the mechanism of @sec-schema.
-The tolerance zone is a separate shape aspect (`TOLERANCE_ZONE`) whose form record's name is a fixed string: `'cylindrical or circular'` is the Ø in front of the 0.2; a planar zone is `'within a circle'`, `'between two parallel planes'`, and so on.
+The tolerance zone is a separate shape aspect (`TOLERANCE_ZONE`) whose form record's name comes from a fixed list that the schema enforces with a global rule: `'cylindrical or circular'` is the Ø in front of the 0.2, a flatness zone is `'between two equidistant complex surfaces or two parallel planes'`, and `'unknown'` is what a writer uses when it cannot tell.
 
 The `toleranced_shape_aspect`, `#702`, would be the hole's axis shape aspect — position is a tolerance on where the axis is, not on the wall.
 
@@ -194,7 +199,7 @@ A diameter with a plus/minus tolerance:
 ```
 
 `DIMENSIONAL_SIZE` says the hole's wall (`#703`) has a size of kind `'diameter'`.
-Its value is a representation — the property pattern of @sec-properties-validation again — whose item is a nominal length of 6 mm, qualified with a format string (`'NR2 1.2'`: two decimal places) that says how to display it.
+Its value is a representation — the property pattern of @sec-properties-validation again — whose item is a nominal length of 6 mm, qualified with a format string (`'NR2 1.2'`: one digit before the decimal point, two after) that says how to display it.
 `PLUS_MINUS_TOLERANCE` attaches a lower and upper deviation.
 A distance between two features is a `DIMENSIONAL_LOCATION` with two shape aspects instead of one; a fit class is a `LIMITS_AND_FITS` record with grade and deviation strings.
 
@@ -203,9 +208,8 @@ A distance between two features is a `DIMENSIONAL_LOCATION` with two shape aspec
 A graphical callout can point at the semantic data it depicts:
 
 ```step
-#780 = DRAUGHTING_MODEL_ITEM_ASSOCIATION('PMI representation to presentation
-link',
-         '',#750,#630,(#610));
+#780 = DRAUGHTING_MODEL_ITEM_ASSOCIATION('PMI representation to presentation link',
+         '',#750,#630,#610);
 ```
 
 — *the callout `#610`, in draughting model `#630`, presents tolerance `#750`.*
@@ -218,14 +222,15 @@ Without this record the two halves of the PMI are unrelated, and a file can perf
 Drawings have views; models with PMI have *saved views*: a camera position and the set of annotations visible from it, so that a receiving system can show the PMI the way the author arranged it rather than all at once.
 
 ```step
-#800 = DRAUGHTING_MODEL('Front',(#801,#610,#615),#165);
-#801 = CAMERA_MODEL_D3('',#802,#803);
+#800 = DRAUGHTING_MODEL('view content 1',(#801,#610,#615),#165);
+#801 = CAMERA_MODEL_D3('Front',#802,#803);
 #802 = AXIS2_PLACEMENT_3D('',#804,#805,#806);       /* where the camera is,
 looking along its axis */
-#803 = VIEW_VOLUME(.PARALLEL.,#807,1.,1.,.T.,1.,1.,.T.,#808);
+#803 = VIEW_VOLUME(.PARALLEL.,#807,1.,1.,.T.,1.,.T.,.T.,#808);
 ```
 
-A saved view is a `DRAUGHTING_MODEL` — one per view — whose items include a `CAMERA_MODEL_D3` and the callouts that belong in the view.
+A saved view is a `DRAUGHTING_MODEL` paired with a `CAMERA_MODEL_D3` among its items: the model says what is shown, the camera says from where.
+The view's *name* lives on the camera, not on the model, and from AP242 second edition a `MODEL_GEOMETRIC_VIEW` carries it as well.
 The camera's `view_reference_system` is an axis placement giving position and direction.
 The same callout may appear in several views.
 This is why a viewer sometimes shows six annotations out of ninety: it has opened the first view.

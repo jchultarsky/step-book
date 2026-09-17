@@ -20,7 +20,8 @@ The same three-record pattern that attaches a shape attaches anything else, and 
 
 - **`PROPERTY_DEFINITION`** names the property and says what it is a property *of*.
   `name` is `'Material'`; `definition` is `#5`, the block's product definition.
-  The `definition` attribute is the same SELECT as on `PRODUCT_DEFINITION_SHAPE` and can also point at a `PRODUCT_DEFINITION_SHAPE` (a property of the geometry), a `SHAPE_ASPECT` (a property of one feature), or a `NEXT_ASSEMBLY_USAGE_OCCURRENCE` (a property of one occurrence).
+  The `definition` attribute is the `characterized_definition` SELECT that `PRODUCT_DEFINITION_SHAPE` inherits, though a shape property is narrowed by a rule to product definitions and occurrences.
+A plain `PROPERTY_DEFINITION` may use the whole of it: a `PRODUCT_DEFINITION_SHAPE` (a property of the geometry), a `SHAPE_ASPECT` (a property of one feature), or a `NEXT_ASSEMBLY_USAGE_OCCURRENCE` (a property of one occurrence).
 - **`PROPERTY_DEFINITION_REPRESENTATION`** binds the property to a representation, exactly as `SHAPE_DEFINITION_REPRESENTATION` binds a shape to one.
 - **`REPRESENTATION`** is the container, with a context.
   For text properties the context is irrelevant but required; writers reuse the geometric context.
@@ -38,7 +39,9 @@ For a numeric property the item is a **`MEASURE_REPRESENTATION_ITEM`**, and the 
 
 `MEASURE_REPRESENTATION_ITEM` is a complex-instance-free way of saying "a representation item that is a measure with unit": a name, a wrapped value, a unit.
 The kilogram is `SI_UNIT(.KILO.,.GRAM.)` — the SI base name is `gram`, and the kilogram takes a prefix.
-AP242 also offers `GENERAL_PROPERTY` for properties with a registered name and definition; the CAx-IF practice for ordinary CAD attributes is the plain `PROPERTY_DEFINITION` above.
+The CAx-IF practice adds two more records to every user attribute: a `GENERAL_PROPERTY` carrying the attribute's name, and a `GENERAL_PROPERTY_ASSOCIATION` tying it to the `PROPERTY_DEFINITION`.
+It is the presence of that `GENERAL_PROPERTY` that tells a reader this is a user attribute rather than a validation property.
+It is not an AP242 addition: AP203 second edition and AP214 have it too.
 
 This is the mechanism by which a CAD system's custom properties — part number, material, finish, supplier, cost centre — reach a STEP file, when the exporter is configured to send them.
 Most are not by default.
@@ -88,8 +91,9 @@ Those strings are prescribed by the recommended practice, not by the schema, and
 The `definition` points at the `PRODUCT_DEFINITION_SHAPE` (`#4`) — these are properties of the *shape* — and the units are derived: cubic millimetres for volume, square millimetres for area, built from the length unit as @sec-contexts-units described.
 The centroid is an ordinary `CARTESIAN_POINT` in the geometric context, so it is in millimetres automatically.
 
-Validation properties extend to assemblies.
-`'assembly validation property'` with `'number of children'` (a `COUNT_MEASURE`) records how many components an assembly should have; `'centroid'` at the assembly level checks that placements composed correctly; and AP242 adds properties for the independent curve length of wireframes, for tessellation (`'tessellated surface area'`), and for PMI (`'number of annotations'`, `'number of views'`, `'affected geometry'`), so that a receiver can confirm that not just the shape but the annotations arrived.
+Validation properties extend well beyond solids, as separate families rather than as extensions of this one.
+`'assembly validation property'` with `'number of children'` (a `COUNT_MEASURE`) records how many components an assembly should have, and `'notional solids centroid'` checks that placements composed correctly.
+The same pattern with a different `PROPERTY_DEFINITION` name gives `'tessellated validation property'`, `'attribute validation property'`, `'composite validation property'` and `'pmi validation property'`, the last with items named `'number of annotations'`, `'number of views'` and `'affected area'`, so that a receiver can confirm that not just the shape but the annotations arrived.
 
 ::: {.callout-note title="Engineering background: Why an exchange format needs a checksum"}
 Every step of a geometry exchange can lose information silently.

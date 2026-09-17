@@ -1,7 +1,7 @@
 # Appearance: Colours and Layers {#sec-appearance}
 
 ::: {.chapter-abstract}
-Eight records to make a pin orange.
+Nine records to make a pin orange.
 Why the colour is attached to the geometry from the outside, how a colour reaches a single face, and where the layers went.
 :::
 
@@ -36,10 +36,10 @@ From the bottom:
 - `#321` `SURFACE_STYLE_USAGE` — that side style applied to `.BOTH.` sides of the surface (or `.POSITIVE.` or `.NEGATIVE.`).
 - `#320` `PRESENTATION_STYLE_ASSIGNMENT` — a set of styles (here, one surface style usage) to be assigned together.
 - `#319` `STYLED_ITEM` — the assignment. `name` is `'color'`, `styles` is `(#320)`, and `item` is `#249`: the pin's `MANIFOLD_SOLID_BREP`. This is the record that connects appearance to geometry, and it does so by pointing *at* the solid — the solid does not know it has a colour.
-- `#318` `MECHANICAL_DESIGN_GEOMETRIC_PRESENTATION_REPRESENTATION` — a representation whose items are styled items, in the same geometric context as the geometry it decorates (`#302`). Its job is to be a container that the AP can require and a reader can look for: *find every representation of this type, and you have found every colour in the file.*
+- `#318` `MECHANICAL_DESIGN_GEOMETRIC_PRESENTATION_REPRESENTATION` — a representation whose items are styled items, in the same geometric context as the geometry it decorates (`#302`). Its job is to be a container a reader can look for. There are two such containers in practice, this one and `DRAUGHTING_MODEL`, and a file with PMI in it will use the latter: *find every representation of either type, and you have found every colour in the file.*
 
 Every colour in every AP214 or AP242 file follows this chain.
-The middle five records are almost always exactly these, differing only in instance numbers, and once you have read one you can skim the rest.
+The middle six records are almost always exactly these, differing only in instance numbers, and once you have read one you can skim the rest.
 What varies is the two ends: which colour, and which item.
 
 ## What gets coloured {#sec-appearance-what-gets-coloured}
@@ -53,7 +53,7 @@ This is what most exporters write for a part with a single body colour, and it i
 
 **A face.** `STYLED_ITEM('',(#s),#88)` with `#88` an `ADVANCED_FACE` colours one face.
 Files with per-face colours have one styled item per face, and they can number in the thousands.
-When a face colour and a body colour both apply, the face wins; AP214 formalises this with `OVER_RIDING_STYLED_ITEM`, a subtype of `STYLED_ITEM` with an extra attribute pointing at the styled item it overrides, but many exporters simply write both and rely on the reader to prefer the more specific one.
+When a face colour and a body colour both apply, the face wins; Part 46 formalises this with `OVER_RIDING_STYLED_ITEM`, a subtype of `STYLED_ITEM` with an extra attribute pointing at the styled item it overrides, but many exporters simply write both and rely on the reader to prefer the more specific one.
 
 **An edge or a curve.** Via a `CURVE_STYLE` instead of a surface style: `CURVE_STYLE('',#font,POSITIVE_LENGTH_MEASURE(0.1),#colour)` — a line font, a width (a wrapped measure, as @sec-schema predicted), a colour.
 Edge colours appear in wireframe exports and in PMI annotation geometry.
@@ -77,7 +77,7 @@ The other:
 A `DRAUGHTING_PRE_DEFINED_COLOUR` has only a name, from a fixed list: `'red'`, `'green'`, `'blue'`, `'yellow'`, `'magenta'`, `'cyan'`, `'black'`, `'white'`.
 It stands in for the RGB triple wherever one is expected.
 It is inherited from the drawing-exchange parts of the standard, where line colours were symbolic, and is what a few exporters write for their default palette.
-A reader must map the eight names to values itself.
+The schema gives the eight names no RGB values, but the CAx-IF recommended practice fixes them as the pure corners of the colour cube, plus black and white.
 
 ## Layers {#sec-appearance-layers}
 
@@ -102,7 +102,7 @@ A layer can be switched off, or an item hidden, with `INVISIBILITY`:
 ```
 
 — a set of styled items (or layer assignments, or presentation representations) that are not to be displayed.
-Its context is a `PRESENTATION_STYLE_BY_CONTEXT` or a draughting model, and it is rare in mechanical exchange except inside saved views, which belong to @sec-pmi.
+`INVISIBILITY` itself carries only a list of items; to hide something in one view rather than everywhere, the subtype `CONTEXT_DEPENDENT_INVISIBILITY` adds a context — a draughting model, a presentation representation or a presentation set, and it is rare in mechanical exchange except inside saved views, which belong to @sec-pmi.
 
 ## Names on geometry {#sec-appearance-names-on-geometry}
 
@@ -115,13 +115,13 @@ The same is true of feature names, which do not survive export at all: a STEP fi
 ::: {.callout-warning title="In the wild: What AP203 files cannot say"}
 `STYLED_ITEM`, `COLOUR_RGB` and `PRESENTATION_LAYER_ASSIGNMENT` are not in AP203 first edition (`CONFIG_CONTROL_DESIGN`).
 A file with that schema is grey and layerless by definition.
-Files exist that declare `CONFIG_CONTROL_DESIGN` and contain colour records anyway; strict readers drop the colours, lenient ones keep them, and the CAx Implementor Forum's recommended practice is to write AP214 or AP242 if colours matter.
+Files exist that declare `CONFIG_CONTROL_DESIGN` and contain colour records anyway; strict readers drop the colours and lenient ones keep them.
 AP203 second edition added presentation; AP242 carries everything here.
 :::
 
 ::: {.callout-important title="In brief"}
 Colour reaches geometry from the outside: a `STYLED_ITEM` points at a solid, face or curve and at a `PRESENTATION_STYLE_ASSIGNMENT`, which descends through five fixed records to a `COLOUR_RGB` or a named colour.
-Styled items are collected in a `MECHANICAL_DESIGN_GEOMETRIC_PRESENTATION_REPRESENTATION`.
+Styled items are collected in a `MECHANICAL_DESIGN_GEOMETRIC_PRESENTATION_REPRESENTATION` or, in files with PMI, a `DRAUGHTING_MODEL`.
 Face colours override body colours.
 Layers are `PRESENTATION_LAYER_ASSIGNMENT`s listing their members.
 Face names live in `representation_item.name`, when they live anywhere.
