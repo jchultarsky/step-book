@@ -1,6 +1,6 @@
-# The STEP Book
+# Inside the STEP File
 
-Open-source book on the STEP file format (ISO 10303), published as an HTML site on GitHub Pages plus a downloadable PDF.
+Open-source book on the STEP file format (ISO 10303), published as an HTML site on GitHub Pages plus a downloadable PDF. The text was converted from the PDF draft in `docs/`; the `.qmd` sources are now canonical.
 
 ## Toolchain
 
@@ -11,7 +11,10 @@ Open-source book on the STEP file format (ISO 10303), published as an HTML site 
 ## Conventions
 
 - One sentence per line in `.qmd` sources.
-- Chapters live in `chapters/`, ordered in `_quarto.yml`. Each chapter starts with a level-1 heading with a `{#sec-...}` id.
+- Chapters live in `chapters/` (numbered files) and `appendices/`, ordered in `_quarto.yml`. Each starts with a level-1 heading with a `{#sec-...}` id, followed by a `::: {.chapter-abstract}` div, and ends with a `::: {.callout-important title="In brief"}` summary.
+- Boxed sections: `callout-note` titled "Engineering background: …" and `callout-warning` titled "In the wild: …".
+- Part 21 listings use ```` ```step ````, EXPRESS uses ```` ```express ```` (definitions in `syntax/`). Entity names in prose are upper case in backticks.
+- Appendix A embeds `examples/block.step` via the include-code-files extension; never paste the file into the chapter.
 - Citations go in `references.bib` (IEEE style via `ieee.csl`); cite with `[@key]`.
 - Example STEP files live in `examples/`; listings in the text should be complete, valid files.
 - Check both HTML and PDF output after structural changes; tables and callouts are the usual sources of divergence.

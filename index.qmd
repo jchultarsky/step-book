@@ -1,34 +1,75 @@
 # Preface {.unnumbered}
 
-STEP, formally ISO 10303, is the international standard for representing and exchanging product data.
-Almost every mechanical CAD system can read and write it, and a large share of the world's engineering data crosses company boundaries as `.stp` files.
-Yet the standard itself is vast, expensive, and written for implementers rather than for the people who use it day to day.
+This is a book about what is in a STEP file.
+Not how to parse one — that is a smaller problem than it looks, and there is a formal grammar for it — but what the records mean once you have them: why a single bracket takes three records to name, why a millimetre takes a record with three parts, why the placement of one part inside another takes five records and no numbers, and how a cylinder manages to be a closed solid with only three faces.
 
-This book is an attempt to fill that gap.
-It explains what a STEP file actually contains, how it is structured, what the standard does and does not guarantee, and how to work with it in practice.
+It is written for someone who is comfortable with data structures and databases, has opened a STEP file in a text editor, and found it opaque.
+No mechanical-engineering background is assumed.
+Where the format cannot be understood without some — boundary representation, NURBS, geometric dimensioning and tolerancing — the background is supplied in place, in boxed sections you can skip if you already have it.
 
-## Who this book is for {.unnumbered}
+## How the book is organised {.unnumbered}
 
-- Engineers and designers who exchange CAD data and want to understand what happens to it.
-- Software developers writing importers, exporters, or tooling for STEP data.
-- Students and researchers who need an approachable introduction before reading the standard itself.
+Part I is about the file and the product.
+It starts with a complete, real file of 170 records and works through it a record at a time: the syntax, the header, the schema that gives records their meaning, the product identity chain, units, and the path from a product to its shape.
+It ends with assemblies, which is where most of the interesting structure lives and where most tools get things wrong.
 
-No prior knowledge of ISO 10303 is assumed.
-Familiarity with 3D CAD concepts such as solids, faces, and assemblies will help.
+Part II is about geometry.
+It begins with what a boundary representation is and why topology and geometry are kept separate, then reads a block, a cylinder, a sphere and a spline part line by line.
+B-splines get a chapter of their own.
 
-## How the book is organized {.unnumbered}
+Part III covers everything else a file can carry: colours and layers, user properties and validation properties, product manufacturing information (PMI) in both its graphical and semantic forms, the differences between application protocols, and the third edition of the file format.
 
-**Part I, Foundations**, introduces the standard and dissects a real STEP file line by line.
-**Part II, The Standard**, covers the EXPRESS modelling language and the Application Protocols that define which entities may appear in a file.
-The appendices collect a glossary and reference material.
+Each part builds on the last, but the chapters in Part III can be read in any order once Part I is done.
+
+## The running example {.unnumbered}
+
+Most of the book follows one small assembly: a rectangular bracket, 60 by 20 by 10 millimetres with a 6 mm hole through it, and two identical pins, 6 mm in diameter and 30 mm long, standing on the bracket.
+It is deliberately trivial as a mechanical object.
+As a STEP file it exercises almost everything the format has: product structure, repeated components, placement transforms, planar and cylindrical faces, seam edges, inner loops, colours, and enough boilerplate to show you what to skim.
+
+The files were produced with Open CASCADE Technology (OCCT), the open-source kernel behind FreeCAD and many commercial tools, rather than by hand.
+This matters.
+A hand-written example shows you what the standard permits; a real export shows you what a widely used writer actually does, including the quirks.
+Where other CAD systems do something different, the text says so.
+
+Every example file is included with the book's source, in the `examples/` directory of the repository, so you can open them beside the text.
+
+## What is left out {.unnumbered}
+
+Three things, deliberately.
+
+**Parsing.**
+Tokens, lexers and the grammar are covered only as far as needed to read a record.
+ISO 10303-21 contains the full grammar, and it is not what makes STEP hard.
+
+**The constraint language.**
+EXPRESS, the schema language, includes rules and functions for validating data.
+Readers of files rarely need them, and they would double the length of the schema chapter.
+
+**Implementation.**
+This book describes the format.
+How to store it, index it or write it back out is a different book.
 
 ## Conventions {.unnumbered}
 
-Entity names from the standard are written in `SMALL_CAPS_WITH_UNDERSCORES`, exactly as they appear in a Part 21 file.
-Listings that show file contents are complete and can be saved and opened in a CAD system unless stated otherwise.
+Entity types appear exactly as they do in files, in upper case and in a monospaced face: `PRODUCT_DEFINITION`.
+Attribute names are in lower case as they appear in the schema: `product_definition.formation`.
+Instance names such as `#22` refer to the record with that number in whichever file the surrounding text is discussing; they are file-local and mean nothing across files.
 
-## Source and contributions {.unnumbered}
+Boxed sections headed *Engineering background* supply the mechanical-engineering or geometry context for the section that follows.
+Sections headed *In the wild* describe what real exporters do that the standard does not say, or says differently.
+Each chapter closes with a short summary headed *In brief*.
 
-This book is open source.
-The text is written in Quarto Markdown and lives at <https://github.com/jchultarsky/step-book>.
-Corrections and contributions are welcome; see the contributing guide in the repository.
+## About this book {.unnumbered}
+
+This book was written as a companion to a series of one-to-one lessons on the STEP format.
+Every file excerpt in it is real unless the surrounding text says otherwise: the records were written by Open CASCADE Technology 7.9, exporting small parts built for the purpose, and have been edited only to rename products and shorten the header.
+The excerpts for degree units, properties, validation properties, PMI, tessellation and edition-3 sections are written to the published patterns rather than exported, and are marked as such where they appear.
+The block file is reproduced complete in @sec-block-file.
+
+The standard itself is ISO 10303.
+Part numbers cited in the text (Part 21, Part 42, AP242) refer to its parts.
+Quotations from the standard are paraphrased, not reproduced.
+
+The book is open source.
+Its text is written in Quarto Markdown and lives at <https://github.com/jchultarsky/step-book>, where corrections and contributions are welcome.

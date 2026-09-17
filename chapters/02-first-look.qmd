@@ -1,0 +1,235 @@
+# A First Look at a File {#sec-first-look}
+
+::: {.chapter-abstract}
+A complete file of 170 records, and how to read any one of them.
+Instance names, entity types, parameters; strings, references, lists; the two symbols that mean "nothing"; and the one kind of record that breaks the pattern.
+:::
+
+The running example begins with the simplest thing worth exporting: a rectangular block, 60 by 20 by 10 millimetres, sitting with one corner at the origin.
+Open CASCADE writes it as 170 records.
+Here is the whole file with the middle cut out; the complete listing is in @sec-block-file.
+
+```step
+ISO-10303-21;
+HEADER;
+FILE_DESCRIPTION(('Open CASCADE Model'),'2;1');
+FILE_NAME('block.step','2026-09-17T16:14:23',('J. Chultarsky'),('Physna'),
+  'Open CASCADE STEP processor 7.9','Open CASCADE 7.9','Unknown');
+FILE_SCHEMA(('AUTOMOTIVE_DESIGN { 1 0 10303 214 1 1 1 1 }'));
+ENDSEC;
+DATA;
+#1 = APPLICATION_PROTOCOL_DEFINITION('international standard',
+  'automotive_design',2000,#2);
+#2 = APPLICATION_CONTEXT(
+  'core data for automotive mechanical design processes');
+#3 = SHAPE_DEFINITION_REPRESENTATION(#4,#10);
+#4 = PRODUCT_DEFINITION_SHAPE('','',#5);
+#5 = PRODUCT_DEFINITION('design','',#6,#9);
+#6 = PRODUCT_DEFINITION_FORMATION('','',#7);
+#7 = PRODUCT('BLOCK','block 60x20x10','',(#8));
+#8 = PRODUCT_CONTEXT('',#2,'mechanical');
+#9 = PRODUCT_DEFINITION_CONTEXT('part definition',#2,'design');
+#10 = ADVANCED_BREP_SHAPE_REPRESENTATION('',(#11,#15),#165);
+#11 = AXIS2_PLACEMENT_3D('',#12,#13,#14);
+#12 = CARTESIAN_POINT('',(0.,0.,0.));
+#13 = DIRECTION('',(0.,0.,1.));
+#14 = DIRECTION('',(1.,0.,-0.));
+#15 = MANIFOLD_SOLID_BREP('',#16);
+#16 = CLOSED_SHELL('',(#17,#57,#97,#119,#141,#153));
+#17 = ADVANCED_FACE('',(#18),#52,.F.);
+#18 = FACE_BOUND('',#19,.F.);
+#19 = EDGE_LOOP('',(#20,#30,#38,#46));
+#20 = ORIENTED_EDGE('',*,*,#21,.F.);
+#21 = EDGE_CURVE('',#22,#24,#26,.T.);
+#22 = VERTEX_POINT('',#23);
+#23 = CARTESIAN_POINT('',(0.,0.,0.));
+    /* ... 140 records of faces, edges, vertices and points ... */
+#165 = ( GEOMETRIC_REPRESENTATION_CONTEXT(3)
+  GLOBAL_UNCERTAINTY_ASSIGNED_CONTEXT((#169))
+  GLOBAL_UNIT_ASSIGNED_CONTEXT((#166,#167,#168))
+  REPRESENTATION_CONTEXT('Context #1','3D Context with UNIT and UNCERTAINTY') );
+#166 = ( LENGTH_UNIT() NAMED_UNIT(*) SI_UNIT(.MILLI.,.METRE.) );
+#167 = ( NAMED_UNIT(*) PLANE_ANGLE_UNIT() SI_UNIT($,.RADIAN.) );
+#168 = ( NAMED_UNIT(*) SI_UNIT($,.STERADIAN.) SOLID_ANGLE_UNIT() );
+#169 = UNCERTAINTY_MEASURE_WITH_UNIT(LENGTH_MEASURE(1.E-07),#166,
+  'distance_accuracy_value','confusion accuracy');
+#170 = PRODUCT_RELATED_PRODUCT_CATEGORY('part',$,(#7));
+ENDSEC;
+END-ISO-10303-21;
+```
+
+Everything that follows in this book is a closer look at some piece of this.
+For now the aim is to be able to read any single line.
+
+## The skeleton {#sec-first-look-skeleton}
+
+A Part 21 file has a fixed outer structure and two sections:
+
+```step
+ISO-10303-21;
+HEADER;
+  /* three fixed records describing the file itself */
+ENDSEC;
+DATA;
+  /* any number of numbered records: the actual content */
+ENDSEC;
+END-ISO-10303-21;
+```
+
+The `HEADER` says what the file is: who wrote it, when, and — crucially — which schema its records follow.
+It has its own chapter.
+The `DATA` section is the payload: a set of records, each with a number, that reference one another to form a graph.
+There is nothing else.
+Whitespace and line breaks are insignificant except inside strings; the exporter above wraps long records at 72 columns because an old convention says so, and many do not.
+
+Comments are allowed anywhere whitespace is, delimited `/* ... */`.
+Real files almost never contain them; the ones above were added for the listing.
+
+## Reading a record {#sec-first-look-reading-a-record}
+
+Take one line:
+
+```step
+#7 = PRODUCT('BLOCK','block 60x20x10','',(#8));
+```
+
+Read it as a row from a database dump.
+
+- `#7` is the record's *instance name* — its ID.
+  It is unique within this file and means nothing outside it.
+  Other records refer to this one by writing `#7`.
+  There is no significance to the number itself; exporters assign them in whatever order they happen to write things, and a file that renumbered every record would be the same file.
+- `PRODUCT` is the *entity type* — the table name.
+  Somewhere in the schema is a definition of `product` listing its attributes in order.
+- Everything inside the parentheses is the *parameter list*: the column values, in schema order.
+  Here there are four.
+- `;` ends the record.
+
+So `#7` says: there is a `PRODUCT` whose four attribute values are the string `'BLOCK'`, the string `'block 60x20x10'`, an empty string, and a list containing a reference to record `#8`.
+What those four columns *mean* — identifier, name, description, list of contexts — is in the schema, and @sec-schema shows how to look it up.
+For now, the shape.
+
+A note on terminology, since two words are used for the same slots.
+In the *file*, the values in the parentheses are **parameters**.
+In the *schema*, the slots they fill are **attributes**.
+`PRODUCT` has four attributes; record `#7` supplies four parameters.
+Same slots, seen from the two ends.
+
+## The kinds of value {#sec-first-look-kinds-of-value}
+
+Every parameter is one of a small number of things.
+The block file contains all of them but one.
+
+**Strings** are single-quoted: `'BLOCK'`, `'design'`, `''`.
+An apostrophe inside a string is doubled: `'Julian''s bracket'`.
+Anything outside plain ASCII is, strictly, spelled with an escape sequence — `\X2\00C5\X0\` for Å — though many exporters write raw UTF-8 and most readers accept it.
+Nearly every entity in a mechanical file begins with a `name` attribute, and nearly every exporter leaves it empty, which is why `''` opens so many records.
+
+**References** are instance names used as values: the `#8` in `(#8)`, the `#16` in `MANIFOLD_SOLID_BREP('',#16)`.
+A reference is a pointer to another record in the same file.
+They can point forward to records not yet seen — `#3` refers to `#10`, seven lines later — and the file is a set of records, not a sequence, so this is normal.
+
+**Lists** are parenthesised, comma-separated: `(#11,#15)`, `(0.,0.,0.)`, `(#17,#57,#97,#119,#141,#153)`.
+A list with one element is still a list: `(#8)`.
+Lists nest: `((#11,#12),(#13,#14))` is a list of two lists.
+Whether a given list is a `SET` or a `LIST` or an `ARRAY` — ordered, unordered, bounded — is the schema's business; the file writes them all the same way.
+
+**Reals** always contain a decimal point: `0.`, `1.`, `-0.`, `1.E-07`.
+The trailing-dot form `10.` is standard and ubiquitous.
+`1.E-07` is one ten-millionth.
+`-0.` is negative zero, which the exporter wrote because that is what came out of its floating-point arithmetic; it is harmless and you will see a lot of it.
+
+**Integers** have no decimal point: the `3` in `GEOMETRIC_REPRESENTATION_CONTEXT(3)`, the `2000` in `#1`.
+A parameter that is a real is *never* written as an integer, so `3` and `3.` are different tokens for different attribute types.
+
+**Enumerations** are upper-case names between dots: `.T.`, `.F.`, `.MILLI.`, `.METRE.`, `.RADIAN.`.
+The two most common are the Booleans, `.T.` and `.F.`; some exporters write them out as `.TRUE.` and `.FALSE.`, and both are correct.
+Enumeration values come from a fixed list in the schema — `.MILLI.` is one of about twenty SI prefixes.
+
+**Binary** values are hexadecimal in double quotes: `"0F3A"`.
+They do not occur in this file, and are rare in mechanical files generally; you meet them in PMI for encoded text and in a few presentation entities.
+
+Two symbols remain, and they are the ones that trip people up.
+
+## `$` and `*` {#sec-first-look-dollar-and-star}
+
+`$` means **no value**.
+The attribute is optional in the schema and this record does not supply it.
+In `SI_UNIT($,.RADIAN.)` the first attribute is the prefix — `.MILLI.` in the millimetre record two lines above — and a plain radian has none.
+In `PRODUCT_RELATED_PRODUCT_CATEGORY('part',$,(#7))` the description is absent.
+
+`*` means **derived**: the attribute exists, but the schema says its value is *computed* from other attributes rather than stored, and the file writes `*` to hold the slot.
+In `NAMED_UNIT(*)` the attribute is `dimensions`, and an SI unit knows its own dimensions from its name.
+In `ORIENTED_EDGE('',*,*,#21,.F.)` the second and third attributes — the edge's start and end vertices — are derived from the edge it refers to and the orientation flag.
+
+`$` and `''` are different.
+`''` is a string with no characters in it; `$` is the absence of a string.
+`PRODUCT_DEFINITION('design','',#6,#9)` has an empty description; `PRODUCT_DEFINITION('design',$,#6,#9)` would have no description.
+The schema treats these differently, exporters are inconsistent about which they write for a blank field, and a tool that cares about descriptions has to handle both.
+Most tools do not care.
+
+## References point from specific to general {#sec-first-look-reference-direction}
+
+Look again at the first nine data records and note the *direction* of every reference.
+
+```step
+#3 = SHAPE_DEFINITION_REPRESENTATION(#4,#10);
+#4 = PRODUCT_DEFINITION_SHAPE('','',#5);
+#5 = PRODUCT_DEFINITION('design','',#6,#9);
+#6 = PRODUCT_DEFINITION_FORMATION('','',#7);
+#7 = PRODUCT('BLOCK','block 60x20x10','',(#8));
+#8 = PRODUCT_CONTEXT('',#2,'mechanical');
+#9 = PRODUCT_DEFINITION_CONTEXT('part definition',#2,'design');
+```
+
+`#6` points at `#7`; `#5` points at `#6`; `#4` points at `#5`.
+The *version* knows which *product* it is a version of.
+The *product* has no idea that any versions exist.
+Every reference in a STEP file runs this way: from the more specific or dependent thing toward the more general or independent one.
+A face points at its surface; the surface does not list its faces.
+An edge points at its vertices; the vertex does not know which edges meet there.
+
+The consequence is that almost every interesting question — "what does this product look like?", "which faces use this surface?", "which assemblies contain this part?" — starts at the general end and has to walk *against* the arrows.
+Nothing in the file helps with that; it is the reader's job to build the reverse index.
+This is the single most important structural fact about the format, and the reason a STEP file cannot be usefully processed one line at a time.
+
+## Complex records {#sec-first-look-complex-records}
+
+Every record so far has had one entity type.
+Four records near the end have several:
+
+```step
+#166 = ( LENGTH_UNIT() NAMED_UNIT(*) SI_UNIT(.MILLI.,.METRE.) );
+```
+
+The pattern: after `#166 =` comes an opening parenthesis, then a sequence of *type-name-with-parameters* groups, with no commas between them, then a closing parenthesis.
+This is a **complex entity instance**, and it describes **one object that is several entity types at once**.
+`#166` is a `LENGTH_UNIT` *and* a `NAMED_UNIT` *and* an `SI_UNIT`.
+Each group carries the attributes that its own type declares: `LENGTH_UNIT` declares none, `NAMED_UNIT` declares one (the derived `dimensions`), `SI_UNIT` declares two (prefix and name).
+
+Why an object would need to be three types at once, why the groups are in alphabetical order, and why the file does not simply say `SI_UNIT` and let you infer the rest, are questions about the schema, and they are answered in @sec-schema.
+The point here is to recognise the form when you see it.
+Two rules of thumb: a complex record is always about something that has *both* a general classification and a specific one — a unit that is both "a named unit" and "a length unit"; and the records that most often take this form are units, representation contexts, and the relationship records that position parts in assemblies.
+
+## What the block file contains {#sec-first-look-block-contents}
+
+Standing back from the syntax, the 170 records fall into five groups, and the same five groups appear in every single-part STEP file in roughly the same proportions.
+
+| Records | Group | What it says |
+|---|---|---|
+| `#1`–`#2` | Application context | "This is mechanical design data under AP214." |
+| `#3`–`#9` | Product identity | "There is a part called BLOCK, one version, design view, and it has a shape." |
+| `#10`–`#16` | Shape representation and solid | "The shape is this B-rep solid, in this coordinate system." |
+| `#17`–`#164` | Topology and geometry | Six faces, twelve edges, eight vertices, and their planes, lines and points. |
+| `#165`–`#170` | Context, units, category | "Millimetres, radians; points closer than $10^{-7}$ mm coincide; it's a part." |
+
+The proportions are the thing to notice.
+Nine records establish what the part *is*; a hundred and fifty describe its shape; six say how to measure it.
+In a real part with a few hundred faces the geometry becomes 99% of the file, and the product-identity records — the ones that carry the part number, the version and the assembly structure — become a few dozen lines scattered through a hundred thousand.
+
+::: {.callout-important title="In brief"}
+A record is `#id = TYPE(parameters);`.
+Parameters are strings, references, lists, reals, integers, enumerations or binaries; `$` is an absent optional value and `*` a derived one.
+References point from the specific to the general, so reading a file means walking against the arrows.
+A record beginning `#id = (` is one object with several types.
+:::

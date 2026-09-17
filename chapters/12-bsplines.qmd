@@ -1,0 +1,174 @@
+# Free-Form Geometry: B-Splines {#sec-bsplines}
+
+::: {.chapter-abstract}
+The one non-analytic shape STEP needs, because every CAD kernel converges on it.
+What the seven numbers in a B-spline record are, why a circle written as a spline has seven control points and weights of one-half, and how to tell a real free-form surface from an analytic one in disguise.
+:::
+
+A plane, a cylinder and a sphere can each be written down with a handful of numbers because each is a closed-form equation.
+A car body panel, a turbine blade or a filleted corner blended between three faces cannot.
+Every CAD system represents those as **B-spline** curves and surfaces — specifically, non-uniform rational B-splines, **NURBS** — and so does STEP.
+It is the only free-form representation in Part 42 that matters, and it can also represent every analytic shape exactly, which is why exporters sometimes write circles and cylinders as splines.
+
+::: {.callout-note title="Engineering background: NURBS in one page"}
+A B-spline curve is a smooth path controlled by a sequence of **control points**.
+It does not, in general, pass through them; it is pulled toward them, the way a flexible ruler is bent by pegs.
+Three things fix its shape:
+
+**Degree.** The polynomial degree of the pieces.
+Degree 1 gives straight segments between control points; degree 2 gives parabolic arcs; degree 3, cubic, is the usual choice for free-form work because it is the lowest degree that can be smooth in curvature.
+A degree-$p$ curve with $n$ control points is made of $n - p$ polynomial pieces joined end to end.
+
+**Knots.** A non-decreasing list of parameter values that says where one piece ends and the next begins.
+The knot vector has $n + p + 1$ entries.
+Repeating a knot value $p$ times forces the curve *through* a control point (and lets it have a corner there); repeating the first and last knots $p + 1$ times **clamps** the curve so that it starts and ends exactly at the first and last control points.
+Almost every curve in a CAD file is clamped.
+Knots that are evenly spaced give a *uniform* B-spline; STEP's are *non-uniform* in general.
+
+**Weights.** A **rational** B-spline attaches a positive weight to each control point; a heavier point pulls harder.
+Weights are what let a spline represent a circle *exactly*, which a polynomial spline cannot.
+A curve whose weights are all 1 is *non-rational*, and the weights are omitted.
+
+A B-spline **surface** is the same construction in two parameters, $u$ and $v$: a rectangular *grid* of control points, a degree in each direction, a knot vector in each direction, and optionally a grid of weights.
+Every point on the surface is a weighted blend of a $(p + 1) \times (q + 1)$ window of control points.
+
+None of this is needed to *read* a STEP file — the records are just lists of numbers — but it is needed to know which list is which, and to recognise the special cases.
+:::
+
+## A B-spline curve record {#sec-bsplines-curve-record}
+
+From the cone of @sec-curves-surfaces, its straight seam written as a spline:
+
+```step
+#33 = B_SPLINE_CURVE_WITH_KNOTS('',1,(#34,#35),.UNSPECIFIED.,.F.,.F.,
+        (2,2),(0.,1.),.PIECEWISE_BEZIER_KNOTS.);
+#34 = CARTESIAN_POINT('',(5.,0.,0.));
+#35 = CARTESIAN_POINT('',(2.,0.,10.));
+```
+
+The attributes, from the inheritance chain `representation_item` → `b_spline_curve` → `b_spline_curve_with_knots`:
+
+| Parameter | Attribute | Declared in |
+|---|---|---|
+| `''` | `name` | `representation_item` |
+| `1` | `degree` | `b_spline_curve` |
+| `(#34,#35)` | `control_points_list` | `b_spline_curve` |
+| `.UNSPECIFIED.` | `curve_form` | `b_spline_curve` |
+| `.F.` | `closed_curve` | `b_spline_curve` |
+| `.F.` | `self_intersect` | `b_spline_curve` |
+| `(2,2)` | `knot_multiplicities` | `b_spline_curve_with_knots` |
+| `(0.,1.)` | `knots` | `b_spline_curve_with_knots` |
+| `.PIECEWISE_BEZIER_KNOTS.` | `knot_spec` | `b_spline_curve_with_knots` |
+
+Degree 1, two control points: a straight segment from (5, 0, 0) to (2, 0, 10).
+The knots are stored compressed — *distinct values* with *multiplicities* rather than the full vector — so `(2,2)` and `(0.,1.)` expand to the knot vector (0, 0, 1, 1): $n + p + 1 = 2 + 1 + 1 = 4$ entries, with the ends repeated $p + 1 = 2$ times.
+Clamped, as promised.
+
+`curve_form` is a hint: `.POLYLINE_FORM.`, `.CIRCULAR_ARC.`, `.ELLIPTIC_ARC.`, `.PARABOLIC_ARC.`, `.HYPERBOLIC_ARC.` or `.UNSPECIFIED.`.
+Writers almost always put `.UNSPECIFIED.` even when the curve is a circle, so the hint is rarely useful.
+`closed_curve` and `self_intersect` are `LOGICAL` — `.T.`, `.F.` or `.U.` for unknown — and are what they say.
+`knot_spec` describes the knot pattern: `.UNIFORM_KNOTS.`, `.QUASI_UNIFORM_KNOTS.`, `.PIECEWISE_BEZIER_KNOTS.` (every interior knot has multiplicity $p$, so each piece is an independent Bézier segment) or `.UNSPECIFIED.`.
+It, too, is a hint; the multiplicities are the truth.
+
+## A B-spline surface record {#sec-bsplines-surface-record}
+
+From a small part whose top edge is a free-form spline extruded downward:
+
+```step
+#56 = B_SPLINE_SURFACE_WITH_KNOTS('',3,1,
+        ((#57,#58),(#59,#60),(#61,#62),(#63,#64),(#65,#66),(#67,#68)),
+        .UNSPECIFIED.,.F.,.F.,.F.,
+        (4,1,1,4),(2,2),
+        (0.,10.770329614269,22.43223340396,33.612573291459),(-5.,0.),
+        .UNSPECIFIED.);
+#57 = CARTESIAN_POINT('',(0.,0.,5.));
+#58 = CARTESIAN_POINT('',(0.,0.,0.));
+#59 = CARTESIAN_POINT('',(3.579071051472,4.965892889794,5.));
+#60 = CARTESIAN_POINT('',(3.579071051472,4.965892889794,0.));
+    /* ... four more pairs ... */
+#67 = CARTESIAN_POINT('',(30.,3.,5.));
+#68 = CARTESIAN_POINT('',(30.,3.,0.));
+```
+
+| Parameter | Attribute | Meaning |
+|---|---|---|
+| `3, 1` | `u_degree`, `v_degree` | cubic along *u*, linear along *v* |
+| `((#57,#58),...,(#67,#68))` | `control_points_list` | a list of 6 rows, each of 2 points: a 6 × 2 grid |
+| `.UNSPECIFIED.` | `surface_form` | hint (`.PLANE_SURF.`, `.CYLINDRICAL_SURF.`, …, `.UNSPECIFIED.`) |
+| `.F., .F., .F.` | `u_closed`, `v_closed`, `self_intersect` | logicals |
+| `(4,1,1,4), (2,2)` | `u_multiplicities`, `v_multiplicities` | |
+| `(0.,10.77,22.43,33.61), (-5.,0.)` | `u_knots`, `v_knots` | distinct knot values |
+| `.UNSPECIFIED.` | `knot_spec` | |
+
+Read it as two curves at right angles.
+Along *u*: degree 3, six control points, knots expanding to (0, 0, 0, 0, 10.77, 22.43, 33.61, 33.61, 33.61, 33.61) — ten entries, $6 + 3 + 1$, clamped at both ends, with two interior knots dividing the curve into three cubic pieces.
+The interior knot values are the cumulative chord lengths of the original spline, which is how the exporter's kernel parametrised it; they carry no geometric meaning beyond spacing.
+Along *v*: degree 1, two control points, knots (−5, −5, 0, 0).
+A straight line.
+
+Each row of the control grid is a pair of points with the same x and y and z = 5 or z = 0.
+The surface is the *u*-curve — the free-form spline along the top of the part — swept straight down five millimetres.
+It is, in other words, a `SURFACE_OF_LINEAR_EXTRUSION`, and the exporter that wrote this file was asked to convert everything to NURBS, so it wrote it as one.
+Nothing in the record says "extrusion"; you can only tell from the degree-1 *v* direction and the parallel rows.
+
+## Rational splines: the circle as a spline {#sec-bsplines-rational}
+
+Convert the pin of @sec-curves-surfaces to NURBS and its circles come out like this:
+
+```step
+#31 = ( BOUNDED_CURVE()
+        B_SPLINE_CURVE(2,(#32,#33,#34,#35,#36,#37,#38),.UNSPECIFIED.,.T.,.F.)
+        B_SPLINE_CURVE_WITH_KNOTS((1,2,2,2,2,1),
+          (-2.094395102393,0.,2.094395102393,4.188790204786,6.28318530718,8.377580409573),
+          .UNSPECIFIED.)
+        CURVE()
+        GEOMETRIC_REPRESENTATION_ITEM()
+        RATIONAL_B_SPLINE_CURVE((1.,0.5,1.,0.5,1.,0.5,1.))
+        REPRESENTATION_ITEM('') );
+```
+
+A complex instance, and @sec-schema says why: `RATIONAL_B_SPLINE_CURVE` and `B_SPLINE_CURVE_WITH_KNOTS` are *sibling* subtypes of `b_spline_curve` — one adds weights, the other adds knots — and a curve that needs both has no single leaf name.
+So the record is written externally: every type in the chain, alphabetically, each with its own attributes.
+`BOUNDED_CURVE`, `CURVE`, `GEOMETRIC_REPRESENTATION_ITEM` and `REPRESENTATION_ITEM` are the supertypes contributing nothing but the name.
+
+The content is the textbook NURBS circle.
+Degree 2.
+Seven control points.
+Weights alternating 1, ½, 1, ½, 1, ½, 1.
+Knots expanding to (−2.094, 0, 0, 2.094, 2.094, 4.189, 4.189, 6.283, 6.283, 8.378) — ten entries, $7 + 2 + 1$, with every interior knot doubled.
+Three pieces, each a quadratic rational arc spanning 120° (2.094 radians), joined at the knots of multiplicity 2, meeting to form a full circle.
+The half-weight points are the corners of the circumscribing triangle; the unit-weight points lie on the circle.
+`closed_curve` is `.T.`.
+The knot values are angles in radians because that is how the kernel parametrised the original circle; the negative first knot is the clamp extending one span past the start.
+
+The equivalent surface — the pin's cylindrical side as a rational B-spline — is the same construction in *u* with a degree-1 straight line in *v*, and its weights are a 7 × 2 grid.
+
+## Recognising analytic geometry in spline clothing {#sec-bsplines-recognising}
+
+A file can legitimately contain a cylinder written as `CYLINDRICAL_SURFACE` or as a rational B-spline surface, and a reader may need to know that they are the same shape.
+Some exporters convert everything to NURBS on the way out (older CATIA translators did this for anything not planar).
+The signs:
+
+- A degree-1 curve with two control points is a **line**.
+- A degree-2 rational curve with 7 control points, weights (1, ½)\*, and knots of multiplicity 2 at 120° intervals is a **full circle**. Quarter-circles use 3 control points and weights (1, $\sqrt{2}/2$, 1). Other arc splits exist.
+- A surface with degree 1 in one direction and control rows that are translates of each other is an **extrusion**.
+- A surface with degree 2 rational in one direction with the circle pattern, and degree 1 in the other, is a **cylinder**.
+- A surface whose control net is planar is a **plane** (a bilinear 2 × 2 patch, as `#69` in the same file: degree 1 in both directions, four points).
+
+None of this is required.
+Any reader that can evaluate a NURBS can evaluate these.
+But a tool that wants to report "this part has 14 cylindrical holes," or to compare two files for equivalence, has to look through the representation to the shape.
+
+## What the geometry chapters leave out {#sec-bsplines-leave-out}
+
+Part 42 defines several more B-spline forms — `BEZIER_CURVE`, `QUASI_UNIFORM_CURVE`, `UNIFORM_CURVE` and their surface equivalents — which are B-splines with knot vectors implied by the name instead of stored.
+They appear rarely; `..._WITH_KNOTS` is what every mainstream exporter writes.
+It also defines `OFFSET_CURVE_3D`, `OFFSET_SURFACE`, `CURVE_REPLICA` and `SURFACE_REPLICA`, `RECTANGULAR_TRIMMED_SURFACE` (a surface cut to a parameter rectangle), and `CURVE_BOUNDED_SURFACE` (a surface cut by curves rather than by topology).
+Each is what its name suggests, each is in the AP242 schema, and a reader that has understood the records in this chapter can look any of them up.
+
+::: {.callout-important title="In brief"}
+A B-spline record is degree, control points, three flags, and a knot vector stored as distinct values plus multiplicities; the full vector has $n + p + 1$ entries and is almost always clamped.
+A surface is the same in two directions with a grid of control points.
+Rational splines add a weight per control point and are written as complex instances because the rational and with-knots subtypes are siblings.
+Circles are seven points with weights 1, ½ alternating; lines are degree 1 with two points; extrusions are degree 1 in one direction.
+:::

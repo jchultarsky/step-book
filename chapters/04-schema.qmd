@@ -1,0 +1,314 @@
+# Where Records Get Their Meaning: The Schema {#sec-schema}
+
+::: {.chapter-abstract}
+The file says `ADVANCED_FACE('',(#18),#52,.F.)`.
+Nothing in the file says what those four values are.
+The schema does — and reading enough of the schema language to look them up is the one prerequisite for everything else in this book.
+:::
+
+Every entity type in a STEP file — `PRODUCT`, `ADVANCED_FACE`, `SI_UNIT` — is defined in a **schema** written in a language called **EXPRESS**, which is ISO 10303-11.
+The schema for AP214 is a single text file of about 15,000 lines; AP242's is larger.
+It lists every entity, its attributes in order, its relationship to other entities, and a body of constraints.
+The Part 21 file is a dump of instances of those entities, and it deliberately omits everything the schema already says: attribute names, attribute types, inheritance.
+To read a record you look its type up in the schema and lay the parameters against the attributes.
+
+This chapter is EXPRESS as a *reader* needs it.
+The language also has functions, rules and procedures for validating data; they are skipped here, and you will not miss them.
+
+## An entity declaration {#sec-schema-entity-declaration}
+
+Here is the definition of `product`, from Part 41, exactly as it appears in the AP214 schema apart from spacing:
+
+```express
+ENTITY product;
+  id                 : identifier;
+  name               : label;
+  description        : OPTIONAL text;
+  frame_of_reference : SET [1:?] OF product_context;
+END_ENTITY;
+```
+
+Lay record `#7` from the block file against it:
+
+```step
+#7 = PRODUCT('BLOCK','block 60x20x10','',(#8));
+```
+
+| Attribute | Type | Value in `#7` |
+|-----------|------|---------------|
+| `id` | `identifier` (a string) | `'BLOCK'` |
+| `name` | `label` (a string) | `'block 60x20x10'` |
+| `description` | `text`, optional | `''` |
+| `frame_of_reference` | set of 1 or more `product_context` | `(#8)` |
+
+Four attributes, four parameters, in order.
+Several things in the declaration are worth naming.
+
+`identifier`, `label` and `text` are **defined types** — names given to a base type so the schema can say what a string is *for*.
+All three are declared elsewhere as `TYPE label = STRING;` and so on.
+The file does not distinguish them; a string is a string.
+
+`OPTIONAL` means the attribute may be absent, in which case the file writes `$`.
+An attribute without `OPTIONAL` must have a value.
+`#7` supplies `''` for its optional description, which is a value (an empty one), not an absence.
+
+`SET [1:?] OF product_context` is an **aggregate**: an unordered collection of at least one, at most any number, of references to `product_context` instances.
+EXPRESS has four aggregate kinds — `SET` (unordered, no duplicates), `BAG` (unordered, duplicates allowed), `LIST` (ordered) and `ARRAY` (ordered, fixed bounds) — and the file writes all four as a parenthesised list.
+The bounds are constraints on valid data, not storage instructions.
+
+## Inheritance and the flattened record {#sec-schema-inheritance}
+
+Most entities are not declared from scratch.
+`ADVANCED_FACE`, the workhorse of every B-rep file, is the bottom of a chain:
+
+```express
+ENTITY representation_item;
+  name : label;
+END_ENTITY;
+
+ENTITY topological_representation_item
+  SUBTYPE OF (representation_item);
+END_ENTITY;
+
+ENTITY face
+  SUBTYPE OF (topological_representation_item);
+  bounds : SET [1:?] OF face_bound;
+END_ENTITY;
+
+ENTITY face_surface
+  SUBTYPE OF (face, geometric_representation_item);
+  face_geometry : surface;
+  same_sense    : BOOLEAN;
+END_ENTITY;
+
+ENTITY advanced_face
+  SUBTYPE OF (face_surface);
+END_ENTITY;
+```
+
+(Constraints and supertype clauses removed; they return below.) `advanced_face` adds no attributes of its own.
+It is a `face_surface` with extra rules about what kinds of surface and edge it may use.
+`face_surface` has *two* supertypes — it is both a `face` and a `geometric_representation_item`, and both of those descend from `representation_item`.
+EXPRESS allows multiple inheritance, including the diamond.
+
+Now the record:
+
+```step
+#17 = ADVANCED_FACE('',(#18),#52,.F.);
+```
+
+Four parameters, and `advanced_face` declares zero attributes.
+They come from the ancestors, **flattened into one list**: each entity's attributes appear once, in the order given by walking the supertype graph depth-first, supertypes before subtypes, and multiple supertypes in the order they are listed.
+
+| Parameter | Attribute | Declared in |
+|-----------|-----------|-------------|
+| `''` | `name` | `representation_item` |
+| `(#18)` | `bounds` | `face` |
+| `#52` | `face_geometry` | `face_surface` |
+| `.F.` | `same_sense` | `face_surface` |
+
+`geometric_representation_item` and `topological_representation_item` declare nothing, and `representation_item` is visited once even though there are two paths to it.
+This is the rule that makes ordinary records readable, and it is the rule that must be got exactly right: shift one attribute and every value lands in the wrong slot.
+
+A record like this — one leaf type name, all inherited attributes flattened in — is what Part 21 calls the **internal mapping**.
+It is the normal case.
+
+## Derived attributes and `*` {#sec-schema-derived}
+
+Some attributes are declared with a formula instead of a stored value.
+From Part 41:
+
+```express
+ENTITY named_unit;
+  dimensions : dimensional_exponents;
+END_ENTITY;
+
+ENTITY si_unit
+  SUBTYPE OF (named_unit);
+  prefix : OPTIONAL si_prefix;
+  name   : si_unit_name;
+DERIVE
+  SELF\named_unit.dimensions : dimensional_exponents
+                             := dimensions_for_si_unit(name);
+END_ENTITY;
+```
+
+`named_unit` stores its `dimensions` — length$^{1}$, mass$^{0}$, and so on.
+`si_unit` inherits that attribute and *redeclares it as derived*: an SI unit knows its dimensions from its name, so the value is computed by a function rather than stored.
+Attribute slots are positional, so the file cannot simply omit it; it writes `*` in the slot:
+
+```step
+#166 = ( LENGTH_UNIT() NAMED_UNIT(*) SI_UNIT(.MILLI.,.METRE.) );
+```
+
+`*` is "there is a value here, but you compute it." `$` is "there is no value." A reader that does not evaluate derivations treats `*` as a gap; nothing that matters for reading geometry or product structure lives behind one.
+
+## Inverse attributes {#sec-schema-inverse}
+
+Declarations may also contain an `INVERSE` clause:
+
+```express
+ENTITY representation_context;
+  context_identifier : identifier;
+  context_type       : text;
+INVERSE
+  representations_in_context : SET [1:?] OF representation
+                               FOR context_of_items;
+END_ENTITY;
+```
+
+An inverse attribute is the schema saying: *you can find the representations that use this context by looking for `representation` instances whose `context_of_items` points here.*
+It declares the reverse of a reference that exists elsewhere.
+**Inverse attributes never appear in the file.**
+`REPRESENTATION_CONTEXT('Context #1','3D Context ...')` has two parameters, not three.
+They are worth knowing about for two reasons: the schema uses them in constraints, and they are a map of exactly the reverse lookups a reader will end up building for itself.
+
+## Complex instances and the external mapping {#sec-schema-complex-instances}
+
+@sec-first-look introduced records with several type names and promised the explanation.
+It is in the `SUPERTYPE OF` clause, which I removed from the declarations above.
+Here is `named_unit` in full:
+
+```express
+ENTITY named_unit
+  SUPERTYPE OF (ONEOF (si_unit, conversion_based_unit, context_dependent_unit)
+                ANDOR
+               ONEOF (length_unit, mass_unit, time_unit, electric_current_unit,
+                      thermodynamic_temperature_unit, amount_of_substance_unit,
+                       luminous_intensity_unit, plane_angle_unit,
+                       solid_angle_unit, ratio_unit));
+  dimensions : dimensional_exponents;
+END_ENTITY;
+```
+
+A supertype clause constrains how an entity's subtypes may be combined in a single instance.
+`ONEOF (a, b, c)` means exactly one of them.
+`a ANDOR b` means either, or both.
+`a AND b` means both.
+An entity with no supertype clause allows any combination, as if every pair were `ANDOR`.
+
+Read `named_unit`'s clause: an instance is *one of* {SI, conversion-based, context-dependent} **and/or** *one of* {length, mass, time, …}.
+A millimetre is an SI unit *and* a length unit.
+There is no entity named `si_length_unit`; the schema deliberately does not enumerate the thirty combinations.
+So there is no leaf type to name in an internal-mapping record, and the file falls back to the **external mapping**:
+
+```step
+#166 = ( LENGTH_UNIT() NAMED_UNIT(*) SI_UNIT(.MILLI.,.METRE.) );
+```
+
+The rules of the external mapping:
+
+- Every entity type the instance *is* appears as a block: the leaves, and every supertype above them, up to the root.
+  `NAMED_UNIT` is present because both leaves descend from it.
+- Each block carries **only the attributes that entity declares itself**, not inherited ones.
+  `SI_UNIT` gets `prefix` and `name`; `NAMED_UNIT` gets `dimensions`; `LENGTH_UNIT` declares nothing and gets an empty pair of parentheses.
+- Blocks are in **alphabetical order** of entity name.
+  Not hierarchical order — alphabetical.
+  L before N before S.
+- The set of leaves must be one the supertype clauses permit.
+  `(LENGTH_UNIT() MASS_UNIT() ...)` would violate the second `ONEOF`.
+
+The other complex record in the block file works the same way with a different reason.
+`representation_context` has *no* supertype clause, so any combination of its subtypes is legal, and a 3D context that also carries units and an uncertainty is three of them at once:
+
+```step
+#165 = ( GEOMETRIC_REPRESENTATION_CONTEXT(3)
+  GLOBAL_UNCERTAINTY_ASSIGNED_CONTEXT((#169))
+  GLOBAL_UNIT_ASSIGNED_CONTEXT((#166,#167,#168))
+  REPRESENTATION_CONTEXT('Context #1','3D Context with UNIT and UNCERTAINTY') );
+```
+
+Each subtype adds one attribute — dimension count, uncertainty set, unit set — and the root carries the two it declares.
+
+Why list the supertypes at all, when a reader with the schema could derive them from the leaves?
+Partly because the supertype blocks are carrying attribute values that have to go somewhere.
+Mostly because the format was designed to be readable by a program that does *not* have the schema: a tool that only cares about `REPRESENTATION_CONTEXT` can find that block and take its two values without knowing the other three types exist.
+The redundancy is the price of that.
+It is also a free consistency check — if the supertypes listed do not match what the schema derives from the leaves, the file was written against a different schema than it claims.
+
+Exporters are supposed to use the internal mapping whenever a leaf name exists and the external mapping only when it does not.
+A few use the external form more liberally, so a reader must accept either form for any entity.
+
+## Enumerations {#sec-schema-enumerations}
+
+An enumeration is a closed list of names:
+
+```express
+TYPE si_prefix = ENUMERATION OF
+  (exa, peta, tera, giga, mega, kilo, hecto, deca,
+   deci, centi, milli, micro, nano, pico, femto, atto);
+END_TYPE;
+
+TYPE si_unit_name = ENUMERATION OF
+  (metre, gram, second, ampere, kelvin, mole, candela, radian, steradian,
+   hertz, newton, pascal, joule, watt, coulomb, volt, farad, ohm, siemens,
+   weber, tesla, henry, degree_celsius, lumen, lux, becquerel, gray, sievert);
+END_TYPE;
+```
+
+In the file the chosen name is upper-cased and dotted: `.MILLI.`, `.METRE.`.
+The base type `BOOLEAN` is written as an enumeration too — `.T.`/`.F.` or `.TRUE.`/`.FALSE.` — and its cousin `LOGICAL` adds a third value, `.U.` for unknown.
+
+## SELECT types and the typed wrapper {#sec-schema-select}
+
+One record in the block file has a value that is wrapped in a type name:
+
+```step
+#169 = UNCERTAINTY_MEASURE_WITH_UNIT(LENGTH_MEASURE(1.E-07),#166,
+  'distance_accuracy_value','confusion accuracy');
+```
+
+The first attribute, `value_component`, is declared with a **SELECT** type — EXPRESS's tagged union:
+
+```express
+TYPE measure_value = SELECT
+  (length_measure, mass_measure, plane_angle_measure, solid_angle_measure,
+   area_measure, volume_measure, parameter_value, context_dependent_measure,
+   descriptive_measure, positive_length_measure, positive_plane_angle_measure,
+   count_measure);
+END_TYPE;
+
+TYPE length_measure      = REAL; END_TYPE;
+TYPE plane_angle_measure = REAL; END_TYPE;
+```
+
+A `measure_value` is any one of those.
+But `length_measure` and `plane_angle_measure` are both plain `REAL` underneath, so a bare `1.E-07` would be ambiguous — a length or an angle?
+The file resolves this by wrapping the value in the name of the alternative chosen: `LENGTH_MEASURE(1.E-07)`.
+
+The rule for when a wrapper appears is exact.
+A parameter is wrapped when **both** hold:
+
+1. the attribute's declared type is a `SELECT`, and
+2. the alternative chosen is *not* an entity type.
+
+The second attribute of `#169`, `unit_component`, is also a SELECT — `TYPE unit = SELECT (named_unit, derived_unit)` — but both alternatives are entities, so the value is a bare reference: `#166`.
+The record at `#166` already says what it is.
+Wrappers exist only for values that have no record of their own to carry a type.
+
+You will meet wrappers most often with measures (`LENGTH_MEASURE`, `PLANE_ANGLE_MEASURE`, `POSITIVE_LENGTH_MEASURE`), with curve parameters (`PARAMETER_VALUE(0.5)` in trimmed curves), and in PMI, where `DESCRIPTIVE_MEASURE('...')` carries text.
+A SELECT can include another SELECT, so wrappers can in principle nest; in practice they rarely do.
+
+## Case {#sec-schema-case}
+
+EXPRESS identifiers are case-insensitive, and published schemas are written in lower case: `representation_context`.
+Part 21 keywords — entity names, enumeration values, the wrapper names — are required to be **upper case**; the grammar admits nothing else.
+So the mapping from schema to file is "upper-case the name," and the mapping back is the reverse.
+Strings, being data, keep their case: `'BLOCK'` and `'block'` are different values.
+
+## What to skip, and where to find the rest {#sec-schema-what-to-skip}
+
+The schema also contains `WHERE` clauses on entities (per-instance constraints), global `RULE`s (constraints across instances), `FUNCTION`s used by both, `ABSTRACT SUPERTYPE` declarations (an entity that can only appear as part of a subtype), `UNIQUE` clauses, and the `SCHEMA`/`USE FROM` machinery that assembles AP242 from hundreds of modules.
+A validator needs all of it.
+A reader of files needs none of it, and this book will not use any of it again except to explain, in passing, why a particular record has the shape it has.
+
+The schemas themselves are free even though the standard is not.
+STEP Tools publishes the long-form EXPRESS for AP203, AP214 and AP242 at `steptools.com/stds/step/`, and that is the text every declaration in this book was checked against.
+Opening the AP242 long form and searching for `ENTITY next_assembly_usage_occurrence` is the best twenty minutes you can spend before @sec-assemblies.
+
+::: {.callout-important title="In brief"}
+A record's parameters are its entity's attributes, flattened from the root of the inheritance chain down, supertypes first.
+`$` is an absent optional; `*` is a derived value.
+A record with several type names in parentheses is one object whose combination of subtypes has no single name; blocks are alphabetical and carry only their own attributes.
+A value is wrapped in a type name only when its attribute is a SELECT and the chosen alternative is not an entity.
+:::

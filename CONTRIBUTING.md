@@ -1,6 +1,6 @@
 # Contributing
 
-Thank you for helping improve The STEP Book. Small fixes and large chapters are equally welcome.
+Thank you for helping improve *Inside the STEP File*. Small fixes and large chapters are equally welcome.
 
 ## Quick fixes
 
@@ -18,7 +18,7 @@ Every page of the published book has an **Edit this page** link that opens the s
 - **One sentence per line.** Start each sentence on a new line in the source. Paragraphs are still separated by blank lines. This keeps diffs readable and reviews focused.
 - **Cite the standard.** Add sources to `references.bib` and cite them with `[@key]`. Prefer the current edition of each ISO 10303 part.
 - **Use the standard's terminology.** Write entity names exactly as they appear in a Part 21 file, in backticks: `AXIS2_PLACEMENT_3D`.
-- **Keep examples real.** Listings should be complete, valid files unless the text says otherwise. Put reusable files in `examples/`.
+- **Keep examples real.** Listings are excerpts of the files in `examples/`, which were exported by Open CASCADE. If a listing is written to a published pattern rather than exported, the text must say so.
 - **Cross-reference, don't repeat.** Give sections, figures, tables, and listings an identifier (`{#sec-...}`, `{#tbl-...}`, `{#lst-...}`) and refer to them with `@sec-...`.
 - **Check both outputs.** Some Markdown renders differently in HTML and in the PDF. Look at both before submitting.
 

@@ -1,0 +1,244 @@
+# Product Manufacturing Information {#sec-pmi}
+
+::: {.chapter-abstract}
+Tolerances, datums and dimensions — the information that makes a model manufacturable — and the two entirely different ways a STEP file can carry them: as pictures of symbols, or as data.
+Why AP242 exists, in one chapter.
+:::
+
+A B-rep says what a part's nominal shape is.
+It does not say how far a real part may deviate from that shape and still be acceptable, which surfaces must be flat and how flat, which holes must line up with which faces and how closely.
+That information — **product manufacturing information**, PMI, or in older usage geometric dimensioning and tolerancing, GD&T — lived for a century on drawings, and moving it into the 3D model is the whole project of *model-based definition*.
+AP242 was created, more than for any other reason, to carry it.
+
+::: {.callout-note title="Engineering background: Geometric dimensioning and tolerancing"}
+A manufactured part never matches its model exactly.
+GD&T is the language for saying how much mismatch is allowed, in a way that a machinist, an inspector and a designer all read the same way.
+Its core ideas:
+
+**Features** are the physical surfaces of the part — a face, a hole, a slot — as opposed to the model's ideal geometry.
+
+**Datums** are theoretically exact references derived from real features.
+A **datum feature** is the actual surface (the bottom face of the bracket, say), and the **datum** is the perfect plane that surface is taken to represent.
+Datums are labelled A, B, C.
+
+A **datum reference frame** is an ordered set of datums — primary, secondary, tertiary — that fully locates the part.
+*A|B|C* means: sit the part on A, slide it against B, then against C.
+Order matters because it decides which contact takes precedence.
+
+A **feature control frame** is the rectangular box on a drawing that states one tolerance: a **characteristic symbol** (position, flatness, perpendicularity, and eleven others, each with its own glyph), a **tolerance zone** (a width or a diameter within which the feature's real surface or axis must lie), optional **modifiers** (the circled M, "maximum material condition," changes how the zone grows as the feature departs from its largest permitted size), and the **datum references** the tolerance is measured against.
+
+**Dimensions** give sizes and locations, each with a plus/minus tolerance or a fit class.
+
+Two standards say how to write all this: ASME Y14.5 in North America and the ISO GPS family (ISO 1101 and its neighbours) elsewhere.
+They agree on most symbols and differ in some default rules, which is why a semantic PMI record carries a flag saying which system it follows.
+:::
+
+## Two kinds of PMI {#sec-pmi-two-kinds}
+
+STEP can carry a tolerance in two ways, and the difference is the single most important thing in this chapter.
+
+**Graphical (presentation) PMI** is the feature control frame as a *drawing*: the lines that make up the box, the symbol and the text, positioned in 3D space near the feature.
+A viewer can display it.
+Nothing can read it: the "0.2" is a set of line segments in the shape of digits.
+Every CAD system can export this, and every viewer can show it, and it carries exactly as much meaning as a photograph of a drawing.
+
+**Semantic (representation) PMI** is the tolerance as *data*: a `POSITION_TOLERANCE` record with a magnitude of 0.2 millimetres, referring to a `SHAPE_ASPECT` that is linked to a specific face, with a datum system whose datums are linked to other faces.
+A program can read it, check it, feed it to an inspection planner.
+Only some systems export it, only some readers consume it, and it is the reason AP242 is different from AP214.
+
+A file may have either, both, or — best — both with a link from each graphical callout to the semantic data it depicts.
+The CAx Implementor Forum's PMI recommended practice specifies how to write all three, and the records below follow it.
+*(They are written to that pattern rather than exported; the exporter used for the running example does not write PMI.)*
+
+## Graphical PMI {#sec-pmi-graphical}
+
+A callout is drawn with curves collected under an annotation occurrence:
+
+```step
+#600 = ANNOTATION_CURVE_OCCURRENCE('flatness callout',(#601),#605);
+#601 = PRESENTATION_STYLE_ASSIGNMENT((#602));
+#602 = CURVE_STYLE('',#603,POSITIVE_LENGTH_MEASURE(0.13),#604);
+#603 = DRAUGHTING_PRE_DEFINED_CURVE_FONT('continuous');
+#604 = COLOUR_RGB('',0.,0.,0.);
+#605 = GEOMETRIC_CURVE_SET('',(#606,#607, /* ... */ ));
+#606 = POLYLINE('',(#620,#621,#622,#623,#620));      /* the frame's box */
+#607 = POLYLINE('',(#624,#625, /* ... */ ));          /* strokes of the symbol
+and digits */
+```
+
+`ANNOTATION_CURVE_OCCURRENCE` is a `STYLED_ITEM` — the same entity that carried colour in @sec-appearance — whose item is a `GEOMETRIC_CURVE_SET` of polylines and arcs, and whose style says how to draw them.
+The digits "0.2" are polylines shaped like digits.
+Arrowheads are filled triangles under an `ANNOTATION_FILL_AREA_OCCURRENCE`.
+In AP242 the curves may instead be a mesh under a `TESSELLATED_ANNOTATION_OCCURRENCE`, using the tessellation records of @sec-pcurves-meshes.
+
+Several occurrences making one callout are grouped:
+
+```step
+#610 = DRAUGHTING_CALLOUT('',(#600,#611,#612));
+```
+
+— the frame, its leader line, its arrowhead.
+The callout lies on an annotation plane, which fixes the plane in 3D that the 2D-looking symbol is drawn in:
+
+```step
+#615 = ANNOTATION_PLANE('',(#601),#616,(#610));
+#616 = PLANE('',#617);
+```
+
+And all annotations, planes and callouts are collected in a **`DRAUGHTING_MODEL`**, a representation in the same geometric context as the part:
+
+```step
+#630 = DRAUGHTING_MODEL('',(#615,#610, /* ... */ ),#165);
+#631 = MECHANICAL_DESIGN_AND_DRAUGHTING_RELATIONSHIP('','',#630,#10);
+```
+
+The relationship record ties the draughting model to the shape representation it annotates.
+A reader looking for "all the PMI drawn on this part" finds the draughting models related to its shape representation and walks their items.
+
+That is graphical PMI: geometry that happens to look like symbols, organised so a viewer knows to draw it and where.
+
+## Semantic PMI: features {#sec-pmi-features}
+
+Semantic PMI is built on **shape aspects** — named regions of a part's shape that a tolerance can refer to:
+
+```step
+#700 = SHAPE_ASPECT('top face','',#4,.T.);
+#701 = GEOMETRIC_ITEM_SPECIFIC_USAGE('','',#700,#10,(#153));
+```
+
+`SHAPE_ASPECT` has a `name`, a `description`, `of_shape` (the part's `PRODUCT_DEFINITION_SHAPE` — the abstract shape from @sec-product-to-shape, now earning its keep) and a `product_definitional` flag.
+It says "there is a feature of this part's shape called *top face*."
+It does not, by itself, say which geometry that is.
+
+`GEOMETRIC_ITEM_SPECIFIC_USAGE` does: its `definition` is the shape aspect, its `used_representation` is the shape representation, and its `identified_item` is the set containing face `#153` (a set, so that one shape aspect can span several faces).
+This is the record that connects a tolerance's *target* to a specific face in the B-rep, and it is where semantic PMI most often goes wrong in practice — a tolerance whose shape aspect has no `GEOMETRIC_ITEM_SPECIFIC_USAGE`, or one pointing at a face that was re-numbered, is a tolerance on nothing.
+
+A feature made of several faces (the two halves of a slot, a pattern of holes) is a `COMPOSITE_SHAPE_ASPECT` or a `COMPOSITE_GROUP_SHAPE_ASPECT` with `SHAPE_ASPECT_RELATIONSHIP`s to its members.
+A hole's axis, as opposed to its wall, is a shape aspect with `description` `'centre axis'`, related to the wall's shape aspect by a relationship named `'derived'`.
+The vocabulary is the standard's usual: general entities, fixed strings.
+
+## Semantic PMI: datums {#sec-pmi-datums}
+
+```step
+#710 = DATUM_FEATURE('','',#4,.T.);
+#711 = GEOMETRIC_ITEM_SPECIFIC_USAGE('','',#710,#10,(#141));        /* the bottom
+face */
+#712 = DATUM('','',#4,.F.,'A');
+#713 = SHAPE_ASPECT_RELATIONSHIP('','',#710,#712);
+```
+
+Both `DATUM_FEATURE` and `DATUM` are subtypes of `SHAPE_ASPECT`.
+The datum feature is the real surface — linked to face `#141` — and the datum is the theoretical plane it establishes, carrying the letter `'A'` in an extra `identification` attribute.
+The relationship says the feature establishes the datum.
+Datums B and C follow the same pattern on other faces.
+
+A datum reference frame collects them in order:
+
+```step
+#720 = DATUM_SYSTEM('','',#4,.F.,(#721,#722));
+#721 = DATUM_REFERENCE_COMPARTMENT('','',#4,.F.,#712,$);       /* A */
+#722 = DATUM_REFERENCE_COMPARTMENT('','',#4,.F.,#714,$);       /* B */
+```
+
+Each compartment refers to one datum (or a common datum, A–B) and carries optional modifiers; the system lists its compartments in precedence order — primary first — in its `constituents` attribute.
+This is one of the few places in the format where the order of a list carries meaning.
+
+## Semantic PMI: geometric tolerances {#sec-pmi-tolerances}
+
+A flatness tolerance on the top face:
+
+```step
+#740 = FLATNESS_TOLERANCE('','',#741,#700);
+#741 = LENGTH_MEASURE_WITH_UNIT(LENGTH_MEASURE(0.05),#166);
+```
+
+`GEOMETRIC_TOLERANCE`, the supertype, has `name`, `description`, `magnitude` (a measure with unit: the zone width) and `toleranced_shape_aspect`.
+`FLATNESS_TOLERANCE` adds nothing; it is the *type* that says which characteristic this is.
+There are fourteen subtypes, one per symbol.
+
+A position tolerance on the hole, referred to datums, with a modifier and a cylindrical zone, is where the complex instance returns:
+
+```step
+#750 = ( GEOMETRIC_TOLERANCE('','',#751,#702)
+         GEOMETRIC_TOLERANCE_WITH_DATUM_REFERENCE((#720))
+         GEOMETRIC_TOLERANCE_WITH_MODIFIERS((.MAXIMUM_MATERIAL_REQUIREMENT.))
+         POSITION_TOLERANCE() );
+#751 = LENGTH_MEASURE_WITH_UNIT(LENGTH_MEASURE(0.2),#166);
+#752 = TOLERANCE_ZONE('','',#4,.F.,(#750),#753);
+#753 = TOLERANCE_ZONE_FORM('cylindrical or circular');
+```
+
+`GEOMETRIC_TOLERANCE_WITH_DATUM_REFERENCE` adds the datum system; `GEOMETRIC_TOLERANCE_WITH_MODIFIERS` adds the circled-M modifier; `POSITION_TOLERANCE` names the characteristic.
+Three siblings under `geometric_tolerance`, no leaf name for the combination, external mapping, alphabetical — exactly the mechanism of @sec-schema.
+The tolerance zone is a separate shape aspect (`TOLERANCE_ZONE`) whose form record's name is a fixed string: `'cylindrical or circular'` is the Ø in front of the 0.2; a planar zone is `'within a circle'`, `'between two parallel planes'`, and so on.
+
+The `toleranced_shape_aspect`, `#702`, would be the hole's axis shape aspect — position is a tolerance on where the axis is, not on the wall.
+
+## Semantic PMI: dimensions {#sec-pmi-dimensions}
+
+A diameter with a plus/minus tolerance:
+
+```step
+#760 = DIMENSIONAL_SIZE(#703,'diameter');
+#761 = DIMENSIONAL_CHARACTERISTIC_REPRESENTATION(#760,#762);
+#762 = SHAPE_DIMENSION_REPRESENTATION('',(#763),#165);
+#763 = ( LENGTH_MEASURE_WITH_UNIT() MEASURE_REPRESENTATION_ITEM()
+         MEASURE_WITH_UNIT(LENGTH_MEASURE(6.),#166)
+         QUALIFIED_REPRESENTATION_ITEM((#764)) REPRESENTATION_ITEM('nominal
+         value') );
+#764 = VALUE_FORMAT_TYPE_QUALIFIER('NR2 1.2');
+#765 = PLUS_MINUS_TOLERANCE(#766,#760);
+#766 = TOLERANCE_VALUE(#767,#768);
+#767 = LENGTH_MEASURE_WITH_UNIT(LENGTH_MEASURE(-0.02),#166);
+#768 = LENGTH_MEASURE_WITH_UNIT(LENGTH_MEASURE(0.05),#166);
+```
+
+`DIMENSIONAL_SIZE` says the hole's wall (`#703`) has a size of kind `'diameter'`.
+Its value is a representation — the property pattern of @sec-properties-validation again — whose item is a nominal length of 6 mm, qualified with a format string (`'NR2 1.2'`: two decimal places) that says how to display it.
+`PLUS_MINUS_TOLERANCE` attaches a lower and upper deviation.
+A distance between two features is a `DIMENSIONAL_LOCATION` with two shape aspects instead of one; a fit class is a `LIMITS_AND_FITS` record with grade and deviation strings.
+
+## Linking the two {#sec-pmi-linking}
+
+A graphical callout can point at the semantic data it depicts:
+
+```step
+#780 = DRAUGHTING_MODEL_ITEM_ASSOCIATION('PMI representation to presentation
+link',
+         '',#750,#630,(#610));
+```
+
+— *the callout `#610`, in draughting model `#630`, presents tolerance `#750`.*
+A reader can then show the picture and know what it means, or check that every semantic tolerance has a picture.
+The recommended practice prescribes the name string.
+Without this record the two halves of the PMI are unrelated, and a file can perfectly well have a semantic flatness tolerance and a graphical callout that happen to describe the same thing with no connection between them.
+
+## Saved views {#sec-pmi-saved-views}
+
+Drawings have views; models with PMI have *saved views*: a camera position and the set of annotations visible from it, so that a receiving system can show the PMI the way the author arranged it rather than all at once.
+
+```step
+#800 = DRAUGHTING_MODEL('Front',(#801,#610,#615),#165);
+#801 = CAMERA_MODEL_D3('',#802,#803);
+#802 = AXIS2_PLACEMENT_3D('',#804,#805,#806);       /* where the camera is,
+looking along its axis */
+#803 = VIEW_VOLUME(.PARALLEL.,#807,1.,1.,.T.,1.,1.,.T.,#808);
+```
+
+A saved view is a `DRAUGHTING_MODEL` — one per view — whose items include a `CAMERA_MODEL_D3` and the callouts that belong in the view.
+The camera's `view_reference_system` is an axis placement giving position and direction.
+The same callout may appear in several views.
+This is why a viewer sometimes shows six annotations out of ninety: it has opened the first view.
+
+::: {.callout-warning title="In the wild: What actually arrives"}
+Every mainstream CAD system exports graphical PMI when asked, and most produce it as polylines; the tessellated form is less common.
+Semantic PMI is exported by NX, Creo, CATIA and SolidWorks in their current versions, with coverage that varies by tolerance type and is documented, system by system, in the CAx Implementor Forum's test results.
+NIST's MBE PMI test models — a set of parts with known PMI and published answer keys — are the standard way to find out what a particular exporter gets right.
+It is normal for a file to have complete graphical PMI and partial semantic PMI: the graphical side is drawn from the CAD system's display and is always complete, the semantic side requires the system to have modelled the tolerance as data in the first place, and many drawings-first workflows never did.
+:::
+
+::: {.callout-important title="In brief"}
+Graphical PMI is symbols drawn as curves: `ANNOTATION_CURVE_OCCURRENCE`s grouped into `DRAUGHTING_CALLOUT`s on `ANNOTATION_PLANE`s, collected in a `DRAUGHTING_MODEL`.
+Semantic PMI is data: `SHAPE_ASPECT`s linked to faces by `GEOMETRIC_ITEM_SPECIFIC_USAGE`; `DATUM_FEATURE` → `DATUM` → `DATUM_SYSTEM`; `GEOMETRIC_TOLERANCE` subtypes (complex instances when they carry datums or modifiers) with a magnitude and a target; `DIMENSIONAL_SIZE`/`LOCATION` with a nominal value and a `PLUS_MINUS_TOLERANCE`.
+`DRAUGHTING_MODEL_ITEM_ASSOCIATION` links a picture to its meaning; saved views are draughting models with a camera.
+:::

@@ -1,0 +1,93 @@
+# Glossary {#sec-glossary}
+
+AIM
+:   Application Interpreted Model: an AP's data model expressed in integrated-resource entities.
+    What the file contains.
+
+Anchor
+:   (edition 3) a stable public name for an instance, for reference from other files.
+
+AP
+:   Application Protocol: a scoped data model for a domain.
+    AP203, AP214, AP242.
+
+ARM
+:   Application Reference Model: an AP's data model in domain vocabulary.
+    What the committee designed.
+
+B-rep
+:   boundary representation: a solid described by its bounding faces, edges and vertices.
+
+Complex entity instance
+:   a record with several entity types (external mapping), for an object whose combination of subtypes has no single name.
+
+Conformance class
+:   a named subset of an AP that an implementation can claim to support.
+
+Datum
+:   a theoretically exact reference plane, axis or point derived from a real feature.
+
+Derived attribute
+:   one whose value is computed from others; written `*`.
+
+EXPRESS
+:   the schema language of ISO 10303 (Part 11).
+
+External mapping
+:   the parenthesised multi-type form of a record.
+    See complex entity instance.
+
+Feature control frame
+:   the boxed statement of one geometric tolerance on a drawing or model.
+
+GD&T
+:   geometric dimensioning and tolerancing; the language of tolerances and datums.
+
+Instance name
+:   the `#n` identifier of a record; file-local.
+
+Integrated resources
+:   the shared library of entity definitions (Parts 41–49, 101–112) from which every AP is built.
+
+Internal mapping
+:   the ordinary one-type record form with all inherited attributes flattened.
+
+Knot vector
+:   the parameter breakpoints of a B-spline; stored as distinct values plus multiplicities.
+
+Long form
+:   an AP schema flattened into a single file (`_MIM_LF`).
+
+NAUO
+:   `NEXT_ASSEMBLY_USAGE_OCCURRENCE`: one occurrence of a child in a parent.
+
+NURBS
+:   non-uniform rational B-spline; the free-form curve and surface type.
+
+Part 21
+:   ISO 10303-21, the clear-text file format.
+    "A STEP file."
+
+Pcurve
+:   a curve in the parameter space of a surface; the 2D image of an edge on a face.
+
+PMI
+:   product manufacturing information: tolerances, datums, dimensions, notes.
+
+Representation
+:   a set of representation items in a context; the Part 43 container for geometry and properties.
+
+Seam
+:   an edge along which a periodic surface is cut, traversed twice by one loop.
+
+Semantic PMI
+:   PMI as data; contrast graphical PMI, PMI as drawn symbols.
+
+Shape aspect
+:   a named region of a shape that a tolerance or property can refer to.
+
+Uncertainty
+:   the writing kernel's coincidence tolerance, carried in the representation context.
+
+Validation property
+:   volume, area, centroid or count written by the exporter so the importer can check the transfer.

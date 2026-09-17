@@ -1,0 +1,111 @@
+# Application Protocols and the Real World {#sec-application-protocols}
+
+::: {.chapter-abstract}
+What differs between an AP203, an AP214 and an AP242 file at the level of records; what "conformance class" means and why vendors care; and how to read a file's origin from its habits.
+:::
+
+Everything in this book so far has been written against records that are identical across the three mechanical application protocols.
+The block's geometry is the same in all of them; so is its product chain, its units, its assembly structure.
+This chapter is about where they differ, and about the gap between what a protocol permits and what any given exporter writes.
+
+## Three protocols, one lineage {#sec-application-protocols-lineage}
+
+|                         | AP203 ed. 1 (1994)      | AP214 (2001, 2010)     | AP242 (2014, 2020, 2025)                          |
+|-------------------------|-------------------------|------------------------|---------------------------------------------------|
+| Schema name             | `CONFIG_CONTROL_DESIGN` | `AUTOMOTIVE_DESIGN`    | `AP242_MANAGED_MODEL_BASED_3D_ENGINEERING_MIM_LF` |
+| Product structure, B-rep | yes                    | yes                    | yes                                               |
+| Colours, layers         | **no**                  | yes                    | yes                                               |
+| Graphical PMI           | no                      | yes (drawing-oriented) | yes                                               |
+| Semantic PMI            | no                      | limited                | **yes**                                           |
+| Tessellation            | no                      | no                     | **yes**                                           |
+| Validation properties   | by convention           | by convention          | yes, incl. PMI and tessellation                   |
+| Kinematics, composites  | no                      | kinematics             | both, extended                                    |
+| PDM (XML)               | no                      | no                     | business object model                             |
+
+AP203's second edition (2011) adopted the modular architecture and added presentation, closing most of the gap to AP214; its schema name is `AP203_CONFIGURATION_CONTROLLED_3D_DESIGN_OF_MECHANICAL_PARTS_AND_ASSEMBLIES_MIM_LF`, and it is comparatively rare in the wild.
+AP242 was designed as the successor to both and is a superset of each for everything a CAD system exports.
+
+The practical consequences for a reader:
+
+- A file declaring **AP203 first edition** has geometry and structure and nothing else.
+  If it contains colour records, the writer violated its own declaration.
+- A file declaring **AP214** may have everything in Parts I and II of this book plus colours, layers, graphical PMI and user properties.
+  Its semantic PMI, if any, uses an older and less complete set of entities.
+- A file declaring **AP242** may have all of that plus tessellation, full semantic PMI, saved views, and the AP242-specific validation properties.
+
+And for a writer: if colours or PMI matter, write AP242.
+Writing AP214 for colour is still common and still works; writing AP203 for anything but bare geometry is a mistake that many exporters' default settings make.
+
+## Conformance classes {#sec-application-protocols-conformance-classes}
+
+An AP is large, and no implementation supports all of it.
+The standard therefore defines **conformance classes**: named subsets an implementation can claim.
+AP203's original six classes ranged from "configuration-controlled design without shape" up through wireframe, surface, faceted B-rep and advanced B-rep.
+AP214 has twenty.
+AP242's are organised by capability — geometry, assembly, PMI, tessellation — and a vendor's export dialog often exposes them as options.
+
+For a reader of files the classes matter in one way: they tell you what the *writer* was tested against.
+A CAD vendor who says their exporter conforms to AP242 "with semantic PMI" has passed the tests for that class, which means the records in @sec-pmi will be present and well-formed.
+A vendor who does not make that claim may still write them, or may write some of them, or may write them wrongly.
+
+## Recommended practices {#sec-application-protocols-recommended-practices}
+
+The standard says what is legal.
+It does not say, for most things, what is *good*.
+Two exporters can write the same assembly placement with `rep_1` and `rep_2` swapped, both legally, and a reader has to handle both.
+The gap is filled by the **recommended practices** of the CAx Implementor Forum (CAx-IF), a joint body of CAD vendors and users that has run interoperability test rounds since the 1990s and publishes, freely, documents that pin down how to write each capability so that it will actually be read: assembly structure, colours and layers, user-defined attributes, validation properties, PMI (graphical and semantic), tessellation, external references.
+
+Several things in this book are recommended practice rather than standard: the string `'geometric validation property'`, the names `'volume'`, `'surface area'` and `'centroid'`, the orientation of `rep_1` and `rep_2`, the `'PMI representation to presentation link'` association name, the tolerance zone form strings.
+A reader that follows the recommended practices reads every mainstream exporter's files; a reader that follows only the standard reads none of them reliably.
+The documents are at the forum's site (now part of the MBx Interoperability Forum), and for anyone working with real files they are more useful than the standard itself.
+
+## Reading a file's origin from its habits {#sec-application-protocols-origin}
+
+With the header's `originating_system` as confirmation, each exporter has a signature.
+What follows is characteristic rather than guaranteed; versions change.
+
+**Open CASCADE** (and FreeCAD, CadQuery, and many small tools): `FACE_BOUND` rather than `FACE_OUTER_BOUND` for every bound; duplicated `CARTESIAN_POINT`s for line origins; duplicated surfaces for pcurves; product names defaulting to `Open CASCADE STEP translator N`; one geometric context per product; `-0.` in directions; category `'part'` for assemblies too.
+
+**SolidWorks**: `.TRUE./.FALSE.` spelled out; product `id` and `name` from the filename; `FACE_OUTER_BOUND` used; colours per face when face colours exist, otherwise per body; a `SHAPE_REPRESENTATION` with only an axis placement for each part alongside the B-rep representation.
+
+**NX** (via ST-Developer): very clean, spec-conformant structure; `FACE_OUTER_BOUND`; shared points; product number in `id`; comprehensive validation properties; the best semantic PMI coverage of the mainstream systems.
+
+**CATIA V5**: `PRODUCT_DEFINITION_FORMATION_WITH_SPECIFIED_SOURCE` with `.NOT_KNOWN.`; older versions converting many surfaces to B-splines; per-face colours common; `MAPPED_ITEM` used in some assembly exports.
+
+**Creo**: historically prone to writing many small surfaces where one would do; product names from the part name; assembly structure via `CONTEXT_DEPENDENT_SHAPE_REPRESENTATION` as in this book.
+
+None of this changes what the records *mean*.
+It changes what a reader will find, in what quantity, and where.
+
+## When files are wrong {#sec-application-protocols-when-wrong}
+
+Three kinds of error, in increasing order of difficulty.
+
+**Syntactic.**
+A string not closed, a record not terminated, a keyword in lower case, a real without a decimal point.
+Rare from CAD exporters, common from scripts and hand edits.
+Most readers reject these; some repair the obvious ones.
+
+**Schema.**
+An entity that does not exist in the declared schema; too many or too few parameters; a string where a reference belongs.
+These come from exporters that mislabel the AP, from software that edits files without understanding them, and from bugs.
+Readers vary from strict rejection to silent acceptance of anything they recognise.
+
+**Semantic.**
+Everything is legal and the model is wrong: a shell that is not closed, a face whose loop does not chain, a placement with the frames reversed, a validation property that does not match the geometry, a tolerance on a shape aspect that points at nothing.
+These are the errors that matter and the only ones the format cannot catch by inspection.
+They are why validation properties exist, why validators such as NIST's STEP File Analyzer exist, and why "opens fine in my CAD system" is not the same as "correct."
+
+::: {.callout-warning title="In the wild: Test files"}
+Two public collections are worth knowing.
+The **CAx-IF test rounds** produce files for each capability from each participating vendor, with results published; they are the reference for what a given exporter does.
+**NIST's MBE PMI validation models** are a set of parts designed to exercise semantic PMI, with published drawings and expected results, and exports of each from several CAD systems.
+Both are free, and between them they answer most "does system X write Y correctly?" questions without guesswork.
+:::
+
+::: {.callout-important title="In brief"}
+AP203, AP214 and AP242 share geometry and structure; they differ in presentation, PMI and tessellation, with AP242 a superset of both older protocols.
+Conformance classes name what an implementation was tested for.
+The recommended practices of the CAx Implementor Forum, not the standard, decide how real files are written, and a reader must follow them.
+Exporters have recognisable habits; none change the meaning of the records.
+:::

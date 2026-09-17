@@ -1,0 +1,172 @@
+# Entity Quick Reference {#sec-entity-reference}
+
+The entities that appear in typical mechanical files, with their attributes in file order (inherited attributes included, derived ones marked `*`) and the chapter where each is discussed.
+Types in italics are supertypes that appear only inside complex instances.
+
+## Header {#sec-entity-reference-header}
+
+| Entity | Attributes, in order | Where |
+|---|---|---|
+| `FILE_DESCRIPTION` | description (list), implementation_level | @sec-header |
+| `FILE_NAME` | name, time_stamp, author (list), organization (list), preprocessor_version, originating_system, authorization | @sec-header |
+| `FILE_SCHEMA` | schema_identifiers (list) | @sec-header |
+
+## Context and identity {#sec-entity-reference-context-identity}
+
+| Entity | Attributes, in order | Where |
+|---|---|---|
+| `APPLICATION_CONTEXT` | application | @sec-header, @sec-product-chain |
+| `APPLICATION_PROTOCOL_DEFINITION` | status, application_interpreted_model_schema_name, application_protocol_year, application | @sec-header |
+| `PRODUCT_CONTEXT` | name, frame_of_reference, discipline_type | @sec-product-chain |
+| `PRODUCT_DEFINITION_CONTEXT` | name, frame_of_reference, life_cycle_stage | @sec-product-chain |
+| `PRODUCT` | id, name, description, frame_of_reference (set) | @sec-product-chain |
+| `PRODUCT_DEFINITION_FORMATION` | id, description, of_product | @sec-product-chain |
+| `PRODUCT_DEFINITION_FORMATION_WITH_SPECIFIED_SOURCE` | id, description, of_product, make_or_buy | @sec-product-chain |
+| `PRODUCT_DEFINITION` | id, description, formation, frame_of_reference | @sec-product-chain |
+| `PRODUCT_RELATED_PRODUCT_CATEGORY` | name, description, products (set) | @sec-product-chain |
+
+## Shape binding {#sec-entity-reference-shape-binding}
+
+| Entity | Attributes, in order | Where |
+|---|---|---|
+| `PRODUCT_DEFINITION_SHAPE` | name, description, definition | @sec-product-to-shape |
+| `SHAPE_DEFINITION_REPRESENTATION` | definition, used_representation | @sec-product-to-shape |
+| `SHAPE_REPRESENTATION` and subtypes | name, items (set), context_of_items | @sec-product-to-shape |
+| `AXIS2_PLACEMENT_3D` | name, location, axis, ref_direction | @sec-product-to-shape, @sec-assemblies |
+
+## Assembly {#sec-entity-reference-assembly}
+
+| Entity | Attributes, in order | Where |
+|---|---|---|
+| `NEXT_ASSEMBLY_USAGE_OCCURRENCE` | id, name, description, relating_product_definition, related_product_definition, reference_designator | @sec-assemblies |
+| `CONTEXT_DEPENDENT_SHAPE_REPRESENTATION` | representation_relation, represented_product_relation | @sec-assemblies |
+| *`REPRESENTATION_RELATIONSHIP`* | name, description, rep_1, rep_2 | @sec-assemblies |
+| *`REPRESENTATION_RELATIONSHIP_WITH_TRANSFORMATION`* | transformation_operator | @sec-assemblies |
+| *`SHAPE_REPRESENTATION_RELATIONSHIP`* | — | @sec-assemblies |
+| `ITEM_DEFINED_TRANSFORMATION` | name, description, transform_item_1, transform_item_2 | @sec-assemblies |
+| `MAPPED_ITEM` | name, mapping_source, mapping_target | @sec-assemblies |
+| `REPRESENTATION_MAP` | mapping_origin, mapped_representation | @sec-assemblies |
+
+## Units and context {#sec-entity-reference-units-context}
+
+| Entity | Attributes, in order | Where |
+|---|---|---|
+| *`REPRESENTATION_CONTEXT`* | context_identifier, context_type | @sec-contexts-units |
+| *`GEOMETRIC_REPRESENTATION_CONTEXT`* | coordinate_space_dimension | @sec-contexts-units |
+| *`GLOBAL_UNIT_ASSIGNED_CONTEXT`* | units (set) | @sec-contexts-units |
+| *`GLOBAL_UNCERTAINTY_ASSIGNED_CONTEXT`* | uncertainty (set) | @sec-contexts-units |
+| *`NAMED_UNIT`* | dimensions `*` or explicit | @sec-contexts-units |
+| *`SI_UNIT`* | prefix, name | @sec-contexts-units |
+| *`CONVERSION_BASED_UNIT`* | name, conversion_factor | @sec-contexts-units |
+| *`LENGTH_UNIT`*, *`PLANE_ANGLE_UNIT`*, *`SOLID_ANGLE_UNIT`*, *`MASS_UNIT`* | — | @sec-contexts-units |
+| `DIMENSIONAL_EXPONENTS` | length_exponent, mass_exponent, time_exponent, electric_current_exponent, thermodynamic_temperature_exponent, amount_of_substance_exponent, luminous_intensity_exponent | @sec-contexts-units |
+| `UNCERTAINTY_MEASURE_WITH_UNIT` | value_component, unit_component, name, description | @sec-contexts-units |
+| `LENGTH_MEASURE_WITH_UNIT` etc. | value_component, unit_component | @sec-contexts-units |
+| `DERIVED_UNIT` | elements (set) | @sec-contexts-units |
+| `DERIVED_UNIT_ELEMENT` | unit, exponent | @sec-contexts-units |
+
+## Topology {#sec-entity-reference-topology}
+
+| Entity | Attributes, in order | Where |
+|---|---|---|
+| `MANIFOLD_SOLID_BREP` | name, outer | @sec-reading-the-block |
+| `BREP_WITH_VOIDS` | name, outer, voids (set) | @sec-reading-the-block |
+| `CLOSED_SHELL`, `OPEN_SHELL` | name, cfs_faces (set) | @sec-reading-the-block |
+| `ADVANCED_FACE` | name, bounds (set), face_geometry, same_sense | @sec-reading-the-block |
+| `FACE_BOUND`, `FACE_OUTER_BOUND` | name, bound, orientation | @sec-reading-the-block |
+| `EDGE_LOOP` | name, edge_list (list) | @sec-reading-the-block |
+| `VERTEX_LOOP` | name, loop_vertex | @sec-curves-surfaces |
+| `ORIENTED_EDGE` | name, edge_start `*`, edge_end `*`, edge_element, orientation | @sec-reading-the-block |
+| `EDGE_CURVE` | name, edge_start, edge_end, edge_geometry, same_sense | @sec-reading-the-block |
+| `VERTEX_POINT` | name, vertex_geometry | @sec-reading-the-block |
+
+## Geometry {#sec-entity-reference-geometry}
+
+| Entity | Attributes, in order | Where |
+|---|---|---|
+| `CARTESIAN_POINT` | name, coordinates (list) | @sec-reading-the-block |
+| `DIRECTION` | name, direction_ratios (list) | @sec-reading-the-block |
+| `VECTOR` | name, orientation, magnitude | @sec-reading-the-block |
+| `LINE` | name, pnt, dir | @sec-reading-the-block |
+| `CIRCLE` | name, position, radius | @sec-curves-surfaces |
+| `ELLIPSE` | name, position, semi_axis_1, semi_axis_2 | @sec-curves-surfaces |
+| `TRIMMED_CURVE` | name, basis_curve, trim_1 (set), trim_2 (set), sense_agreement, master_representation | @sec-curves-surfaces |
+| `POLYLINE` | name, points (list) | @sec-curves-surfaces, @sec-pmi |
+| `PLANE` | name, position | @sec-reading-the-block |
+| `CYLINDRICAL_SURFACE` | name, position, radius | @sec-curves-surfaces |
+| `CONICAL_SURFACE` | name, position, radius, semi_angle | @sec-curves-surfaces |
+| `SPHERICAL_SURFACE` | name, position, radius | @sec-curves-surfaces |
+| `TOROIDAL_SURFACE` | name, position, major_radius, minor_radius | @sec-curves-surfaces |
+| `SURFACE_OF_LINEAR_EXTRUSION` | name, swept_curve, extrusion_axis | @sec-curves-surfaces |
+| `SURFACE_OF_REVOLUTION` | name, swept_curve, axis_position | @sec-curves-surfaces |
+| `B_SPLINE_CURVE_WITH_KNOTS` | name, degree, control_points_list, curve_form, closed_curve, self_intersect, knot_multiplicities, knots, knot_spec | @sec-bsplines |
+| `B_SPLINE_SURFACE_WITH_KNOTS` | name, u_degree, v_degree, control_points_list (list of lists), surface_form, u_closed, v_closed, self_intersect, u_multiplicities, v_multiplicities, u_knots, v_knots, knot_spec | @sec-bsplines |
+| *`RATIONAL_B_SPLINE_CURVE`* | weights_data (list) | @sec-bsplines |
+| *`RATIONAL_B_SPLINE_SURFACE`* | weights_data (list of lists) | @sec-bsplines |
+| `SURFACE_CURVE`, `SEAM_CURVE` | name, curve_3d, associated_geometry (list), master_representation | @sec-pcurves-meshes |
+| `PCURVE` | name, basis_surface, reference_to_curve | @sec-pcurves-meshes |
+| `DEFINITIONAL_REPRESENTATION` | name, items (set), context_of_items | @sec-pcurves-meshes |
+
+## Tessellation (AP242) {#sec-entity-reference-tessellation}
+
+| Entity | Attributes, in order | Where |
+|---|---|---|
+| `COORDINATES_LIST` | name, npoints, position_coords (list of lists) | @sec-pcurves-meshes |
+| `TRIANGULATED_FACE` | name, coordinates, pnmax, normals, geometric_link, pnindex, triangles | @sec-pcurves-meshes |
+| `TESSELLATED_SHELL` | name, items (set), topological_link | @sec-pcurves-meshes |
+| `TESSELLATED_SOLID` | name, items (set), geometric_link | @sec-pcurves-meshes |
+
+## Appearance {#sec-entity-reference-appearance}
+
+| Entity | Attributes, in order | Where |
+|---|---|---|
+| `STYLED_ITEM` | name, styles (set), item | @sec-appearance |
+| `PRESENTATION_STYLE_ASSIGNMENT` | styles (set) | @sec-appearance |
+| `SURFACE_STYLE_USAGE` | side, style | @sec-appearance |
+| `SURFACE_SIDE_STYLE` | name, styles (set) | @sec-appearance |
+| `SURFACE_STYLE_FILL_AREA` | fill_area | @sec-appearance |
+| `FILL_AREA_STYLE` | name, fill_styles (set) | @sec-appearance |
+| `FILL_AREA_STYLE_COLOUR` | name, fill_colour | @sec-appearance |
+| `COLOUR_RGB` | name, red, green, blue | @sec-appearance |
+| `DRAUGHTING_PRE_DEFINED_COLOUR` | name | @sec-appearance |
+| `CURVE_STYLE` | name, curve_font, curve_width, curve_colour | @sec-appearance |
+| `PRESENTATION_LAYER_ASSIGNMENT` | name, description, assigned_items (set) | @sec-appearance |
+| `MECHANICAL_DESIGN_GEOMETRIC_PRESENTATION_REPRESENTATION` | name, items (set), context_of_items | @sec-appearance |
+
+## Properties {#sec-entity-reference-properties}
+
+| Entity | Attributes, in order | Where |
+|---|---|---|
+| `PROPERTY_DEFINITION` | name, description, definition | @sec-properties-validation |
+| `PROPERTY_DEFINITION_REPRESENTATION` | definition, used_representation | @sec-properties-validation |
+| `REPRESENTATION` | name, items (set), context_of_items | @sec-properties-validation |
+| `DESCRIPTIVE_REPRESENTATION_ITEM` | name, description | @sec-properties-validation |
+| `MEASURE_REPRESENTATION_ITEM` | name, value_component, unit_component | @sec-properties-validation |
+
+## PMI {#sec-entity-reference-pmi}
+
+| Entity | Attributes, in order | Where |
+|---|---|---|
+| `SHAPE_ASPECT` | name, description, of_shape, product_definitional | @sec-pmi |
+| `SHAPE_ASPECT_RELATIONSHIP` | name, description, relating_shape_aspect, related_shape_aspect | @sec-pmi |
+| `GEOMETRIC_ITEM_SPECIFIC_USAGE` | name, description, definition, used_representation, identified_item (set) | @sec-pmi |
+| `DATUM` | name, description, of_shape, product_definitional, identification | @sec-pmi |
+| `DATUM_FEATURE` | name, description, of_shape, product_definitional | @sec-pmi |
+| `DATUM_SYSTEM` | name, description, of_shape, product_definitional, constituents (list, in precedence order) | @sec-pmi |
+| `DATUM_REFERENCE_COMPARTMENT` | name, description, of_shape, product_definitional, base, modifiers | @sec-pmi |
+| *`GEOMETRIC_TOLERANCE`* | name, description, magnitude, toleranced_shape_aspect | @sec-pmi |
+| *`GEOMETRIC_TOLERANCE_WITH_DATUM_REFERENCE`* | datum_system (set) | @sec-pmi |
+| *`GEOMETRIC_TOLERANCE_WITH_MODIFIERS`* | modifiers (set) | @sec-pmi |
+| `FLATNESS_TOLERANCE`, `POSITION_TOLERANCE`, … | as `GEOMETRIC_TOLERANCE` | @sec-pmi |
+| `TOLERANCE_ZONE` | name, description, of_shape, product_definitional, defining_tolerance (set), form | @sec-pmi |
+| `DIMENSIONAL_SIZE` | applies_to, name | @sec-pmi |
+| `DIMENSIONAL_LOCATION` | name, description, relating_shape_aspect, related_shape_aspect | @sec-pmi |
+| `DIMENSIONAL_CHARACTERISTIC_REPRESENTATION` | dimension, representation | @sec-pmi |
+| `PLUS_MINUS_TOLERANCE` | range, toleranced_dimension | @sec-pmi |
+| `TOLERANCE_VALUE` | lower_bound, upper_bound | @sec-pmi |
+| `ANNOTATION_CURVE_OCCURRENCE` | name, styles (set), item | @sec-pmi |
+| `DRAUGHTING_CALLOUT` | name, contents (set) | @sec-pmi |
+| `ANNOTATION_PLANE` | name, styles (set), item, elements (set) | @sec-pmi |
+| `DRAUGHTING_MODEL` | name, items (set), context_of_items | @sec-pmi |
+| `DRAUGHTING_MODEL_ITEM_ASSOCIATION` | name, description, definition, used_representation, identified_item (set) | @sec-pmi |
+| `CAMERA_MODEL_D3` | name, view_reference_system, perspective_of_volume | @sec-pmi |

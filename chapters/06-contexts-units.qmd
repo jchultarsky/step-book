@@ -1,0 +1,165 @@
+# Measuring Things: Contexts and Units {#sec-contexts-units}
+
+::: {.chapter-abstract}
+Six records that say "millimetres, radians, and anything closer than a ten-millionth is the same point." Why a millimetre is three types at once, how an inch file smuggles in a millimetre anyway, and what a kernel's tolerance is doing in an exchange file.
+:::
+
+Every number in the geometry of the block file — the `60.` in a corner point, the `1.` in a direction, the `3.` in a circle's radius later on — is a bare real.
+Nothing on the record says what unit it is in.
+That information lives in one place, and every geometric representation points at it:
+
+```step
+#10 = ADVANCED_BREP_SHAPE_REPRESENTATION('',(#11,#15),#165);
+    ...
+#165 = ( GEOMETRIC_REPRESENTATION_CONTEXT(3)
+  GLOBAL_UNCERTAINTY_ASSIGNED_CONTEXT((#169))
+  GLOBAL_UNIT_ASSIGNED_CONTEXT((#166,#167,#168))
+  REPRESENTATION_CONTEXT('Context #1','3D Context with UNIT and UNCERTAINTY') );
+#166 = ( LENGTH_UNIT() NAMED_UNIT(*) SI_UNIT(.MILLI.,.METRE.) );
+#167 = ( NAMED_UNIT(*) PLANE_ANGLE_UNIT() SI_UNIT($,.RADIAN.) );
+#168 = ( NAMED_UNIT(*) SI_UNIT($,.STERADIAN.) SOLID_ANGLE_UNIT() );
+#169 = UNCERTAINTY_MEASURE_WITH_UNIT(LENGTH_MEASURE(1.E-07),#166,
+  'distance_accuracy_value','confusion accuracy');
+```
+
+Read top down: *a three-dimensional coordinate space, measured in millimetres, radians and steradians, in which two points closer than $10^{-7}$ mm are the same point.*
+
+## Representations and their contexts {#sec-contexts-units-representations}
+
+The word *representation* is Part 43's, and it is worth a moment because it organises half the file.
+A **representation** is a bag of **representation items** together with a **representation context** that says how to interpret them.
+`#10` is a representation: its items are `#11` (an axis placement) and `#15` (a solid), and its context is `#165`.
+Every point, curve, surface, face and solid in the file is a representation item, and every one belongs to some representation, and every representation has exactly one context.
+
+The context is where units live.
+It is shared: in a single-part file there is one, and every representation in the file points at it.
+In an assembly file there may be several — OCCT writes one per product, all identical — and each representation points at its own.
+A reader that assumes one context per file will be right most of the time and wrong in ways that are hard to notice.
+
+## The context record {#sec-contexts-units-context-record}
+
+`#165` is a complex instance of four types, and @sec-schema explained why: `representation_context` has no supertype constraint, so any combination of its subtypes is legal, and this one is three at once.
+
+- `REPRESENTATION_CONTEXT('Context #1','3D Context with UNIT and UNCERTAINTY')` — the root, with an identifier and a free-text type.
+  Both strings are the writer's choice and mean nothing to a reader.
+- `GEOMETRIC_REPRESENTATION_CONTEXT(3)` — this context is for geometry, in three dimensions.
+  Two-dimensional contexts, `(2)`, appear in files that carry drawing views or the 2D parameter-space curves of @sec-pcurves-meshes.
+- `GLOBAL_UNIT_ASSIGNED_CONTEXT((#166,#167,#168))` — the units in force for every item in this context.
+- `GLOBAL_UNCERTAINTY_ASSIGNED_CONTEXT((#169))` — the tolerance in force.
+
+Part 42 requires a geometric context to carry three units: a length unit, a plane angle unit and a solid angle unit.
+Nothing in a mechanical file ever measures a solid angle; `#168` is there because the rule says so, and you will see the steradian in nearly every file.
+
+## The millimetre {#sec-contexts-units-millimetre}
+
+```step
+#166 = ( LENGTH_UNIT() NAMED_UNIT(*) SI_UNIT(.MILLI.,.METRE.) );
+```
+
+Three blocks, alphabetical.
+`LENGTH_UNIT()` declares no attributes and says only *this measures length*.
+`NAMED_UNIT(*)` carries the derived `dimensions`.
+`SI_UNIT(.MILLI.,.METRE.)` gives the prefix and the base unit.
+A metre would be `SI_UNIT($,.METRE.)`; a micron `SI_UNIT(.MICRO.,.METRE.)`.
+The radian and steradian at `#167` and `#168` follow the same pattern with `$` for no prefix, and with `PLANE_ANGLE_UNIT()` and `SOLID_ANGLE_UNIT()` in place of `LENGTH_UNIT()`.
+
+This exact record — the millimetre as a three-way complex instance — is probably the most frequently written line in all of STEP.
+
+## Inch files {#sec-contexts-units-inch-files}
+
+Imperial units cannot be spelled with an SI prefix and name, so an inch is a **conversion-based unit**: a named unit defined as a multiple of another unit.
+The block, exported by the same OCCT build with its output unit set to inches:
+
+```step
+#166 = ( CONVERSION_BASED_UNIT('INCH',#168) LENGTH_UNIT() NAMED_UNIT(#167) );
+#167 = DIMENSIONAL_EXPONENTS(1.,0.,0.,0.,0.,0.,0.);
+#168 = LENGTH_MEASURE_WITH_UNIT(25.4,#169);
+#169 = ( LENGTH_UNIT() NAMED_UNIT(*) SI_UNIT(.MILLI.,.METRE.) );
+#172 = UNCERTAINTY_MEASURE_WITH_UNIT(LENGTH_MEASURE(3.937007874016E-09),#166,
+  'distance_accuracy_value','confusion accuracy');
+```
+
+`#166` is still a length unit and still a named unit, but the third block is now `CONVERSION_BASED_UNIT` with a `name` and a `conversion_factor`.
+The factor, `#168`, is a *measure with unit*: 25.4 of unit `#169`.
+And `#169` is the millimetre.
+So an inch file contains the millimetre after all — as the thing the inch is defined in terms of — and every coordinate in the file is then in inches: the block's far corner is at `(2.362204724409,0.787401574803,0.393700787402)`, and the uncertainty has been converted too, to $3.9 \times 10^{-9}$ inches.
+
+Three details.
+First, `NAMED_UNIT(#167)` is an explicit reference where the SI record had `*`.
+An SI unit can derive its dimensions from its name; a conversion-based unit cannot, so `dimensions` must be stored, and `DIMENSIONAL_EXPONENTS(1.,0.,0.,0.,0.,0.,0.)` says length$^{1}$ mass$^{0}$ time$^{0}$ current$^{0}$ temperature$^{0}$ substance$^{0}$ luminosity$^{0}$ — a length.
+Second, the string `'INCH'` is a label.
+What makes it an inch is the `25.4`.
+A reader that keys on the name will meet `'inch'`, `'IN'` and `'Inch'` before long; the factor is the reliable part.
+Third — and this is a real defect in a widely used exporter — the `25.4` in `#168` is written bare.
+@sec-schema's rule says a SELECT-typed value that is not an entity must be wrapped, and the uncertainty record two lines below wraps its value correctly as `LENGTH_MEASURE(...)`; the conversion factor should read `LENGTH_MEASURE(25.4)`.
+Every mainstream reader accepts the bare form, which is why it has never been fixed, and it is a fair specimen of the gap between the standard and the files.
+
+Angles are treated the same way.
+A file that measures angles in degrees carries (this excerpt written to the same pattern rather than exported)
+
+```step
+#170 = ( CONVERSION_BASED_UNIT('DEGREE',#174) NAMED_UNIT(#175)
+PLANE_ANGLE_UNIT() );
+#174 = PLANE_ANGLE_MEASURE_WITH_UNIT(PLANE_ANGLE_MEASURE(0.01745329252),#176);
+#175 = DIMENSIONAL_EXPONENTS(0.,0.,0.,0.,0.,0.,0.);
+#176 = ( NAMED_UNIT(*) PLANE_ANGLE_UNIT() SI_UNIT($,.RADIAN.) );
+```
+
+— a degree is 0.0174533 radians, and an angle is dimensionless, so every exponent is zero.
+
+## Uncertainty {#sec-contexts-units-uncertainty}
+
+```step
+#169 = UNCERTAINTY_MEASURE_WITH_UNIT(LENGTH_MEASURE(1.E-07),#166,
+  'distance_accuracy_value','confusion accuracy');
+```
+
+Four attributes: a value (wrapped, because `measure_value` is a SELECT), a unit (bare, because it is an entity), a name, and a description.
+The name is the important one.
+`'distance_accuracy_value'` is a string the standard prescribes, and it means: *two points closer together than this value are to be treated as coincident.*
+Here that is one ten-millionth of a millimetre.
+
+::: {.callout-note title="Engineering background: Why a tolerance travels with the geometry"}
+A boundary representation says that a solid's faces meet along shared edges and its edges meet at shared vertices.
+But the faces are defined by surfaces — planes, cylinders, splines — and the edges by curves, and those are computed in floating point.
+Where a cylinder meets a plane, the curve of intersection does not lie *exactly* on either; it lies within some small distance of both.
+Whether a shell is "closed" is therefore a question about a threshold: are the gaps smaller than the tolerance?
+Every geometric kernel has such a threshold, and they differ — $10^{-7}$ in Open CASCADE, $10^{-6}$ or $10^{-8}$ elsewhere, sometimes scaled to the model's size.
+The file records the writer's value so that a reader can know how tightly the geometry was made to fit.
+If the reader's kernel is stricter, gaps that were invisible at export become holes at import, and the solid falls apart into a surface model.
+Much of the "healing" that STEP importers do is repairing exactly that.
+:::
+
+The uncertainty is what makes the same file behave differently in different tools.
+A `'confusion accuracy'` of $10^{-7}$ mm from one kernel and $10^{-4}$ mm from another describe geometry of very different quality, and the reader that ignores this value is the one whose imports mysteriously fail.
+
+## Derived units {#sec-contexts-units-derived-units}
+
+Length, angle and solid angle cover geometry.
+Properties such as area, volume and mass need units that are products of the base ones, and Part 41 provides `DERIVED_UNIT`:
+
+```step
+#300 = DERIVED_UNIT((#301));
+#301 = DERIVED_UNIT_ELEMENT(#166,3.);
+```
+
+`#300` is "millimetres to the power three" — a cubic millimetre — built from one element: the length unit `#166` raised to the exponent `3.`.
+An area would use `2.`; a density would combine a mass unit with exponent `1.` and a length unit with exponent `-3.`.
+These appear with validation properties in @sec-properties-validation and almost nowhere else.
+
+## Contexts in assemblies {#sec-contexts-units-assemblies}
+
+The clamp assembly of @sec-assemblies has three geometric contexts, one per product, all textually identical to `#165`.
+Each product's shape representation points at its own.
+This is legal and common, and it has a consequence that is easy to state and easy to forget: **units are a property of the representation, not of the file.**
+A file may, in principle, hold one part in millimetres and another in inches, each in its own context, and an assembly that places both.
+Readers that read the first context they find and apply it to everything will get the second part wrong by a factor of 25.4.
+Follow the reference from each representation to its context; never cache "the" unit.
+
+::: {.callout-important title="In brief"}
+Units live in the representation context, which every geometric representation references.
+A geometric context carries three units — length, plane angle, solid angle — each a complex instance.
+SI units derive their dimensions; conversion-based units (inch, degree) state them and define themselves as a multiple of an SI unit, so inch files contain the millimetre.
+The uncertainty is the writing kernel's coincidence tolerance, named `'distance_accuracy_value'`.
+A file can have several contexts; units belong to representations, not files.
+:::

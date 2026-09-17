@@ -1,0 +1,118 @@
+# Parameter Curves, and Meshes {#sec-pcurves-meshes}
+
+::: {.chapter-abstract}
+Two things a geometry chapter has to mention because they are in the files: the second, two-dimensional copy of every edge that doubles the size of a B-rep, and the AP242 records that carry a triangle mesh instead of — or alongside — a B-rep.
+:::
+
+## The edge that is written twice {#sec-pcurves-meshes-written-twice}
+
+The block of @sec-reading-the-block was exported with a setting that suppresses *parameter curves*.
+Without it, the same block is 350 records instead of 170, and edge `#21` looks like this:
+
+```step
+#21 = EDGE_CURVE('',#22,#24,#26,.T.);
+#26 = SURFACE_CURVE('',#27,(#31,#43),.PCURVE_S1.);
+#27 = LINE('',#28,#29);                       /* the 3D line, as before */
+#31 = PCURVE('',#32,#37);
+#32 = PLANE('',#33);                          /* a copy of the x=0 face's plane */
+#37 = DEFINITIONAL_REPRESENTATION('',(#38),#42);
+#38 = LINE('',#39,#40);                       /* a 2D line in the plane's parameter space */
+#39 = CARTESIAN_POINT('',(0.,0.));
+#40 = VECTOR('',#41,1.);
+#41 = DIRECTION('',(1.,0.));
+#42 = ( GEOMETRIC_REPRESENTATION_CONTEXT(2)
+        PARAMETRIC_REPRESENTATION_CONTEXT()
+        REPRESENTATION_CONTEXT('2D SPACE','') );
+#43 = PCURVE('',#44,#49);
+#44 = PLANE('',#45);                          /* a copy of the y=0 face's plane */
+#49 = DEFINITIONAL_REPRESENTATION('',(#50),#54);
+    /* ... another 2D line, another 2D context ... */
+```
+
+The edge's geometry is no longer a `LINE` but a `SURFACE_CURVE`: a 3D curve (`#27`, the line) together with a list of one or two `PCURVE`s, each describing the *same* edge as a 2D curve in the parameter space of one of the faces it borders.
+Edge `#21` lies on two faces, so it has two pcurves.
+
+A `PCURVE` has a `basis_surface` and a `reference_to_curve`.
+The reference is a `DEFINITIONAL_REPRESENTATION` — a representation whose single item is a 2D curve and whose context is a 2D *parametric* context (dimension 2, no units, because parameter space is unitless).
+Here the 2D curve is a line from (0, 0) in direction (1, 0): the edge runs along the plane's local X parameter.
+
+The last attribute of the surface curve, `master_representation`, says which of the three descriptions is authoritative when they disagree: `.CURVE_3D.`, `.PCURVE_S1.` or `.PCURVE_S2.`.
+This exporter says the first pcurve is the master.
+
+::: {.callout-note title="Engineering background: Why a kernel keeps parameter curves"}
+A face is a piece of a surface bounded by a loop of edges.
+To *use* the face — to mesh it, to find which side of an edge is inside — the kernel needs the boundary in the surface's own coordinates: the (u, v) parameters, not the (x, y, z) positions.
+It can compute that by projecting each edge's 3D curve onto the surface, but projection is slow, numerically delicate, and ambiguous on periodic surfaces (which side of the seam?) and at degenerate points (a cone's apex maps to a whole line in parameter space).
+So kernels store the 2D curve directly, for every edge, on every face it bounds.
+Those are the pcurves.
+Writing them into the exchange file spares the importing kernel the projection and, more importantly, removes the ambiguities.
+It also roughly doubles the number of records, since every edge acquires two 2D curves, two 2D contexts, two representations, and — as this exporter does it — two duplicate copies of the surfaces it lies on.
+:::
+
+Three subtypes of `SURFACE_CURVE` appear.
+Plain `SURFACE_CURVE` is the ordinary case.
+`SEAM_CURVE` is the seam of @sec-curves-surfaces: a surface curve whose *two* pcurves lie on the *same* surface, one on each side of the cut.
+The pin's seam, with pcurves on:
+
+```step
+#26 = SEAM_CURVE('',#27,(#31,#43),.PCURVE_S1.);
+#31 = PCURVE('',#32,#37);                     /* on the cylinder, at angle 0 */
+#43 = PCURVE('',#44,#49);                     /* on the cylinder, at angle 2π */
+```
+
+`INTERSECTION_CURVE` marks an edge where two surfaces meet, which is nearly all of them; some exporters write it, most write plain `SURFACE_CURVE`.
+
+Are pcurves needed?
+For a reader that only walks structure, no: an edge's 3D curve is `surface_curve.curve_3d`, one more hop than before, and everything else is unchanged.
+For a reader that rebuilds solids in a geometric kernel, they are a strong hint and occasionally the only way to trim a face correctly; the CAx Implementor Forum recommends writing them.
+Most CAD exporters do.
+OCCT and a few others make it optional.
+A file without them is smaller, not wrong.
+
+::: {.callout-warning title="In the wild: Duplicated surfaces"}
+The pcurve `#31` points at `#32`, a `PLANE` — but the face `#17` that the edge belongs to already has a plane, `#52`, identical in every value.
+The exporter has written the plane twice: once for the face, once for the pcurve to refer to.
+Every pcurve in this file does the same, so a file that "has 6 planes" in its faces has 30 `PLANE` records.
+Other exporters share them.
+Neither is wrong, and this is one reason two files of the same part from two systems can differ by a factor of two in size while describing identical geometry.
+:::
+
+## Meshes: tessellated geometry {#sec-pcurves-meshes-tessellated}
+
+Everything so far has been exact geometry.
+AP242 added a second kind: **tessellated** geometry, in which a shape is a set of triangles.
+It exists because the two things most often done with a CAD model downstream — viewing it, and comparing it — do not need surfaces and are far cheaper on a mesh; because lightweight visualisation formats (JT above all) had been carrying meshes for years and STEP could not; and because some geometry (scanned surfaces, simulation results) never had an exact form.
+A tessellated shape lives in a `TESSELLATED_SHAPE_REPRESENTATION` and is built from these records:
+
+```step
+#500 = TESSELLATED_SHAPE_REPRESENTATION('',(#501),#165);
+#501 = TESSELLATED_SOLID('',(#502),#15);
+#502 = TESSELLATED_SHELL('',(#503),#16);
+#503 = TRIANGULATED_FACE('',#504,4,((0.,0.,-1.)),#141,(1,2,3,4),((1,2,3),(1,3,4)));
+#504 = COORDINATES_LIST('',4,((0.,0.,0.),(60.,0.,0.),(60.,20.,0.),(0.,20.,0.)));
+```
+
+*(These five records are hand-written to the AP242 schema — the bottom face of the block as two triangles — rather than exported; the exporter used in this book does not write tessellation.)*
+
+`COORDINATES_LIST` is the vertex buffer: a count and a list of 3D points, as bare lists of reals rather than `CARTESIAN_POINT` records — the first place in the format where geometry is written *without* a record per point, precisely because a mesh may have a million of them.
+
+`TRIANGULATED_FACE` is the index buffer.
+Its attributes: the coordinates list; `pnmax`, the number of points used; `normals`, a list of either one normal (flat shading, as here) or one per point; an optional `geometric_link` back to the exact `ADVANCED_FACE` it approximates (`#141`, the bottom face); `pnindex`, a list of 1-based indices into the coordinates list selecting the points this face uses; and `triangles`, a list of triples of 1-based indices *into* `pnindex`.
+So `(1,2,3)` means the first, second and third entries of `pnindex`, which are points 1, 2 and 3 of the coordinates list.
+If `pnindex` is empty, the triangles index the coordinates directly.
+
+`TESSELLATED_SHELL` groups faces, with an optional `topological_link` to the exact shell; `TESSELLATED_SOLID` wraps a shell, with an optional link to the exact solid.
+Here all three links are filled (`#141`, `#16`, `#15`): this is a **hybrid** file that carries the exact B-rep *and* a mesh of it, and says which is which.
+A `COMPLEX_TRIANGULATED_FACE` adds triangle strips and fans to the plain triangle list; `TRIANGULATED_SURFACE_SET` and `TESSELLATED_CURVE_SET` cover meshes and polylines with no solid behind them; `TESSELLATED_POINT_SET` covers scanned points.
+
+Tessellated PMI — annotations drawn as triangles rather than curves — uses the same records and is in @sec-pmi.
+
+Two things to know when meeting a tessellated file.
+First, the mesh is *approximate* and carries no statement of how approximate: there is no chordal tolerance attribute, and the deviation from the true surface is whatever the writer chose.
+Second, in a hybrid file the mesh and the B-rep are independent representations of the same `PRODUCT_DEFINITION_SHAPE`; nothing requires them to agree, and a reader that wants to trust the mesh should check it against the exact geometry or against the validation properties of @sec-properties-validation.
+
+::: {.callout-important title="In brief"}
+A `SURFACE_CURVE` is a 3D curve plus its images in the parameter spaces of the faces it bounds (`PCURVE`s, each a 2D curve in a unitless 2D context); a `SEAM_CURVE` has both images on one surface.
+They help importing kernels trim faces and roughly double a file.
+AP242 tessellation stores a mesh as a `COORDINATES_LIST` and `TRIANGULATED_FACE`s with 1-based indices, optionally linked to the exact topology; it is approximate, with no stated tolerance.
+:::

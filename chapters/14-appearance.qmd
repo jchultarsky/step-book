@@ -1,0 +1,128 @@
+# Appearance: Colours and Layers {#sec-appearance}
+
+::: {.chapter-abstract}
+Eight records to make a pin orange.
+Why the colour is attached to the geometry from the outside, how a colour reaches a single face, and where the layers went.
+:::
+
+The clamp assembly was exported with the bracket grey and the pins orange.
+Both colours are in the file, and neither is anywhere near the geometry it colours.
+Here is the pin's:
+
+```step
+#318 = MECHANICAL_DESIGN_GEOMETRIC_PRESENTATION_REPRESENTATION('',(#319),#302);
+#319 = STYLED_ITEM('color',(#320),#249);
+#320 = PRESENTATION_STYLE_ASSIGNMENT((#321));
+#321 = SURFACE_STYLE_USAGE(.BOTH.,#322);
+#322 = SURFACE_SIDE_STYLE('',(#323));
+#323 = SURFACE_STYLE_FILL_AREA(#324);
+#324 = FILL_AREA_STYLE('',(#325));
+#325 = FILL_AREA_STYLE_COLOUR('',#326);
+#326 = COLOUR_RGB('',0.800000010877,0.500000003429,0.199999998682);
+```
+
+Nine records, of which one carries the colour and one names the thing being coloured.
+The rest is Part 46 — *visual presentation* — doing what the integrated resources always do: expressing a simple idea in terms general enough to cover every kind of presentation anyone might want.
+
+## Reading the chain {#sec-appearance-reading-the-chain}
+
+From the bottom:
+
+- `#326` `COLOUR_RGB` — red 0.8, green 0.5, blue 0.2. Components are reals from 0 to 1. The name is empty. (The values are not quite 0.8, 0.5 and 0.2 because they passed through single-precision floats on the way; this is normal.)
+- `#325` `FILL_AREA_STYLE_COLOUR` — a colour used for filling areas. The alternative is a hatch pattern or a tile.
+- `#324` `FILL_AREA_STYLE` — a set of fill styles (here, one). Fill styles are what a *face* gets; curve styles are what an *edge* gets.
+- `#323` `SURFACE_STYLE_FILL_AREA` — the fill style applied as a surface style element. Other elements exist for boundaries, silhouettes, parameter lines, rendering.
+- `#322` `SURFACE_SIDE_STYLE` — a set of surface style elements for one side of a surface.
+- `#321` `SURFACE_STYLE_USAGE` — that side style applied to `.BOTH.` sides of the surface (or `.POSITIVE.` or `.NEGATIVE.`).
+- `#320` `PRESENTATION_STYLE_ASSIGNMENT` — a set of styles (here, one surface style usage) to be assigned together.
+- `#319` `STYLED_ITEM` — the assignment. `name` is `'color'`, `styles` is `(#320)`, and `item` is `#249`: the pin's `MANIFOLD_SOLID_BREP`. This is the record that connects appearance to geometry, and it does so by pointing *at* the solid — the solid does not know it has a colour.
+- `#318` `MECHANICAL_DESIGN_GEOMETRIC_PRESENTATION_REPRESENTATION` — a representation whose items are styled items, in the same geometric context as the geometry it decorates (`#302`). Its job is to be a container that the AP can require and a reader can look for: *find every representation of this type, and you have found every colour in the file.*
+
+Every colour in every AP214 or AP242 file follows this chain.
+The middle five records are almost always exactly these, differing only in instance numbers, and once you have read one you can skim the rest.
+What varies is the two ends: which colour, and which item.
+
+## What gets coloured {#sec-appearance-what-gets-coloured}
+
+`STYLED_ITEM.item` can point at any representation item.
+In practice:
+
+**A solid.** As here.
+The whole body takes the colour.
+This is what most exporters write for a part with a single body colour, and it is what a viewer applies by default to every face of the solid.
+
+**A face.** `STYLED_ITEM('',(#s),#88)` with `#88` an `ADVANCED_FACE` colours one face.
+Files with per-face colours have one styled item per face, and they can number in the thousands.
+When a face colour and a body colour both apply, the face wins; AP214 formalises this with `OVER_RIDING_STYLED_ITEM`, a subtype of `STYLED_ITEM` with an extra attribute pointing at the styled item it overrides, but many exporters simply write both and rely on the reader to prefer the more specific one.
+
+**An edge or a curve.** Via a `CURVE_STYLE` instead of a surface style: `CURVE_STYLE('',#font,POSITIVE_LENGTH_MEASURE(0.1),#colour)` — a line font, a width (a wrapped measure, as @sec-schema predicted), a colour.
+Edge colours appear in wireframe exports and in PMI annotation geometry.
+
+**A mapped item or a whole representation**, so that an assembly component can be coloured as a unit without touching the child's geometry.
+Less common.
+
+The pin's colour is on the pin's *solid*, `#249`, which belongs to the pin's product.
+Both occurrences of the pin are therefore orange, because both are instances of the same product and there is one solid.
+Had the CAD system coloured pin-2 differently, the exporter would have had to either duplicate the pin's geometry as a second product or style a `MAPPED_ITEM`; different systems make different choices, and "instance colour" is one of the features most often lost in exchange.
+
+## Named colours {#sec-appearance-named-colours}
+
+`COLOUR_RGB` is one of two colour entities.
+The other:
+
+```step
+#340 = DRAUGHTING_PRE_DEFINED_COLOUR('red');
+```
+
+A `DRAUGHTING_PRE_DEFINED_COLOUR` has only a name, from a fixed list: `'red'`, `'green'`, `'blue'`, `'yellow'`, `'magenta'`, `'cyan'`, `'black'`, `'white'`.
+It stands in for the RGB triple wherever one is expected.
+It is inherited from the drawing-exchange parts of the standard, where line colours were symbolic, and is what a few exporters write for their default palette.
+A reader must map the eight names to values itself.
+
+## Layers {#sec-appearance-layers}
+
+CAD systems group entities onto named layers, and Part 46 carries them:
+
+```step
+#350 = PRESENTATION_LAYER_ASSIGNMENT('Fasteners','pins and bolts',(#249,#41));
+```
+
+A name, a description, and a set of the representation items on the layer.
+As always, the layer points at its members; a face does not know its layer.
+A file's layers are found by collecting every `PRESENTATION_LAYER_ASSIGNMENT` and inverting.
+Layer assignments are far less common in STEP than in native CAD files: many exporters do not write them, and when they do the members are typically solids rather than faces.
+AP203 first edition has no layer entity at all.
+
+## Visibility {#sec-appearance-visibility}
+
+A layer can be switched off, or an item hidden, with `INVISIBILITY`:
+
+```step
+#360 = INVISIBILITY((#319));
+```
+
+— a set of styled items (or layer assignments, or presentation representations) that are not to be displayed.
+Its context is a `PRESENTATION_STYLE_BY_CONTEXT` or a draughting model, and it is rare in mechanical exchange except inside saved views, which belong to @sec-pmi.
+
+## Names on geometry {#sec-appearance-names-on-geometry}
+
+Not appearance, but often asked about in the same breath: *where is the name of a face?*
+Every representation item has a `name` attribute, and it is almost always `''`.
+Some systems — NX and Creo among them, when asked — write the user's face or body name there: `ADVANCED_FACE('Mounting surface',(#18),#52,.F.)`.
+Nothing else in the standard carries "the name of face 7," and a system that does not put it in the name slot has no way to send it.
+The same is true of feature names, which do not survive export at all: a STEP file knows nothing about holes, fillets or pockets, only about faces.
+
+::: {.callout-warning title="In the wild: What AP203 files cannot say"}
+`STYLED_ITEM`, `COLOUR_RGB` and `PRESENTATION_LAYER_ASSIGNMENT` are not in AP203 first edition (`CONFIG_CONTROL_DESIGN`).
+A file with that schema is grey and layerless by definition.
+Files exist that declare `CONFIG_CONTROL_DESIGN` and contain colour records anyway; strict readers drop the colours, lenient ones keep them, and the CAx Implementor Forum's recommended practice is to write AP214 or AP242 if colours matter.
+AP203 second edition added presentation; AP242 carries everything here.
+:::
+
+::: {.callout-important title="In brief"}
+Colour reaches geometry from the outside: a `STYLED_ITEM` points at a solid, face or curve and at a `PRESENTATION_STYLE_ASSIGNMENT`, which descends through five fixed records to a `COLOUR_RGB` or a named colour.
+Styled items are collected in a `MECHANICAL_DESIGN_GEOMETRIC_PRESENTATION_REPRESENTATION`.
+Face colours override body colours.
+Layers are `PRESENTATION_LAYER_ASSIGNMENT`s listing their members.
+Face names live in `representation_item.name`, when they live anywhere.
+:::

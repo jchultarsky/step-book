@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE language SYSTEM "language.dtd">
+<!-- Syntax highlighting for the EXPRESS data modelling language (ISO 10303-11). -->
+<language name="express" version="1" kateversion="5.0" section="Sources"
+          extensions="*.exp;*.express" mimetype="" author="Inside the STEP File" license="MIT">
+  <highlighting>
+    <list name="keywords">
+      <item>SCHEMA</item><item>END_SCHEMA</item>
+      <item>ENTITY</item><item>END_ENTITY</item>
+      <item>TYPE</item><item>END_TYPE</item>
+      <item>FUNCTION</item><item>END_FUNCTION</item>
+      <item>RULE</item><item>END_RULE</item>
+      <item>PROCEDURE</item><item>END_PROCEDURE</item>
+      <item>CONSTANT</item><item>END_CONSTANT</item>
+      <item>LOCAL</item><item>END_LOCAL</item>
+      <item>IF</item><item>THEN</item><item>ELSE</item><item>END_IF</item>
+      <item>CASE</item><item>OTHERWISE</item><item>END_CASE</item>
+      <item>REPEAT</item><item>END_REPEAT</item>
+      <item>ALIAS</item><item>END_ALIAS</item>
+      <item>BEGIN</item><item>END</item>
+      <item>SUBTYPE</item><item>SUPERTYPE</item><item>SUBTYPE_CONSTRAINT</item><item>END_SUBTYPE_CONSTRAINT</item>
+      <item>ABSTRACT</item><item>OF</item><item>ONEOF</item><item>ANDOR</item>
+      <item>OPTIONAL</item><item>UNIQUE</item><item>FIXED</item>
+      <item>DERIVE</item><item>INVERSE</item><item>WHERE</item>
+      <item>SELECT</item><item>ENUMERATION</item><item>EXTENSIBLE</item><item>GENERIC_ENTITY</item><item>BASED_ON</item><item>WITH</item>
+      <item>USE</item><item>REFERENCE</item><item>FROM</item><item>AS</item>
+      <item>FOR</item><item>RETURN</item><item>ESCAPE</item><item>SKIP</item>
+      <item>TO</item><item>BY</item><item>UNTIL</item><item>WHILE</item><item>VAR</item>
+      <item>QUERY</item><item>IN</item><item>LIKE</item>
+      <item>AND</item><item>OR</item><item>XOR</item><item>NOT</item><item>DIV</item><item>MOD</item>
+      <item>SELF</item><item>TRUE</item><item>FALSE</item><item>UNKNOWN</item>
+      <item>PI</item><item>CONST_E</item>
+    </list>
+    <list name="types">
+      <item>REAL</item><item>INTEGER</item><item>NUMBER</item><item>STRING</item>
+      <item>BOOLEAN</item><item>LOGICAL</item><item>BINARY</item>
+      <item>LIST</item><item>SET</item><item>BAG</item><item>ARRAY</item>
+      <item>GENERIC</item><item>AGGREGATE</item>
+    </list>
+    <list name="builtins">
+      <item>ABS</item><item>ACOS</item><item>ASIN</item><item>ATAN</item><item>BLENGTH</item>
+      <item>COS</item><item>EXISTS</item><item>EXP</item><item>FORMAT</item><item>HIBOUND</item>
+      <item>HIINDEX</item><item>LENGTH</item><item>LOBOUND</item><item>LOG</item><item>LOG2</item>
+      <item>LOG10</item><item>LOINDEX</item><item>NVL</item><item>ODD</item><item>ROLESOF</item>
+      <item>SIN</item><item>SIZEOF</item><item>SQRT</item><item>TAN</item><item>TYPEOF</item>
+      <item>USEDIN</item><item>VALUE</item><item>VALUE_IN</item><item>VALUE_UNIQUE</item>
+    </list>
+    <contexts>
+      <context name="Normal" attribute="Normal Text" lineEndContext="#stay">
+        <Detect2Chars attribute="Comment" context="LineComment" char="-" char1="-"/>
+        <Detect2Chars attribute="Comment" context="BlockComment" char="(" char1="*"/>
+        <keyword attribute="Keyword" context="#stay" String="keywords"/>
+        <keyword attribute="DataType" context="#stay" String="types"/>
+        <keyword attribute="Builtin" context="#stay" String="builtins"/>
+        <DetectChar attribute="String" context="String" char="'"/>
+        <RegExpr attribute="Enum" context="#stay" String="\.[A-Za-z_][A-Za-z0-9_]*\."/>
+        <RegExpr attribute="Float" context="#stay" String="[0-9]+\.[0-9]*([Ee][-+]?[0-9]+)?"/>
+        <RegExpr attribute="Int" context="#stay" String="[0-9]+"/>
+        <RegExpr attribute="Rule" context="#stay" String="\b[Ww][Rr][0-9]+\b|\b[Uu][Rr][0-9]+\b"/>
+      </context>
+      <context name="String" attribute="String" lineEndContext="#stay">
+        <Detect2Chars attribute="String" context="#stay" char="'" char1="'"/>
+        <DetectChar attribute="String" context="#pop" char="'"/>
+      </context>
+      <context name="LineComment" attribute="Comment" lineEndContext="#pop"/>
+      <context name="BlockComment" attribute="Comment" lineEndContext="#stay">
+        <Detect2Chars attribute="Comment" context="#pop" char="*" char1=")"/>
+      </context>
+    </contexts>
+    <itemDatas>
+      <itemData name="Normal Text" defStyleNum="dsNormal"/>
+      <itemData name="Keyword" defStyleNum="dsKeyword"/>
+      <itemData name="DataType" defStyleNum="dsDataType"/>
+      <itemData name="Builtin" defStyleNum="dsBuiltIn"/>
+      <itemData name="String" defStyleNum="dsString"/>
+      <itemData name="Enum" defStyleNum="dsConstant"/>
+      <itemData name="Float" defStyleNum="dsFloat"/>
+      <itemData name="Int" defStyleNum="dsDecVal"/>
+      <itemData name="Rule" defStyleNum="dsAttribute"/>
+      <itemData name="Comment" defStyleNum="dsComment"/>
+    </itemDatas>
+  </highlighting>
+  <general>
+    <comments>
+      <comment name="singleLine" start="--"/>
+      <comment name="multiLine" start="(*" end="*)"/>
+    </comments>
+    <keywords casesensitive="0"/>
+  </general>
+</language>

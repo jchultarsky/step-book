@@ -1,0 +1,26 @@
+/*-- scss:defaults --*/
+@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&family=IBM+Plex+Sans+Condensed:wght@500;600&family=IBM+Plex+Serif:ital,wght@0,400;0,600;1,400&display=swap');
+
+$font-family-sans-serif: "IBM Plex Serif", Georgia, "Times New Roman", serif;
+$headings-font-family: "IBM Plex Sans Condensed", "Helvetica Neue", Arial, sans-serif;
+$font-family-monospace: "IBM Plex Mono", SFMono-Regular, Menlo, Consolas, monospace;
+$font-size-base: 1.05rem;
+$code-font-size: 0.85em;
+
+/*-- scss:rules --*/
+// The italic lead-in under every chapter title.
+.chapter-abstract {
+  font-style: italic;
+  margin: 0 0 2rem;
+  padding-left: 1rem;
+  border-left: 3px solid var(--bs-border-color);
+  color: var(--bs-secondary-color);
+}
+
+// Sidebar and navigation use the heading face.
+.sidebar-navigation, .quarto-title-block .title, nav.quarto-secondary-nav {
+  font-family: $headings-font-family;
+}
+
+// Part 21 listings are wide; let them scroll rather than wrap mid-record.
+div.sourceCode pre code { white-space: pre; }

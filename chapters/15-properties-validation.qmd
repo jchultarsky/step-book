@@ -1,0 +1,133 @@
+# Properties and Validation {#sec-properties-validation}
+
+::: {.chapter-abstract}
+How a file carries "material: 6061-T6" and "mass: 0.324 kg" — and how it carries its own checksum, so that a receiving system can tell whether the geometry survived the trip.
+:::
+
+@sec-product-to-shape introduced `PRODUCT_DEFINITION_SHAPE` as a *property definition* — the shape property of a part — and promised the rest of the family.
+The same three-record pattern that attaches a shape attaches anything else, and it is how both user attributes and the standard's built-in validation data travel.
+
+## The property pattern {#sec-properties-validation-pattern}
+
+```step
+#420 = PROPERTY_DEFINITION('Material','',#5);
+#421 = PROPERTY_DEFINITION_REPRESENTATION(#420,#422);
+#422 = REPRESENTATION('',(#423),#165);
+#423 = DESCRIPTIVE_REPRESENTATION_ITEM('Material','6061-T6');
+```
+
+*(The examples in this chapter are written to the pattern in the CAx Implementor Forum's recommended practices; the exporter used for the running example does not write properties.)*
+
+- **`PROPERTY_DEFINITION`** names the property and says what it is a property *of*.
+  `name` is `'Material'`; `definition` is `#5`, the block's product definition.
+  The `definition` attribute is the same SELECT as on `PRODUCT_DEFINITION_SHAPE` and can also point at a `PRODUCT_DEFINITION_SHAPE` (a property of the geometry), a `SHAPE_ASPECT` (a property of one feature), or a `NEXT_ASSEMBLY_USAGE_OCCURRENCE` (a property of one occurrence).
+- **`PROPERTY_DEFINITION_REPRESENTATION`** binds the property to a representation, exactly as `SHAPE_DEFINITION_REPRESENTATION` binds a shape to one.
+- **`REPRESENTATION`** is the container, with a context.
+  For text properties the context is irrelevant but required; writers reuse the geometric context.
+- **`DESCRIPTIVE_REPRESENTATION_ITEM`** carries a string value: `name` `'Material'`, `description` `'6061-T6'`.
+
+For a numeric property the item is a **`MEASURE_REPRESENTATION_ITEM`**, and the unit comes back:
+
+```step
+#430 = PROPERTY_DEFINITION('Mass','',#5);
+#431 = PROPERTY_DEFINITION_REPRESENTATION(#430,#432);
+#432 = REPRESENTATION('',(#433),#165);
+#433 = MEASURE_REPRESENTATION_ITEM('Mass',MASS_MEASURE(0.324),#434);
+#434 = ( MASS_UNIT() NAMED_UNIT(*) SI_UNIT(.KILO.,.GRAM.) );
+```
+
+`MEASURE_REPRESENTATION_ITEM` is a complex-instance-free way of saying "a representation item that is a measure with unit": a name, a wrapped value, a unit.
+The kilogram is `SI_UNIT(.KILO.,.GRAM.)` — the SI base name is `gram`, and the kilogram takes a prefix.
+AP242 also offers `GENERAL_PROPERTY` for properties with a registered name and definition; the CAx-IF practice for ordinary CAD attributes is the plain `PROPERTY_DEFINITION` above.
+
+This is the mechanism by which a CAD system's custom properties — part number, material, finish, supplier, cost centre — reach a STEP file, when the exporter is configured to send them.
+Most are not by default.
+When they are, expect one `PROPERTY_DEFINITION` per attribute per product, each with its own representation, and expect the `name` strings to be whatever the CAD system calls the attribute.
+
+## Validation properties {#sec-properties-validation-validation}
+
+The most important use of the property pattern is one the standard's implementors invented and later formalised: **geometric validation properties**.
+The writer computes a few numbers that summarise the geometry — volume, surface area, centroid — and puts them in the file.
+The reader, after importing, computes the same numbers from what it built and compares.
+If they match to within tolerance, the geometry survived; if the volume is off by a face's worth, a face was lost; if the centroid moved, a component is misplaced.
+
+```step
+#400 = PROPERTY_DEFINITION('geometric validation property','volume of
+part',#4);
+#401 = PROPERTY_DEFINITION_REPRESENTATION(#400,#402);
+#402 = REPRESENTATION('volume',(#403),#165);
+#403 = MEASURE_REPRESENTATION_ITEM('volume
+measure',VOLUME_MEASURE(12000.),#404);
+#404 = DERIVED_UNIT((#405));
+#405 = DERIVED_UNIT_ELEMENT(#166,3.);
+
+#406 = PROPERTY_DEFINITION('geometric validation property','surface area of
+part',#4);
+#407 = PROPERTY_DEFINITION_REPRESENTATION(#406,#408);
+#408 = REPRESENTATION('surface area',(#409),#165);
+#409 = MEASURE_REPRESENTATION_ITEM('surface area
+measure',AREA_MEASURE(4000.),#410);
+#410 = DERIVED_UNIT((#411));
+#411 = DERIVED_UNIT_ELEMENT(#166,2.);
+
+#412 = PROPERTY_DEFINITION('geometric validation property','centroid of
+part',#4);
+#413 = PROPERTY_DEFINITION_REPRESENTATION(#412,#414);
+#414 = REPRESENTATION('centroid',(#415),#165);
+#415 = CARTESIAN_POINT('centre point',(30.,10.,5.));
+```
+
+The block: $60 \times 20 \times 10 = 12\,000$ mm$^3$; $2 \times (1200 + 600 + 200) = 4000$ mm$^2$; centre at (30, 10, 5).
+Three things make these records findable by a reader that knows nothing else about the file:
+
+- `PROPERTY_DEFINITION.name` is the fixed string `'geometric validation property'`.
+- `REPRESENTATION.name` is `'volume'`, `'surface area'` or `'centroid'`.
+- The item's name is `'volume measure'`, `'surface area measure'` or `'centre point'`.
+
+Those strings are prescribed by the recommended practice, not by the schema, and every major exporter follows them.
+The `definition` points at the `PRODUCT_DEFINITION_SHAPE` (`#4`) — these are properties of the *shape* — and the units are derived: cubic millimetres for volume, square millimetres for area, built from the length unit as @sec-contexts-units described.
+The centroid is an ordinary `CARTESIAN_POINT` in the geometric context, so it is in millimetres automatically.
+
+Validation properties extend to assemblies.
+`'assembly validation property'` with `'number of children'` (a `COUNT_MEASURE`) records how many components an assembly should have; `'centroid'` at the assembly level checks that placements composed correctly; and AP242 adds properties for the independent curve length of wireframes, for tessellation (`'tessellated surface area'`), and for PMI (`'number of annotations'`, `'number of views'`, `'affected geometry'`), so that a receiver can confirm that not just the shape but the annotations arrived.
+
+::: {.callout-note title="Engineering background: Why an exchange format needs a checksum"}
+Every step of a geometry exchange can lose information silently.
+A face whose surface the importer cannot rebuild is dropped; a solid whose shell no longer closes is quietly converted to a surface body; a component whose placement was read with the frames reversed lands in the wrong place; an inch file read as millimetres is 25.4 times too small.
+None of these produce an error.
+The file is valid, the import succeeds, and the model is wrong.
+
+Validation properties are the industry's answer.
+They are cheap to compute, they are sensitive to exactly the failures that matter — a missing face changes the area; a lost solid changes the volume; a misplaced component changes the centroid; a unit error changes everything — and they are independent of the representation, so a B-rep in one system and a B-rep in another can be compared without either understanding the other's kernel.
+Most CAD importers check them automatically and report a discrepancy as a warning.
+They are also, for anyone writing tools that transform STEP files, the easiest correctness test there is.
+:::
+
+## Where names hide {#sec-properties-validation-names}
+
+The chapter on identity said the part's name is in `PRODUCT.name`.
+That is the *product's* name.
+Other names in a file:
+
+- **Occurrence names** — `'pin-1'`, `'pin-2'` — are in `NEXT_ASSEMBLY_USAGE_OCCURRENCE.name`.
+- **Body names**, in multi-body parts, are in `MANIFOLD_SOLID_BREP.name` when the exporter writes them, and in `SHAPE_REPRESENTATION.name` for some others.
+- **Face names**, rarely, in `ADVANCED_FACE.name`.
+- **Feature names** do not exist.
+  A STEP file has no features.
+- **Descriptions** of anything are in the entity's `description` attribute, which is `''` or `$` nearly everywhere.
+- **File-level metadata** — author, organisation, originating system — is in the header and nowhere else.
+
+A reader that wants "the name of this thing" has to know which thing and look in the right slot; there is no universal name table.
+
+## What is not here {#sec-properties-validation-not-here}
+
+Properties are strings and numbers hung on the product graph.
+They are not *parametric*: a mass property does not update when the geometry changes, and a material property does not tell a kernel what density to use unless the reader chooses to interpret it.
+They are not *behavioural*: no constraints, no formulas, no design intent.
+STEP has parts for some of that — Part 108 for parameterisation and constraints, AP209 for analysis — and almost no CAD exporter writes them.
+What travels is the evaluated model and a set of labels on it.
+
+::: {.callout-important title="In brief"}
+A property is `PROPERTY_DEFINITION` (name, and what it is a property of) → `PROPERTY_DEFINITION_REPRESENTATION` → `REPRESENTATION` → an item: `DESCRIPTIVE_REPRESENTATION_ITEM` for text, `MEASURE_REPRESENTATION_ITEM` with a wrapped value and a unit for numbers.
+Validation properties use this pattern with prescribed names — `'geometric validation property'`, `'volume'`, `'surface area'`, `'centroid'` — to carry a checksum of the geometry that the receiving system recomputes and compares.
+:::

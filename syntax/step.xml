@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE language SYSTEM "language.dtd">
+<!-- Syntax highlighting for ISO 10303-21 (STEP Part 21) exchange files. -->
+<language name="step" version="1" kateversion="5.0" section="Markup"
+          extensions="*.stp;*.step;*.p21" mimetype="" author="Inside the STEP File" license="MIT">
+  <highlighting>
+    <contexts>
+      <context name="Normal" attribute="Normal Text" lineEndContext="#stay">
+        <Detect2Chars attribute="Comment" context="Comment" char="/" char1="*"/>
+        <RegExpr attribute="Keyword" context="#stay" String="^\s*(ISO-10303-21|END-ISO-10303-21|HEADER|DATA|ENDSEC)(?=;)"/>
+        <RegExpr attribute="Reference" context="#stay" String="#[0-9]+"/>
+        <DetectChar attribute="String" context="String" char="'"/>
+        <DetectChar attribute="Binary" context="Binary" char="&quot;"/>
+        <RegExpr attribute="Enum" context="#stay" String="\.[A-Z_][A-Z0-9_]*\."/>
+        <RegExpr attribute="Float" context="#stay" String="[-+]?[0-9]+\.[0-9]*(E[-+]?[0-9]+)?"/>
+        <RegExpr attribute="Int" context="#stay" String="[-+]?[0-9]+"/>
+        <RegExpr attribute="Entity" context="#stay" String="[A-Z][A-Z0-9_]+"/>
+        <RegExpr attribute="Special" context="#stay" String="[$*]"/>
+      </context>
+      <context name="String" attribute="String" lineEndContext="#stay">
+        <Detect2Chars attribute="String" context="#stay" char="'" char1="'"/>
+        <DetectChar attribute="String" context="#pop" char="'"/>
+      </context>
+      <context name="Binary" attribute="Binary" lineEndContext="#stay">
+        <DetectChar attribute="Binary" context="#pop" char="&quot;"/>
+      </context>
+      <context name="Comment" attribute="Comment" lineEndContext="#stay">
+        <Detect2Chars attribute="Comment" context="#pop" char="*" char1="/"/>
+      </context>
+    </contexts>
+    <itemDatas>
+      <itemData name="Normal Text" defStyleNum="dsNormal"/>
+      <itemData name="Keyword" defStyleNum="dsKeyword"/>
+      <itemData name="Entity" defStyleNum="dsFunction"/>
+      <itemData name="Reference" defStyleNum="dsVariable"/>
+      <itemData name="String" defStyleNum="dsString"/>
+      <itemData name="Binary" defStyleNum="dsSpecialString"/>
+      <itemData name="Enum" defStyleNum="dsConstant"/>
+      <itemData name="Float" defStyleNum="dsFloat"/>
+      <itemData name="Int" defStyleNum="dsDecVal"/>
+      <itemData name="Special" defStyleNum="dsOthers"/>
+      <itemData name="Comment" defStyleNum="dsComment"/>
+    </itemDatas>
+  </highlighting>
+  <general>
+    <comments>
+      <comment name="multiLine" start="/*" end="*/"/>
+    </comments>
+    <keywords casesensitive="1"/>
+  </general>
+</language>

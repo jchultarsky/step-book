@@ -1,0 +1,295 @@
+# Curves and Surfaces {#sec-curves-surfaces}
+
+::: {.chapter-abstract}
+The pin: three faces, three edges, two vertices, and a cylinder that closes on itself.
+Then a hole, a sphere with no edges at all, a torus with two seams, and a cone whose straight edge is written as a spline.
+The analytic geometry of Part 42, read from real records.
+:::
+
+The block used two kinds of geometry: planes and lines.
+Most real parts are mostly planes and lines, with cylinders for every hole and every rounded edge, and occasionally a cone, sphere or torus.
+Everything else is a B-spline, which has the next chapter to itself.
+This chapter reads the analytic shapes, and the topology they force on a solid.
+
+## The pin {#sec-curves-surfaces-pin}
+
+Six millimetres in diameter, thirty long, standing on the origin.
+Here is its entire solid, 55 records, with the placements' points and directions elided where they are obvious:
+
+```step
+#15 = MANIFOLD_SOLID_BREP('',#16);
+#16 = CLOSED_SHELL('',(#17,#50,#59));
+#17 = ADVANCED_FACE('',(#18),#45,.T.);            /* the cylindrical side */
+#18 = FACE_BOUND('',#19,.F.);
+#19 = EDGE_LOOP('',(#20,#30,#37,#38));
+#20 = ORIENTED_EDGE('',*,*,#21,.T.);
+#21 = EDGE_CURVE('',#22,#24,#26,.T.);            /* the seam: (3,0,0) -> (3,0,30) */
+#22 = VERTEX_POINT('',#23);
+#23 = CARTESIAN_POINT('',(3.,0.,0.));
+#24 = VERTEX_POINT('',#25);
+#25 = CARTESIAN_POINT('',(3.,0.,30.));
+#26 = LINE('',#27,#28);                          /* along +Z */
+#30 = ORIENTED_EDGE('',*,*,#31,.T.);
+#31 = EDGE_CURVE('',#24,#24,#32,.T.);            /* top circle: starts and ends at #24 */
+#32 = CIRCLE('',#33,3.);
+#33 = AXIS2_PLACEMENT_3D('',#34,#35,#36);        /* centre (0,0,30), axis +Z */
+#37 = ORIENTED_EDGE('',*,*,#21,.F.);             /* the seam again, reversed */
+#38 = ORIENTED_EDGE('',*,*,#39,.F.);
+#39 = EDGE_CURVE('',#22,#22,#40,.T.);            /* bottom circle */
+#40 = CIRCLE('',#41,3.);
+#41 = AXIS2_PLACEMENT_3D('',#42,#43,#44);        /* centre (0,0,0), axis +Z */
+#45 = CYLINDRICAL_SURFACE('',#46,3.);
+#46 = AXIS2_PLACEMENT_3D('',#47,#48,#49);
+#47 = CARTESIAN_POINT('',(0.,0.,0.));
+#48 = DIRECTION('',(-0.,-0.,-1.));
+#49 = DIRECTION('',(1.,0.,0.));
+#50 = ADVANCED_FACE('',(#51),#54,.F.);           /* bottom cap */
+#51 = FACE_BOUND('',#52,.F.);
+#52 = EDGE_LOOP('',(#53));
+#53 = ORIENTED_EDGE('',*,*,#39,.T.);
+#54 = PLANE('',#55);
+#59 = ADVANCED_FACE('',(#60),#63,.T.);           /* top cap */
+#60 = FACE_BOUND('',#61,.T.);
+#61 = EDGE_LOOP('',(#62));
+#62 = ORIENTED_EDGE('',*,*,#31,.T.);
+#63 = PLANE('',#64);
+```
+
+Three faces: a cylinder and two planar caps.
+Three edges: two circles and one straight line.
+Two vertices, both on the line.
+The Euler check: V − E + F = 2 − 3 + 3 = 2.
+Closed, no holes.
+
+The count looks wrong for a moment — how does a cylinder have only three edges? — and the answer is the most important idea in this chapter.
+
+## Closed edges and the seam {#sec-curves-surfaces-closed-edges-seam}
+
+The top circle `#31` is `EDGE_CURVE('',#24,#24,#32,.T.)`: its start vertex and its end vertex are the *same* record.
+It is a **closed edge** — a loop of curve with a single vertex on it, where it begins and ends.
+The bottom circle `#39` is the same, on `#22`.
+A circular edge in STEP is nearly always written this way, with one vertex, rather than split into two semicircles.
+
+The cylindrical face `#17` is bounded by one loop, `#19`, with four oriented edges: `#21` forwards, `#31`, `#21` **backwards**, `#39`.
+The straight edge `#21` appears twice in the same loop, once in each direction.
+It is a **seam**: a line up the side of the cylinder where the surface, which is periodic, has been cut so that the face can be bounded by a single loop.
+
+Think of the cylinder's side as a rectangle of paper rolled into a tube.
+Its boundary is the two circles — but also the line where the two edges of the paper meet.
+Walking around the boundary of the flattened rectangle, you go up one side of the seam, around the top circle, *down the other side of the seam*, and around the bottom.
+In 3D both sides of the seam are the same line, so the loop traverses `#21` twice.
+The loop is still a single closed cycle; it happens to visit one edge in both directions.
+
+Seams are an artefact of representing a periodic surface with a face that has a boundary, and every cylinder, cone, sphere and torus face has at least one.
+They are legal, universal, and the thing most likely to confuse code that assumes "an edge appears at most once per loop."
+The cylindrical face in this file is *not* two faces; it is one face with a seam.
+
+## The cylinder record {#sec-curves-surfaces-cylinder-record}
+
+```step
+#45 = CYLINDRICAL_SURFACE('',#46,3.);
+#46 = AXIS2_PLACEMENT_3D('',#47,#48,#49);
+#47 = CARTESIAN_POINT('',(0.,0.,0.));
+#48 = DIRECTION('',(-0.,-0.,-1.));
+#49 = DIRECTION('',(1.,0.,0.));
+```
+
+`CYLINDRICAL_SURFACE` has a `position` and a `radius`.
+The position's `location` is a point on the cylinder's axis; its `axis` direction is the axis of the cylinder; its `ref_direction` fixes where the surface's angular parameter starts.
+Radius 3.
+The surface is infinite in both directions along the axis; the face `#17` is the portion of it between the two circles.
+
+Note the axis: `(-0.,-0.,-1.)`.
+This cylinder's axis points *down*.
+The pin's circles have axes pointing up.
+Nothing is wrong: the exporter's kernel built the cylinder one way and its edges another, and the face's `same_sense` (`.T.`) and the bound's orientation (`.F.`) compose to make the outward normal correct.
+The surface normal of a cylinder points *away from* the axis regardless of which way the axis runs; the axis direction affects only the direction of the angular parameter, and so the sense in which loops must run.
+
+## Circles {#sec-curves-surfaces-circles}
+
+```step
+#32 = CIRCLE('',#33,3.);
+#33 = AXIS2_PLACEMENT_3D('',#34,#35,#36);
+#34 = CARTESIAN_POINT('',(0.,0.,30.));
+#35 = DIRECTION('',(0.,0.,1.));
+#36 = DIRECTION('',(1.,0.,0.));
+```
+
+A `CIRCLE` is a `position` and a `radius`.
+The circle lies in the plane through the position's `location`, perpendicular to its `axis`; it starts at the `ref_direction` and runs counter-clockwise about the axis.
+So `#32` is a circle of radius 3 centred at (0, 0, 30), in the plane z = 30, starting at (3, 0, 30) — which is exactly where vertex `#24` sits — and running anticlockwise seen from above.
+An edge that is the *whole* circle starts and ends at that vertex.
+An edge that is *part* of a circle — an arc — has two different vertices and the arc is the piece of the circle from one to the other in the circle's direction (or against it, if `same_sense` is `.F.`).
+
+`ELLIPSE` is the same with two radii.
+`HYPERBOLA` and `PARABOLA` exist and are almost never seen.
+
+## The hole in the bracket {#sec-curves-surfaces-hole-in-bracket}
+
+The bracket is the block with a 6 mm hole down through its centre.
+Two faces change and one is added.
+The top face:
+
+```step
+#88 = ADVANCED_FACE('',(#89,#107),#118,.T.);
+#89 = FACE_BOUND('',#90,.T.);                     /* outer rectangle */
+#90 = EDGE_LOOP('',(#91,#92,#93,#101));
+#107 = FACE_BOUND('',#108,.T.);                   /* inner circle */
+#108 = EDGE_LOOP('',(#109));
+#109 = ORIENTED_EDGE('',*,*,#110,.T.);
+#110 = EDGE_CURVE('',#111,#111,#113,.T.);
+#111 = VERTEX_POINT('',#112);
+#112 = CARTESIAN_POINT('',(27.,10.,10.));
+#113 = CIRCLE('',#114,3.);
+#114 = AXIS2_PLACEMENT_3D('',#115,#116,#117);
+#115 = CARTESIAN_POINT('',(30.,10.,10.));
+#116 = DIRECTION('',(0.,0.,-1.));
+#117 = DIRECTION('',(-1.,0.,0.));
+```
+
+Two bounds.
+`#89` is the rectangle, as in the block.
+`#107` is a loop of one closed edge — the circle of the hole, radius 3, centred at (30, 10, 10).
+A face with a hole is a face with two loops; the inner loop runs the *opposite* way to the outer one (clockwise seen from outside), so that the material is still on the left as you walk it.
+Nothing on the record says which bound is the outer one.
+The standard offers `FACE_OUTER_BOUND` for that purpose, this exporter writes plain `FACE_BOUND` for both, and a reader must decide from the geometry — typically, the bound whose loop encloses the others in the surface's parameter space.
+
+The hole's wall:
+
+```step
+#187 = ADVANCED_FACE('',(#188),#199,.F.);
+#188 = FACE_BOUND('',#189,.F.);
+#189 = EDGE_LOOP('',(#190,#191,#197,#198));
+#190 = ORIENTED_EDGE('',*,*,#162,.F.);            /* bottom circle of the hole */
+#191 = ORIENTED_EDGE('',*,*,#192,.F.);            /* seam, down */
+#192 = EDGE_CURVE('',#111,#163,#193,.T.);
+#197 = ORIENTED_EDGE('',*,*,#110,.T.);            /* top circle of the hole */
+#198 = ORIENTED_EDGE('',*,*,#192,.T.);            /* seam, up */
+#199 = CYLINDRICAL_SURFACE('',#200,3.);
+```
+
+The same cylinder-with-seam structure as the pin, turned inside out: this face's `same_sense` is `.F.`, because the surface normal of a cylinder points away from its axis and the *outside* of the bracket, at the hole wall, is *toward* the axis.
+The top circle `#110` is shared: it bounds the top face's inner loop and the hole wall's loop, traversed forwards in one and — after the bound flags — backwards in the other, as every shared edge must be.
+
+The bracket has 8 + 2 = 10 vertices (the hole adds one on each circle), 12 + 2 + 1 = 15 edges (two circles and a seam), and 6 + 1 = 7 faces.
+V − E + F = 10 − 15 + 7 = 2.
+That is *not* the 0 that @sec-brep promised for a solid with a through-hole, and the reason is instructive.
+The simple formula assumes every face is a disc — one outer loop, nothing inside it.
+The bracket's top and bottom faces are *rings*: each has an inner loop.
+The general form of the check subtracts them:
+
+$$V - E + F - R = 2(S - H)$$
+
+where $R$ is the number of inner loops, $S$ the number of shells and $H$ the number of through-holes (the genus).
+For the bracket: 10 − 15 + 7 − 2 = 0 = 2 × (1 − 1).
+For the block: 8 − 12 + 6 − 0 = 2 = 2 × (1 − 0).
+For the pin: 2 − 3 + 3 − 0 = 2.
+Seams, it turns out, do not disturb the count — a seam adds an edge but the face it cuts is still one face with one loop — and this is the form validators actually compute.
+
+## The sphere: a face with no edges {#sec-curves-surfaces-sphere}
+
+```step
+#16 = CLOSED_SHELL('',(#17));
+#17 = ADVANCED_FACE('',(#18),#22,.T.);
+#18 = FACE_BOUND('',#19,.T.);
+#19 = VERTEX_LOOP('',#20);
+#20 = VERTEX_POINT('',#21);
+#21 = CARTESIAN_POINT('',(3.061616997868E-16,-7.498798913309E-32,-5.));
+#22 = SPHERICAL_SURFACE('',#23,5.);
+```
+
+A sphere of radius 5 as OCCT writes it with the parameter curves suppressed: one face, one bound, and the bound's loop is a **vertex loop** — a loop consisting of a single vertex and no edges.
+The spherical surface is closed in every direction; there is nothing to trim.
+But the schema requires a face to have at least one bound, so the face is "bounded" by a degenerate loop at the south pole (the coordinates are (0, 0, −5) with floating-point noise).
+V − E + F = 1 − 0 + 1 = 2.
+
+Vertex loops also appear at the apex of a cone and at the poles of a sphere that *has* been cut by a seam: the degenerate edge where a meridian meets the pole collapses to a point.
+A `VERTEX_LOOP` is the standard's way of saying "this boundary has zero length."
+
+## The torus: two seams {#sec-curves-surfaces-torus}
+
+```step
+#17 = ADVANCED_FACE('',(#18),#38,.T.);
+#19 = EDGE_LOOP('',(#20,#29,#36,#37));
+#20 = ORIENTED_EDGE('',*,*,#21,.F.);
+#21 = EDGE_CURVE('',#22,#22,#24,.T.);              /* circle, radius 12: the outer equator */
+#29 = ORIENTED_EDGE('',*,*,#30,.F.);
+#30 = EDGE_CURVE('',#22,#22,#31,.T.);              /* circle, radius 2: a meridian */
+#36 = ORIENTED_EDGE('',*,*,#21,.T.);
+#37 = ORIENTED_EDGE('',*,*,#30,.T.);
+#38 = TOROIDAL_SURFACE('',#39,10.,2.);
+```
+
+A torus is periodic in both directions, so a single face on it needs two seams: one around (the equator, `#21`, radius 12 = 10 + 2) and one across (a meridian, `#30`, radius 2).
+Both are closed edges on the single vertex `#22` where they cross, and both appear twice in the loop.
+One face, two edges, one vertex: V − E + F = 1 − 2 + 1 = 0, which for once is the textbook genus-1 answer, because here every edge is a seam and they cancel.
+
+`TOROIDAL_SURFACE` has a `position`, a `major_radius` (centre to tube centre, 10) and a `minor_radius` (tube, 2).
+
+## The cone {#sec-curves-surfaces-cone}
+
+```step
+#33 = B_SPLINE_CURVE_WITH_KNOTS('',1,(#34,#35),.UNSPECIFIED.,.F.,.F.,
+        (2,2),(0.,1.),.PIECEWISE_BEZIER_KNOTS.);
+#34 = CARTESIAN_POINT('',(5.,0.,0.));
+#35 = CARTESIAN_POINT('',(2.,0.,10.));
+#44 = CONICAL_SURFACE('',#45,5.,0.291456794478);
+#45 = AXIS2_PLACEMENT_3D('',#46,#47,#48);
+#46 = CARTESIAN_POINT('',(0.,0.,0.));
+#47 = DIRECTION('',(-0.,-0.,-1.));
+```
+
+`CONICAL_SURFACE` has a `position`, a `radius` at the position's location, and a `semi_angle` in radians.
+This cone has radius 5 at z = 0 and half-angle 0.2915 rad (16.7°): over 10 mm of height it narrows to radius 2, and the axis, again, points down.
+
+The seam of this cone is a straight line from (5, 0, 0) to (2, 0, 10) — and the exporter has written it not as a `LINE` but as a **degree-1 B-spline with two control points**.
+It is a line in everything but name.
+This happens when a kernel has represented a curve internally as a spline and does not bother to recognise that it is analytic on the way out.
+A reader that special-cases `LINE` and `CIRCLE` and treats everything else as "free-form" will call this a free-form edge.
+It is not wrong to do so; it is just less informative.
+The next chapter takes the B-spline record apart.
+
+## The analytic vocabulary {#sec-curves-surfaces-analytic-vocabulary}
+
+Every analytic curve and surface in Part 42 is positioned by an `AXIS2_PLACEMENT_3D` — a point, an axis (the local Z) and a reference direction (the local X) — and then given one or two numbers.
+
+**Surfaces**
+
+| Entity | Extra attributes | Position means |
+|--------|------------------|----------------|
+| `PLANE` | — | a point on the plane; axis = normal |
+| `CYLINDRICAL_SURFACE` | `radius` | a point on the axis; axis = cylinder axis |
+| `CONICAL_SURFACE` | `radius`, `semi_angle` | a point on the axis where the radius applies |
+| `SPHERICAL_SURFACE` | `radius` | the centre |
+| `TOROIDAL_SURFACE` | `major_radius`, `minor_radius` | the centre; axis = the ring's axis |
+| `SURFACE_OF_REVOLUTION` | `swept_curve`, `axis_position` | a curve rotated about an axis (an `AXIS1_PLACEMENT`) |
+| `SURFACE_OF_LINEAR_EXTRUSION` | `swept_curve`, `extrusion_axis` | a curve swept along a vector |
+
+**Curves**
+
+| Entity | Attributes | Notes |
+|--------|------------|-------|
+| `LINE` | `pnt`, `dir` (a `VECTOR`) | infinite; parameter is distance along `dir` |
+| `CIRCLE` | `position`, `radius` | in the position's XY plane, CCW about its axis |
+| `ELLIPSE` | `position`, `semi_axis_1`, `semi_axis_2` | |
+| `TRIMMED_CURVE` | `basis_curve`, `trim_1`, `trim_2`, `sense_agreement`, `master_representation` | a piece of another curve, trimmed by points or parameters |
+| `COMPOSITE_CURVE` | `segments`, `self_intersect` | several curves end to end |
+| `POLYLINE` | `points` | straight segments through a list of points |
+
+`TRIMMED_CURVE` is the record where the typed wrapper of @sec-schema appears most: `trim_1` and `trim_2` are each a SELECT of a `CARTESIAN_POINT` or a `PARAMETER_VALUE`, so a curve trimmed by parameter looks like `TRIMMED_CURVE('',#30,(PARAMETER_VALUE(0.)),(PARAMETER_VALUE(1.5708)),.T.,.PARAMETER.)`.
+Inside a B-rep, trimming is done by the topology — the edge's vertices — and `TRIMMED_CURVE` is rare; it appears in wireframes, in sketches, and in PMI annotation geometry.
+
+::: {.callout-warning title="In the wild: Floating-point noise"}
+The sphere's pole is at `(3.061616997868E-16, -7.498798913309E-32, -5.)`.
+The torus's vertex is at `(12., -2.939152317954E-15, -4.898587196589E-16)`.
+These are zeros, written as the kernel computed them — the residue of a cosine of 90° that came out as $6 \times 10^{-17}$ rather than 0.
+They are harmless, they are everywhere, and they are why comparing coordinates for equality is never the right operation on STEP geometry; comparing within the file's uncertainty is.
+:::
+
+::: {.callout-important title="In brief"}
+Analytic surfaces are positioned by an axis placement plus one or two radii or an angle; their normals point away from the axis (cylinder, cone), outward from the centre (sphere, torus), or along the axis (plane), and `same_sense` reconciles that with the solid.
+A periodic surface is bounded by a single loop that traverses each **seam** edge twice, once in each direction.
+A circular edge is **closed**: one vertex, start = end.
+A surface with nothing to trim gets a **vertex loop**.
+Lines sometimes arrive as degree-1 B-splines.
+:::

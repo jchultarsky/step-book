@@ -1,0 +1,228 @@
+# Reading a Solid: The Block {#sec-reading-the-block}
+
+::: {.chapter-abstract}
+One hundred and fifty records, read from the bottom of the ladder up: points and vertices, lines and edges, loops, faces, shell, solid.
+Then the orientation flags, composed by hand, and the count that proves the shell is closed.
+:::
+
+The block's eight corners, labelled with their vertex records:
+
+```default
+            #40 (0,20,10) ──────────────────── #80 (60,20,10)
+           / │                                 / │
+          /  │                                /  │
+#24 (0,0,10) ───────────────────── #64 (60,0,10) │
+ │           │                      │            │
+ │           #32 (0,20,0) ──────────│────────── #72 (60,20,0)
+ │          /                       │           /
+ │         /                        │          /
+#22 (0,0,0) ─────────────────────── #62 (60,0,0)
+```
+
+X runs to the right (0 to 60), Y into the page (0 to 20), Z up (0 to 10).
+The solid is `#15`, its shell is `#16`, and the shell's six faces are `#17`, `#57`, `#97`, `#119`, `#141` and `#153`.
+The chapter reads it from the bottom up.
+
+## Vertices {#sec-reading-the-block-vertices}
+
+```step
+#22 = VERTEX_POINT('',#23);
+#23 = CARTESIAN_POINT('',(0.,0.,0.));
+```
+
+A `VERTEX_POINT` is a topological vertex with one attribute beyond its name: `vertex_geometry`, a point.
+The `CARTESIAN_POINT` carries a list of coordinates, here three (a 2D point would have two).
+Two records per corner; sixteen for the block.
+The other seven vertices are `#24`, `#32`, `#40`, `#62`, `#64`, `#72` and `#80`, each with its own point.
+
+Nothing in a vertex record says which edges meet there.
+That is in the edges.
+
+## Edges {#sec-reading-the-block-edges}
+
+```step
+#21 = EDGE_CURVE('',#22,#24,#26,.T.);
+#26 = LINE('',#27,#28);
+#27 = CARTESIAN_POINT('',(0.,0.,0.));
+#28 = VECTOR('',#29,1.);
+#29 = DIRECTION('',(0.,0.,1.));
+```
+
+`EDGE_CURVE` has four attributes beyond its name: `edge_start` and `edge_end` (two vertices), `edge_geometry` (a curve), and `same_sense` (whether the edge runs along the curve's direction).
+`#21` runs from `#22` at the origin to `#24` at (0, 0, 10), along the line `#26`, in the line's own direction.
+
+The line is a point and a vector.
+`LINE('',#27,#28)`: through `#27`, in direction `#28`.
+The `VECTOR` is a `DIRECTION` and a magnitude — `(0,0,1)` scaled by `1.` — which is more structure than a line needs and exactly what the schema requires.
+Note that `#27` duplicates the coordinates of `#23`: the exporter has written the line's base point as a separate record rather than reusing the vertex's point.
+It could have shared; it chose not to.
+Real files are full of such duplicated points, and a reader that de-duplicates by coordinate will find the 51 `CARTESIAN_POINT`s in this file collapse to about 20 distinct locations.
+
+The twelve edges of the block, from the file:
+
+| Edge | From | To | Direction | Where |
+|------|------|----|-----------|-------|
+| `#21` | `#22` | `#24` | +Z | x = 0, y = 0 |
+| `#31` | `#22` | `#32` | +Y | x = 0, z = 0 |
+| `#39` | `#32` | `#40` | +Z | x = 0, y = 20 |
+| `#47` | `#24` | `#40` | +Y | x = 0, z = 10 |
+| `#61` | `#62` | `#64` | +Z | x = 60, y = 0 |
+| `#71` | `#62` | `#72` | +Y | x = 60, z = 0 |
+| `#79` | `#72` | `#80` | +Z | x = 60, y = 20 |
+| `#87` | `#64` | `#80` | +Y | x = 60, z = 10 |
+| `#101` | `#22` | `#62` | +X | y = 0, z = 0 |
+| `#108` | `#24` | `#64` | +X | y = 0, z = 10 |
+| `#123` | `#32` | `#72` | +X | y = 20, z = 0 |
+| `#130` | `#40` | `#80` | +X | y = 20, z = 10 |
+
+Every edge's curve runs in a positive axis direction and every `same_sense` is `.T.`, because the exporter chose its lines to match its edges.
+Nothing requires this; an edge whose `same_sense` is `.F.` runs from its start vertex to its end vertex *against* the curve, and you will see plenty.
+
+Each `EDGE_CURVE` costs five records: itself, a line, a point, a vector and a direction.
+Sixty records for twelve edges.
+
+## Loops {#sec-reading-the-block-loops}
+
+```step
+#19 = EDGE_LOOP('',(#20,#30,#38,#46));
+#20 = ORIENTED_EDGE('',*,*,#21,.F.);
+#30 = ORIENTED_EDGE('',*,*,#31,.T.);
+#38 = ORIENTED_EDGE('',*,*,#39,.T.);
+#46 = ORIENTED_EDGE('',*,*,#47,.F.);
+```
+
+An `EDGE_LOOP` is an ordered list of oriented edges forming a closed cycle.
+Each `ORIENTED_EDGE` points at an `EDGE_CURVE` and adds an `orientation`: `.T.` to traverse it from start to end, `.F.` from end to start.
+The two `*` are derived attributes — the oriented edge's own start and end vertices, which follow from the edge and the flag — and are written as `*` because the schema says to compute them.
+
+Follow loop `#19`:
+
+- `#20`: edge `#21` reversed — from `#24` (0, 0, 10) to `#22` (0, 0, 0).
+- `#30`: edge `#31` forwards — from `#22` to `#32` (0, 20, 0).
+- `#38`: edge `#39` forwards — from `#32` to `#40` (0, 20, 10).
+- `#46`: edge `#47` reversed — from `#40` to `#24`.
+
+Each edge ends where the next begins, and the last ends where the first began.
+Four corners of the face at x = 0, visited in order.
+A well-formed loop always chains like this, and checking that it does is the second thing a validator does after counting.
+
+The block has six loops and twenty-four oriented edges.
+Each of the twelve edges appears in exactly two loops.
+Look at `#21`: it is in loop `#19` via `#20` (orientation `.F.`) and in loop `#99` via `#106` (orientation `.T.`).
+Every shared edge appears once forwards and once backwards — almost.
+The full rule needs the next level.
+
+## Faces {#sec-reading-the-block-faces}
+
+```step
+#17 = ADVANCED_FACE('',(#18),#52,.F.);
+#18 = FACE_BOUND('',#19,.F.);
+#52 = PLANE('',#53);
+#53 = AXIS2_PLACEMENT_3D('',#54,#55,#56);
+#54 = CARTESIAN_POINT('',(0.,0.,0.));
+#55 = DIRECTION('',(1.,0.,0.));
+#56 = DIRECTION('',(0.,0.,1.));
+```
+
+An `ADVANCED_FACE` has, as @sec-schema laid out, `bounds` (a set of face bounds), `face_geometry` (a surface) and `same_sense`.
+`#17` has one bound, lies on plane `#52`, and its `same_sense` is `.F.`.
+
+The **bound** wraps the loop and adds another orientation flag: `FACE_BOUND('',#19,.F.)` is loop `#19`, reversed.
+A face with a hole has two bounds; the standard provides `FACE_OUTER_BOUND` to mark the outer one, and this exporter does not use it — both bounds are plain `FACE_BOUND`, and which is outer must be worked out from the geometry.
+@sec-curves-surfaces has the example.
+
+The **plane** is positioned by an axis placement: origin `#54` at (0, 0, 0), normal `#55` along +X, and a reference direction `#56` along +Z that fixes the plane's own in-plane X axis.
+The plane's positive side is +X.
+
+But this face is the one at x = 0 — the left end of the block — and its outside is toward −X.
+Hence `same_sense = .F.`: the face's outward normal is the *reverse* of the plane's normal.
+The face on the opposite end, `#57`, lies on plane `#92` whose normal is also +X, positioned at (60, 0, 0); there the plane normal is already outward and `same_sense` is `.T.`.
+
+The six faces:
+
+| Face | Plane origin | Plane normal | `same_sense` | Outward normal | Which side |
+|------|--------------|--------------|--------------|----------------|------------|
+| `#17` | (0, 0, 0) | +X | `.F.` | −X | left end |
+| `#57` | (60, 0, 0) | +X | `.T.` | +X | right end |
+| `#97` | (0, 0, 0) | +Y | `.F.` | −Y | front |
+| `#119` | (0, 20, 0) | +Y | `.T.` | +Y | back |
+| `#141` | (0, 0, 0) | +Z | `.F.` | −Z | bottom |
+| `#153` | (0, 0, 10) | +Z | `.T.` | +Z | top |
+
+Each face costs eight records: the face, its bound, its loop, the plane, the plane's placement, and the placement's point and two directions.
+Forty-eight for six faces.
+
+## Composing the orientation {#sec-reading-the-block-composing-orientation}
+
+Now the flags together.
+The rule is: after applying the edge orientations *and* the bound orientation, the loop runs counter-clockwise when viewed from outside — with the outward normal pointing at the viewer.
+
+Take `#17` again.
+The plane's normal is +X and `same_sense` is `.F.`, so the outward normal is −X.
+Loop `#19`, after its edge flags, visits (0, 0, 10) → (0, 0, 0) → (0, 20, 0) → (0, 20, 10).
+In the (y, z) plane that sequence is (0, 10) → (0, 0) → (20, 0) → (20, 10), which is counter-clockwise about +X — the wrong way for a face whose outside is −X.
+The bound `#18` has orientation `.F.`, which reverses the loop, making it clockwise about +X, which is counter-clockwise about −X.
+Consistent.
+
+Now `#57`, the right end.
+Its loop `#59` visits the same (y, z) sequence, counter-clockwise about +X.
+The face's outward normal is +X.
+The bound `#58` has orientation `.T.`: no reversal needed.
+Consistent again.
+
+The exporter has a habit visible in every face: `FACE_BOUND.orientation` equals `ADVANCED_FACE.same_sense`.
+That is a property of how OCCT builds its loops, not a rule, and other exporters will hand you a bound of `.T.` on a face of `.F.` with edge flags arranged to compensate.
+
+The shared-edge rule, fully: for each `EDGE_CURVE` shared by two faces, the *effective* orientation in each face — the `ORIENTED_EDGE` flag combined with the `FACE_BOUND` flag — must be opposite.
+Edge `#21` in face `#17`: oriented edge `.F.`, bound `.F.`, effective forwards.
+In face `#97`: oriented edge `#106` is `.T.`, bound `#98` is `.F.`, effective backwards.
+Opposite.
+This is the condition that makes the two faces' normals agree about which side is out; break it on one edge and the shell has a crease where inside becomes outside.
+
+## Shell and solid {#sec-reading-the-block-shell-solid}
+
+```step
+#16 = CLOSED_SHELL('',(#17,#57,#97,#119,#141,#153));
+#15 = MANIFOLD_SOLID_BREP('',#16);
+```
+
+The shell is a set of faces, unordered.
+The solid is a shell.
+`MANIFOLD_SOLID_BREP` has one attribute, `outer`; a subtype, `BREP_WITH_VOIDS`, adds a set of inner shells for cavities.
+There is nothing else at this level: no bounding box, no volume, no centroid.
+Those, if present, are properties attached from outside, in @sec-properties-validation.
+
+## The count {#sec-reading-the-block-count}
+
+| Records | Kind | Count |
+|---------|------|------:|
+| `VERTEX_POINT` + `CARTESIAN_POINT` | 8 vertices × 2 | 16 |
+| `EDGE_CURVE` + `LINE` + point + `VECTOR` + `DIRECTION` | 12 edges × 5 | 60 |
+| `ORIENTED_EDGE` | 12 edges × 2 faces | 24 |
+| face + bound + loop + `PLANE` + placement + point + 2 directions | 6 faces × 8 | 48 |
+| `CLOSED_SHELL` + `MANIFOLD_SOLID_BREP` | | 2 |
+| **Total** | | **150** |
+
+And the Euler check: V − E + F = 8 − 12 + 6 = 2.
+The shell is closed and has no through-holes, and the count of records is exactly what the structure predicts.
+When a file's record counts do *not* match a pattern like this — 13 edges for a box, say — something has been split or duplicated, and the shell is usually not what it claims.
+
+::: {.callout-warning title="In the wild: What varies between exporters"}
+The structure above is universal; the habits are not.
+Other writers use `FACE_OUTER_BOUND` for the outer loop (the standard's intent), share `CARTESIAN_POINT`s between a vertex and the lines that start there, write `same_sense = .F.` on edges rather than choosing curve directions to avoid it, and put the plane's origin at a face corner rather than the part origin.
+SolidWorks tends to write `.TRUE.` and `.FALSE.`.
+Some CATIA exports write every face's `same_sense` as `.T.` and flip the plane's normal instead.
+All of these describe the same box; a reader has to compose the flags and not pattern-match the habits.
+:::
+
+::: {.callout-important title="In brief"}
+Vertex = point.
+Edge = two vertices + curve + sense.
+Oriented edge = edge + direction.
+Loop = cycle of oriented edges.
+Bound = loop + orientation.
+Face = bounds + surface + sense.
+Shell = faces; solid = shell.
+Outward normal is the surface normal flipped by `same_sense`; the loop, after edge flags and bound flag, runs counter-clockwise around it; each shared edge is traversed oppositely by its two faces.
+Eight, twelve, six: V − E + F = 2.
+:::

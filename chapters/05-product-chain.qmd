@@ -1,0 +1,163 @@
+# Identity: The Product Chain {#sec-product-chain}
+
+::: {.chapter-abstract}
+Nine records that say "there is a part called BLOCK" — and why a CAD file needs the version-and-view structure of a product lifecycle system to say it.
+:::
+
+Strip the geometry out of the block file and what remains is this:
+
+```step
+#1 = APPLICATION_PROTOCOL_DEFINITION('international standard',
+  'automotive_design',2000,#2);
+#2 = APPLICATION_CONTEXT(
+  'core data for automotive mechanical design processes');
+#3 = SHAPE_DEFINITION_REPRESENTATION(#4,#10);
+#4 = PRODUCT_DEFINITION_SHAPE('','',#5);
+#5 = PRODUCT_DEFINITION('design','',#6,#9);
+#6 = PRODUCT_DEFINITION_FORMATION('','',#7);
+#7 = PRODUCT('BLOCK','block 60x20x10','',(#8));
+#8 = PRODUCT_CONTEXT('',#2,'mechanical');
+#9 = PRODUCT_DEFINITION_CONTEXT('part definition',#2,'design');
+#170 = PRODUCT_RELATED_PRODUCT_CATEGORY('part',$,(#7));
+```
+
+Two of these (`#3`, `#4`) are the bridge to geometry and belong to @sec-product-to-shape.
+The rest are the **product chain**: the records that establish what thing the file is about.
+Every STEP file has this structure, once per product, and it is the same in AP203, AP214 and AP242.
+
+## The three-level core {#sec-product-chain-three-level-core}
+
+The chain has a spine of three records, and understanding why there are three rather than one is most of the chapter.
+
+```step
+#7 = PRODUCT('BLOCK','block 60x20x10','',(#8));
+#6 = PRODUCT_DEFINITION_FORMATION('','',#7);
+#5 = PRODUCT_DEFINITION('design','',#6,#9);
+```
+
+`PRODUCT` is the thing as a catalogue item: a part number and a name, and nothing else.
+Not a version, not a shape.
+`id` is `'BLOCK'`; `name` is `'block 60x20x10'`; the optional `description` is empty; `frame_of_reference` points at a `PRODUCT_CONTEXT`.
+Schema:
+
+```express
+ENTITY product;
+  id                 : identifier;
+  name               : label;
+  description        : OPTIONAL text;
+  frame_of_reference : SET [1:?] OF product_context;
+END_ENTITY;
+```
+
+`PRODUCT_DEFINITION_FORMATION` is a **version** of that product.
+"Formation" is the standard's word for revision.
+It has an `id` (the revision letter or number), a `description`, and a reference to the product it is a version of.
+This exporter has left both strings empty — it does not know about revisions — and pointed at `#7`.
+
+```express
+ENTITY product_definition_formation;
+  id          : identifier;
+  description : OPTIONAL text;
+  of_product  : product;
+END_ENTITY;
+```
+
+`PRODUCT_DEFINITION` is that version as seen from one **discipline** or **life-cycle stage**.
+The `id` here is `'design'`; the `frame_of_reference` points at a `PRODUCT_DEFINITION_CONTEXT` that names the stage.
+The same version of the same part could have a second `PRODUCT_DEFINITION` for manufacturing, with different geometry hanging off it — stock material, no chamfers, tapped holes shown as drilled — and a third for inspection.
+
+```express
+ENTITY product_definition;
+  id                 : identifier;
+  description        : OPTIONAL text;
+  formation          : product_definition_formation;
+  frame_of_reference : product_definition_context;
+END_ENTITY;
+```
+
+So the three levels are **item → revision → view**.
+This is the data model of a product lifecycle management (PLM) system, and it is in the file because the integrated resources were designed to serve PLM systems as much as CAD exporters.
+A CAD tool writing a single part fills two of the three levels with empty strings and moves on; the structure is there for someone else.
+
+::: {.callout-note title="Engineering background: Item, revision, view"}
+In a manufacturing organisation a *part number* identifies a design intent — "the bracket." A *revision* identifies a specific released state of that design — "bracket, rev C" — and revisions are not interchangeable: rev C may have a different hole spacing from rev B, and a drawing or an assembly refers to a specific one.
+A *view* (or *definition*) is the same revision described for a purpose: the design view carries nominal geometry and tolerances; the manufacturing view carries the as-machined model, stock, and process notes; the as-built view carries what was actually made.
+PLM systems track all three levels and the relationships between them.
+STEP inherits the model so that a file can carry, say, an assembly whose components are at specific revisions, or a manufacturing definition alongside a design definition, without inventing new structure.
+Most CAD exports use none of this, which is why the middle level is nearly always blank.
+:::
+
+## The contexts {#sec-product-chain-contexts}
+
+Two records exist only to anchor the chain in a domain:
+
+```step
+#8 = PRODUCT_CONTEXT('',#2,'mechanical');
+#9 = PRODUCT_DEFINITION_CONTEXT('part definition',#2,'design');
+```
+
+`PRODUCT_CONTEXT` says what discipline the product belongs to; its `discipline_type` is `'mechanical'` and its `frame_of_reference` is the application context `#2`.
+`PRODUCT_DEFINITION_CONTEXT` says what life-cycle stage the definition is in; `life_cycle_stage` is `'design'`, again pointing at `#2`.
+Both strings are prescribed by the AP — AP214 and AP242 specify `'mechanical'` and `'design'` for ordinary part data — and both records are boilerplate that you will learn to skim.
+Some exporters write one pair per product, as OCCT does; others share one pair across every product in the file.
+Both are legal.
+
+## The category {#sec-product-chain-category}
+
+The last non-geometric record in the file classifies the product:
+
+```step
+#170 = PRODUCT_RELATED_PRODUCT_CATEGORY('part',$,(#7));
+```
+
+A `PRODUCT_RELATED_PRODUCT_CATEGORY` has a `name`, an optional `description`, and a list of the products in the category.
+The names are prescribed: `'part'` for a component, `'assembly'` for something with children, occasionally `'tool'` or `'raw material'`.
+This is how a reader that has not yet walked the assembly structure can tell a leaf from an assembly, and it is one of the few places the AP requires a specific string rather than leaving it to the writer.
+
+Notice the reference direction: the *category* points at the *product*.
+A product does not know its own category; you find it by looking for categories that list it.
+This is the pattern from @sec-first-look again — specific to general — and it will recur every time a classification, a property or a style is attached to something.
+
+## What exporters put where {#sec-product-chain-exporters}
+
+The schema says what the slots are for.
+It does not say what a CAD system should write in them, and they differ.
+
+- **`product.id`** is meant to be the part number.
+  OCCT writes whatever name it was given; SolidWorks writes the document's filename without extension; NX and Creo write the part name, which in a well-run shop *is* the part number; CATIA writes the part number field from the part's properties, which is often the same string as the name.
+- **`product.name`** is meant to be the human name.
+  Most exporters write the same string as `id`.
+  OCCT, if given only one name, duplicates it, which is why unedited OCCT files say `PRODUCT('Open CASCADE STEP translator 7.9 1','Open CASCADE STEP translator 7.9 1', ...)`.
+- **`product_definition_formation.id`** is the revision.
+  It is empty in almost every CAD export.
+  When PLM-integrated systems write it, it holds `'A'`, `'B'`, `'01'`.
+- **`product_definition.id`** is nearly always `'design'`, sometimes `''`, occasionally the part name again.
+
+The practical rule for finding "the name of this part" is: `product.name`, falling back to `product.id`, falling back to the filename.
+The practical rule for finding the part *number* is `product.id`, and it is only as good as the exporter's mapping.
+
+::: {.callout-warning title="In the wild: Formations with a source"}
+AP214 and AP242 define a subtype, `PRODUCT_DEFINITION_FORMATION_WITH_SPECIFIED_SOURCE`, which adds a `make_or_buy` enumeration: `.MADE.`, `.BOUGHT.` or `.NOT_KNOWN.`.
+Some exporters — notably older Dassault and Siemens translators — write this subtype for every product with `.NOT_KNOWN.`, so a file's formation records look like `PRODUCT_DEFINITION_FORMATION_WITH_SPECIFIED_SOURCE('','',#7,.NOT_KNOWN.)`.
+It is the same record with one more attribute, and a reader should treat it as a formation.
+:::
+
+## Several products in one file {#sec-product-chain-several-products}
+
+A single-part file has one chain.
+An assembly file has one chain *per product* — the assembly and each distinct component — each with its own `PRODUCT`, formation, definition and category, and usually its own pair of contexts.
+The clamp assembly in @sec-assemblies has three: `CLAMP-ASSY`, `bracket` and `pin-1`.
+What connects them is not in the product chain at all; it is a separate set of records that relate one `PRODUCT_DEFINITION` to another.
+The chain establishes *that* things exist.
+Structure is layered on top.
+
+One more thing the chain does not do: it does not point at geometry.
+`#5`, the design definition of the block, knows its version and its context and nothing else.
+The shape is attached from the other side, by records that point *at* `#5`, and that is the subject of @sec-product-to-shape.
+
+::: {.callout-important title="In brief"}
+`PRODUCT` → `PRODUCT_DEFINITION_FORMATION` → `PRODUCT_DEFINITION` is item → revision → view, the PLM model built into the format.
+Each level points at the one above.
+`PRODUCT_CONTEXT` and `PRODUCT_DEFINITION_CONTEXT` anchor the chain in a discipline and life-cycle stage with prescribed strings.
+`PRODUCT_RELATED_PRODUCT_CATEGORY` says `'part'` or `'assembly'` and points at the product, not the other way round.
+:::

@@ -1,0 +1,138 @@
+# What STEP Is {#sec-what-step-is}
+
+::: {.chapter-abstract}
+Three things share the name, and people switch between them without noticing.
+The standard, the application protocol and the file; how the parts are numbered; and why the entity names look the way they do.
+:::
+
+Open a STEP file in a text editor and the first thing you see is that it is text, and the second is that the text does not help.
+Here are three lines from the middle of a small one:
+
+```step
+#22 = VERTEX_POINT('',#23);
+#23 = CARTESIAN_POINT('',(0.,0.,0.));
+#165 = ( GEOMETRIC_REPRESENTATION_CONTEXT(3)
+  GLOBAL_UNCERTAINTY_ASSIGNED_CONTEXT((#169))
+  GLOBAL_UNIT_ASSIGNED_CONTEXT((#166,#167,#168))
+  REPRESENTATION_CONTEXT('Context #1','3D Context with UNIT and UNCERTAINTY') );
+```
+
+The first two are almost readable: a vertex, at a point, at the origin.
+The third looks like four records that have collided.
+By the end of Part I you will read all three fluently, and you will know why the third one has to look like that.
+But before any of that, it is worth being precise about what the word "STEP" refers to, because it refers to three different things and people switch between them without noticing.
+
+## Three things called STEP {#sec-what-step-is-three-things}
+
+**The standard.** ISO 10303, *Industrial automation systems and integration — Product data representation and exchange*, is a family of several hundred documents developed since the mid-1980s and still growing.
+It defines a data modelling language, several ways of encoding data, a library of shared data definitions for everything from geometry to process plans, and a set of *application protocols* that assemble those definitions into models for particular industries.
+"STEP" is its informal name — the *STandard for the Exchange of Product model data*.
+Almost nobody has read all of it.
+A working knowledge of a dozen parts is enough for anything in this book.
+
+**The application protocol.** When a CAD vendor says they "support STEP," they mean they can read and write files conforming to one or more *application protocols* (APs).
+An AP is a scoped data model: it picks entities from the shared library, adds a few of its own, and says which combinations are legal for its domain.
+Three matter for mechanical CAD: AP203 (*configuration-controlled design*, the original), AP214 (*core data for automotive mechanical design processes*, which added colours, layers and more), and AP242 (*managed model-based 3D engineering*), which merged the two and added product manufacturing information, tessellation and much else.
+AP242 is the current one; the live publication as this is written is ISO 10303-242:2025.
+Files claiming AP203 and AP214 will be in circulation for decades.
+
+**The file.** The text format with the `#22 = ...` records is defined in one part, ISO 10303-21, and is properly called the *clear text encoding of the exchange structure* or, universally, a *Part 21 file*.
+It is one of several encodings — there is also an XML form and, in principle, a binary one — but it is the one everyone uses, and when this book says "a STEP file" it means a Part 21 file.
+
+The distinction matters in practice.
+"STEP can't carry colours" is true of AP203 and false of AP214 and AP242.
+"STEP files are huge" is true of Part 21 and not intrinsic to the data model.
+"Our STEP import failed" almost always means the *reader* did not support something the *AP* allowed and the *writer* used.
+
+## How the standard is organised {#sec-what-step-is-organisation}
+
+Every ISO 10303 document has a part number, and the numbering scheme is the only index you will need.
+Learn the ranges once and you can find anything.
+
+| Range | Contents | You will meet |
+|---|---|---|
+| 1 | Overview and fundamental principles | — |
+| 11–14 | Description methods | **11**, the EXPRESS language |
+| 21–28 | Implementation methods | **21**, the clear-text file; 26, 28 |
+| 31–35 | Conformance testing | rarely |
+| 41–49 | Integrated generic resources | **41, 42, 43, 44, 46, 47** |
+| 101–112 | Integrated application resources | 101 (draughting), 105 (kinematics) |
+| 2xx | Application protocols | **203, 214, 242** |
+| 3xx | Abstract test suites | rarely |
+| 4xx, 1xxx | Application modules | the building blocks of AP242 |
+| 5xx | Application interpreted constructs | when tracing where an entity came from |
+
+The *integrated resources* in the 41–49 and 101–112 ranges are the heart of it.
+Part 41 defines products, versions and contexts; Part 42 geometry and topology; Part 43 the notion of a *representation*; Part 44 product structure and assemblies; Part 46 visual presentation; Part 47 shape tolerances.
+Every entity in a mechanical STEP file comes from one of these.
+The application protocols do not define geometry; they *use* Part 42's.
+
+## Why the entity names look the way they do {#sec-what-step-is-entity-names}
+
+The name `CONTEXT_DEPENDENT_SHAPE_REPRESENTATION` does not suggest "the position of a part in an assembly," yet that is what it means.
+Nobody chose that name for that purpose.
+Understanding how it came about explains most of what is strange about STEP.
+
+Each application protocol is written twice.
+The first version is the **Application Reference Model** (ARM), written in the vocabulary of the domain: *part*, *assembly component occurrence*, *datum feature*.
+It is what the committee actually designed, and it is readable.
+The second version is the **Application Interpreted Model** (AIM), produced by *mapping* every ARM concept onto entities from the integrated resources — the same pool of entities that has to serve shipbuilding, process plants, electrical harnesses and finite-element meshes.
+The AIM is what appears in the file.
+
+So the file does not contain a CAD data model.
+It contains the residue of one, after it has been dissolved into a general-purpose vocabulary designed by committee to be reusable across industries with nothing in common.
+When the ARM says "an occurrence of component B inside assembly A, at this position," the mapping says: represent A's shape and B's shape as `REPRESENTATION`s (Part 43), relate them with a `REPRESENTATION_RELATIONSHIP` carrying a transformation (Part 43 again), and tie that relationship to the *usage* of B in A via a `PRODUCT_DEFINITION_SHAPE` (Part 41).
+The names fall out of the mapping.
+
+Two consequences follow, and both will recur throughout this book.
+
+First, the AIM is *lossy in the direction you care about*.
+Several distinct ARM concepts can land on the same AIM entities, distinguished only by what they are connected to and by the values of certain fixed strings.
+Reading a file well means reconstructing intent the file never states directly.
+
+Second, the file is designed to be *readable without the schema*.
+Every record carries its own type name and its own attribute values.
+This is why the four-way record at the top of the chapter spells out every one of its types instead of letting you infer them — and it is the design decision that makes the format verbose, self-describing and thirty years durable all at once.
+
+## The lineage of the application protocols {#sec-what-step-is-lineage}
+
+A quick history, because the three APs you will meet are best understood as one line of descent.
+
+AP203, published in 1994, was the first to see wide use.
+It carried product structure and B-rep solids and almost nothing else: no colours, no layers, no tolerances.
+It was the format that made cross-vendor exchange of solid models routine, and its limitations are why so many STEP files look grey.
+A second edition in 2011 added most of what was missing.
+
+AP214, driven by the German automotive industry and published in 2001, took a broader scope from the start — colours, layers, drawings, kinematics, configuration management — and became the default export of most CAD systems for a decade.
+Its `FILE_SCHEMA` name, `AUTOMOTIVE_DESIGN`, appears on files for products that have never been near a car.
+
+AP242, first published in 2014, merged AP203 and AP214 into a single protocol and added the things model-based engineering needs: semantic product manufacturing information (tolerances and datums as data rather than pictures), tessellated geometry, and a business-object XML form for product data management.
+Edition 2 (2020) and the 2025 publication extended it further.
+A file claiming AP242 can carry everything an AP214 file can and more; a reader that handles AP242 handles the older two almost for free, since the geometry and product-structure entities are the same.
+
+For the purposes of this book the differences are small until Part III.
+The block, the cylinder and the clamp assembly are written as AP214 files because that is what the exporter chose; the same records, with a different header and two extra strings, would be AP242.
+
+## What "conforming" means {#sec-what-step-is-conforming}
+
+A STEP file makes three claims about itself, and each can be false.
+
+It claims to follow the *file format*: Part 21, at a stated edition.
+A file that violates the grammar — an unterminated string, a lower-case keyword — is not a Part 21 file, and most readers will still open it.
+
+It claims to follow a *schema*: the `FILE_SCHEMA` header names the AP.
+Every record must be an entity type in that schema, with the right number of attributes of the right types.
+Exporters get this wrong more often than you would expect, usually by naming one AP and writing entities from another.
+
+And it claims to satisfy the schema's *rules*: the constraints that say, for instance, that a closed shell's faces must actually enclose a volume, or that a `PRODUCT_DEFINITION` must have exactly one shape.
+Almost no writer checks these, almost no reader enforces them, and the tools that do — validators such as NIST's STEP File Analyzer — exist precisely because they are so often violated.
+
+None of this makes the format unreliable.
+It makes it a format whose *documents* are reliable and whose *files* are as good as the software that wrote them, which is true of every exchange format ever designed.
+The difference with STEP is that the standard is precise enough that when a file is wrong, you can say exactly how.
+
+::: {.callout-important title="In brief"}
+Three meanings: the standard (ISO 10303, hundreds of parts), the application protocol (AP203, AP214, AP242 — a scoped data model), and the file (Part 21, the clear-text encoding).
+The part numbers are the index.
+Entity names are the residue of mapping a domain model onto a cross-industry library, which is why they are long, abstract and self-describing.
+:::

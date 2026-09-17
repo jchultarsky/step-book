@@ -5,11 +5,12 @@ project:
 lang: en
 
 book:
-  title: "The STEP Book"
-  subtitle: "A practical guide to the ISO 10303 file format"
+  title: "Inside the STEP File"
+  subtitle: "Products, shapes and tolerances, one record at a time"
   author: "Julian Chultarsky"
   date: today
-  date-format: "D MMMM YYYY"
+  date-format: "MMMM YYYY"
+  output-file: inside-the-step-file
   repo-url: https://github.com/jchultarsky/step-book
   repo-branch: main
   repo-actions: [edit, issue]
@@ -18,39 +19,66 @@ book:
   downloads: [pdf]
   sharing: []
   page-footer:
-    left: "© 2026 Julian Chultarsky. Text licensed under MIT."
+    left: "© 2026 Julian Chultarsky. Licensed under MIT."
     right: "Built with [Quarto](https://quarto.org/)."
   chapters:
     - index.qmd
-    - part: "Foundations"
+    - part: "The File and the Product"
       chapters:
-        - chapters/introduction.qmd
-        - chapters/anatomy.qmd
-    - part: "The Standard"
+        - chapters/01-what-step-is.qmd
+        - chapters/02-first-look.qmd
+        - chapters/03-header.qmd
+        - chapters/04-schema.qmd
+        - chapters/05-product-chain.qmd
+        - chapters/06-contexts-units.qmd
+        - chapters/07-product-to-shape.qmd
+        - chapters/08-assemblies.qmd
+    - part: "Geometry"
       chapters:
-        - chapters/express.qmd
-        - chapters/application-protocols.qmd
-    - references.qmd
+        - chapters/09-brep-from-scratch.qmd
+        - chapters/10-reading-the-block.qmd
+        - chapters/11-curves-surfaces.qmd
+        - chapters/12-bsplines.qmd
+        - chapters/13-pcurves-meshes.qmd
+    - part: "Everything Else in the File"
+      chapters:
+        - chapters/14-appearance.qmd
+        - chapters/15-properties-validation.qmd
+        - chapters/16-pmi.qmd
+        - chapters/17-application-protocols.qmd
+        - chapters/18-beyond-edition-2.qmd
   appendices:
-    - chapters/glossary.qmd
+    - appendices/a-block-file.qmd
+    - appendices/b-entity-reference.qmd
+    - appendices/c-sources.qmd
+    - appendices/d-glossary.qmd
 
 bibliography: references.bib
 csl: ieee.csl
 
+syntax-definitions:
+  - syntax/step.xml
+  - syntax/express.xml
+
+filters:
+  - include-code-files
+
 format:
   html:
     theme:
-      light: cosmo
-      dark: darkly
+      light: [cosmo, styles/custom.scss]
+      dark: [darkly, styles/custom.scss]
     toc: true
     toc-depth: 3
     number-sections: true
+    number-depth: 2
     code-copy: true
-    code-overflow: wrap
     link-external-newwindow: true
+    highlight-style: github
   typst:
     papersize: a4
     toc: true
     toc-depth: 2
     number-sections: true
+    number-depth: 2
     keep-typ: false

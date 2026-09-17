@@ -1,0 +1,172 @@
+# The Header {#sec-header}
+
+::: {.chapter-abstract}
+Three records that say what the file is, who made it, and which schema it claims to follow — and the one record in the data section that repeats the claim.
+:::
+
+The header is short, its shape is fixed, and it is the only part of the file whose meaning does not depend on the schema.
+It is also the part you will read most often by eye, because it answers the two questions that come up before any other: *what wrote this?* and *what does it claim to be?*
+
+```step
+HEADER;
+FILE_DESCRIPTION(('Open CASCADE Model'),'2;1');
+FILE_NAME('block.step','2026-09-17T16:14:23',('J. Chultarsky'),('Physna'),
+  'Open CASCADE STEP processor 7.9','Open CASCADE 7.9','Unknown');
+FILE_SCHEMA(('AUTOMOTIVE_DESIGN { 1 0 10303 214 1 1 1 1 }'));
+ENDSEC;
+```
+
+Notice first what is missing: no `#n`.
+Header records have no instance names, because nothing refers to them and they refer to nothing.
+They are not part of the graph.
+There are exactly three mandatory ones, they must appear in this order, and each has a fixed set of parameters.
+
+## `FILE_DESCRIPTION` {#sec-header-file-description}
+
+```step
+FILE_DESCRIPTION(('Open CASCADE Model'),'2;1');
+```
+
+Two parameters.
+The first is a list of free-text strings describing the file's contents; exporters put their own name there, or a product name, or leave it as `('')`.
+Nothing reads it.
+
+The second is the **implementation level**, and it matters: `'2;1'` means Part 21 *edition 2, conformance class 1*.
+It tells a reader which version of the file grammar to expect.
+Edition 2 (2002) is what virtually every file in existence uses.
+Edition 3 (2016) added optional sections between the header and the data — anchors, external references, digital signatures — and a file using them declares `'3;1'` or `'3;2'`.
+@sec-beyond-edition-2 covers what changed; until then, `'2;1'`.
+
+## `FILE_NAME` {#sec-header-file-name}
+
+```step
+FILE_NAME('block.step',                             /* name */
+          '2026-09-17T16:14:23',                    /* time_stamp */
+          ('J. Chultarsky'),                        /* author */
+          ('Physna'),                               /* organization */
+          'Open CASCADE STEP processor 7.9',        /* preprocessor_version */
+          'Open CASCADE 7.9',                       /* originating_system */
+          'Unknown');                               /* authorization */
+```
+
+Seven parameters, and two of them are the most useful strings in the file.
+
+The **name** is whatever the writer chose — often the original filename, often with a full Windows path, sometimes empty.
+The **time stamp** is ISO 8601, local time with no zone unless the writer adds one.
+**Author** and **organization** are lists of strings and are usually `('')` and `('')`.
+**Authorization** is a free string that almost nobody fills.
+
+**Preprocessor version** names the software component that wrote the STEP file — the translator library.
+**Originating system** names the application it was running inside.
+They are distinct because most CAD systems do not write STEP themselves; they license a translator.
+When the two strings are the same product, as here, the vendor wrote their own.
+When they differ, you learn something:
+
+| Preprocessor | Originating system | What it tells you |
+|---|---|---|
+| `Open CASCADE STEP processor 7.9` | `Open CASCADE 7.9` | OCCT, or a tool built on it (FreeCAD, CadQuery, many others) |
+| `ST-DEVELOPER v20` | `NX 2312` | Siemens NX, writing through STEP Tools' library |
+| `SwSTEP 2.0` | `SolidWorks 2024` | SolidWorks' own translator |
+| `CATIA V5 STEP AP214` | `CATIA Version 5-6 ...` | Dassault, own translator |
+| `Pro/ENGINEER by Parametric ...` | `Creo Parametric 10.0` | PTC, own translator |
+
+These are the strings as they characteristically appear; version numbers change every release and the exact wording drifts.
+The point is that once you know a file came from NX via ST-Developer, or from SolidWorks, you know a great deal about which of the structures in Part I and Part III it will contain and how it will spell them.
+Every experienced STEP user reads these two fields first.
+
+## `FILE_SCHEMA` {#sec-header-file-schema}
+
+```step
+FILE_SCHEMA(('AUTOMOTIVE_DESIGN { 1 0 10303 214 1 1 1 1 }'));
+```
+
+One parameter, a list of schema names, almost always with one element.
+This is the line that says which application protocol the file follows.
+Every record in the `DATA` section must be an entity type from this schema.
+
+The string has two parts.
+The name before the brace is the schema's EXPRESS identifier, upper-cased.
+The braces hold an *object identifier* — a sequence of integers registered with ISO that pins the exact schema and edition.
+The three you will see:
+
+| Schema name | Protocol |
+|---|---|
+| `CONFIG_CONTROL_DESIGN` | AP203, first edition |
+| `AP203_CONFIGURATION_CONTROLLED_3D_DESIGN_OF_MECHANICAL_PARTS_AND_ASSEMBLIES_MIM_LF` | AP203, second edition |
+| `AUTOMOTIVE_DESIGN` | AP214 |
+| `AP242_MANAGED_MODEL_BASED_3D_ENGINEERING_MIM_LF` | AP242 |
+
+The `_MIM_LF` suffix on the newer names means *module interpreted model, long form* — the AP's schema flattened into a single file rather than assembled from modules, which is the form tools actually load.
+The object identifier's digits differ between AP242 editions, which is how a reader can tell an edition 1 file from an edition 3 file when the name is the same.
+
+The same block, exported by the same OCCT build with the schema set to AP242, has this header and a slightly different pair of opening records:
+
+```step
+FILE_SCHEMA(('AP242_MANAGED_MODEL_BASED_3D_ENGINEERING_MIM_LF {1 0 10303 442 1
+1 4 }'));
+ENDSEC;
+DATA;
+#1 = APPLICATION_PROTOCOL_DEFINITION('international standard',
+  'ap242_managed_model_based_3d_engineering',2013,#2);
+#2 = APPLICATION_CONTEXT('Managed model based 3d engineering');
+```
+
+Every other record is identical.
+For a plain solid there is no difference between an AP214 and an AP242 file beyond the header and these two strings, which is why a reader that handles one handles the other with little extra work.
+The differences begin with colours, PMI and tessellation.
+
+::: {.callout-warning title="In the wild: When the schema lies"}
+`FILE_SCHEMA` is a claim, and exporters break it in two ways.
+Some declare `CONFIG_CONTROL_DESIGN` (AP203, which has no colour entities) and then write AP214 colour records anyway, because that is what the user asked for.
+Others declare AP214 and write entities that exist only in AP242.
+Strict readers reject these files; practical readers treat the header as advisory and accept any entity type they recognise from any of the three protocols.
+There is no rule in the standard that permits this, and it is what every widely used reader does.
+:::
+
+## The optional header records {#sec-header-optional-records}
+
+Edition 2 defines three more header entities that may follow `FILE_SCHEMA`:
+
+```step
+FILE_POPULATION('AUTOMOTIVE_DESIGN',('...'),$);
+SECTION_LANGUAGE($,'en');
+SECTION_CONTEXT($,('...'));
+```
+
+`FILE_POPULATION` describes which subset of the schema is actually used; `SECTION_LANGUAGE` declares the natural language of the strings; `SECTION_CONTEXT` is a free-form context list.
+They are rare enough that many readers do not implement them and a few reject files that contain them.
+Edition 3 adds more.
+The standard also says that anything else in the header section is an error — and some exporters put things there regardless.
+
+## The record that repeats the claim {#sec-header-repeats-the-claim}
+
+Strictly, the header is finished at `ENDSEC`.
+But the first two records of the data section belong with it in spirit, because they exist to say the same thing the header said:
+
+```step
+#1 = APPLICATION_PROTOCOL_DEFINITION('international standard',
+  'automotive_design',2000,#2);
+#2 = APPLICATION_CONTEXT(
+  'core data for automotive mechanical design processes');
+```
+
+`APPLICATION_CONTEXT` is the root from which the product-identity records hang: every `PRODUCT_CONTEXT` and `PRODUCT_DEFINITION_CONTEXT` in the file points back at it, and it says, in prose, what domain the data is in.
+`APPLICATION_PROTOCOL_DEFINITION` attaches to it and records the AP by status (`'international standard'`), name (`'automotive_design'`) and year (`2000`).
+
+Why repeat what `FILE_SCHEMA` already said?
+Because the header belongs to the *file* and these two records belong to the *data*.
+A file might in principle carry data from several contexts; and when data is moved out of Part 21 into a database or another encoding, the header does not travel with it but the records do.
+In practice there is one application context per file and it agrees with the header.
+When it does not, believe the header, and note that the exporter was careless.
+
+The strings inside `#1` and `#2` are prescribed by each AP and are exactly the ones above for AP214.
+AP203 writes `'config control design'` and `1994`; AP242 writes the strings shown earlier and `2013` or later.
+They are the second place, after the header, where you can identify the protocol — and a place where files that have been converted between protocols often still show their origin.
+
+::: {.callout-important title="In brief"}
+Three header records, no instance names, fixed order.
+`FILE_DESCRIPTION` gives the Part 21 edition.
+`FILE_NAME` names the translator and the CAD system, which predict the file's quirks.
+`FILE_SCHEMA` names the AP, and is a claim rather than a guarantee.
+`APPLICATION_CONTEXT` and `APPLICATION_PROTOCOL_DEFINITION`, the first two data records, repeat that claim from inside the data.
+:::
