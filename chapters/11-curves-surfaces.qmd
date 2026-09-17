@@ -80,7 +80,8 @@ Walking around the boundary of the flattened rectangle, you go up one side of th
 In 3D both sides of the seam are the same line, so the loop traverses `#21` twice.
 The loop is still a single closed cycle; it happens to visit one edge in both directions.
 
-Seams are an artefact of representing a periodic surface with a face that has a boundary, and every cylinder, cone, sphere and torus face has at least one.
+Seams are an artefact of representing a periodic surface with a face that has a boundary, and every cylindrical, conical and toroidal face in this book has at least one.
+A sphere can avoid them, as the one later in this chapter does, by being bounded at a pole instead.
 They are legal, universal, and the thing most likely to confuse code that assumes "an edge appears at most once per loop."
 The cylindrical face in this file is *not* two faces; it is one face with a seam.
 
@@ -251,7 +252,8 @@ The next chapter takes the B-spline record apart.
 
 ## The analytic vocabulary {#sec-curves-surfaces-analytic-vocabulary}
 
-Every analytic curve and surface in Part 42 is positioned by an `AXIS2_PLACEMENT_3D` — a point, an axis (the local Z) and a reference direction (the local X) — and then given one or two numbers.
+Most analytic curves and surfaces in Part 42 are positioned by an `AXIS2_PLACEMENT_3D` — a point, an axis (the local Z) and a reference direction (the local X) — and then given one or two numbers.
+The swept surfaces at the foot of the table are the exception: they carry a curve and a direction instead.
 
 **Surfaces**
 
@@ -276,7 +278,7 @@ Every analytic curve and surface in Part 42 is positioned by an `AXIS2_PLACEMENT
 | `COMPOSITE_CURVE` | `segments`, `self_intersect` | several curves end to end |
 | `POLYLINE` | `points` | straight segments through a list of points |
 
-`TRIMMED_CURVE` is the record where the typed wrapper of @sec-schema appears most: `trim_1` and `trim_2` are each a SELECT of a `CARTESIAN_POINT` or a `PARAMETER_VALUE`, so a curve trimmed by parameter looks like `TRIMMED_CURVE('',#30,(PARAMETER_VALUE(0.)),(PARAMETER_VALUE(1.5708)),.T.,.PARAMETER.)`.
+`TRIMMED_CURVE` is the record where the typed wrapper of @sec-schema appears most: `trim_1` and `trim_2` are each a set of one or two values, each a SELECT of a `CARTESIAN_POINT` or a `PARAMETER_VALUE` — a writer may give the point, the parameter, or both, which is why they are parenthesised — so a curve trimmed by parameter looks like `TRIMMED_CURVE('',#30,(PARAMETER_VALUE(0.)),(PARAMETER_VALUE(1.5708)),.T.,.PARAMETER.)`.
 Inside a B-rep, trimming is done by the topology — the edge's vertices — and `TRIMMED_CURVE` is rare; it appears in wireframes, in sketches, and in PMI annotation geometry.
 
 ::: {.callout-warning title="In the wild: Floating-point noise"}
@@ -287,8 +289,8 @@ They are harmless, they are everywhere, and they are why comparing coordinates f
 :::
 
 ::: {.callout-important title="In brief"}
-Analytic surfaces are positioned by an axis placement plus one or two radii or an angle; their normals point away from the axis (cylinder, cone), outward from the centre (sphere, torus), or along the axis (plane), and `same_sense` reconciles that with the solid.
-A periodic surface is bounded by a single loop that traverses each **seam** edge twice, once in each direction.
+Analytic surfaces are positioned by an axis placement plus one or two radii or an angle; their normals point away from the axis (cylinder, cone), outward from the centre (sphere), away from the tube's centre circle (torus, so inward on the inside of the ring), or along the axis (plane), and `same_sense` reconciles that with the solid.
+A periodic surface that has been cut is bounded by a single loop that traverses each **seam** edge twice, once in each direction.
 A circular edge is **closed**: one vertex, start = end.
 A surface with nothing to trim gets a **vertex loop**.
 Lines sometimes arrive as degree-1 B-splines.
