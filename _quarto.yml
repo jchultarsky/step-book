@@ -82,3 +82,5 @@ format:
     number-sections: true
     number-depth: 2
     keep-typ: false
+    include-in-header:
+      - styles/typst-references.typ
