@@ -48,7 +48,8 @@ Shells, loops and solids have no geometry of their own; they are pure connectivi
 The block: one solid, one shell, six faces, six loops (one per face), twelve edges, eight vertices.
 Every face is bounded by exactly one loop because a box has no holes.
 The bracket of @sec-curves-surfaces-hole-in-bracket has top and bottom faces with two loops each — an outer rectangle and an inner circle.
-That is not the only structural difference a hole makes: it also brings a cylindrical face whose seam edge is traversed twice within one loop, two circular edges that start and end at the same vertex, and an Euler count of 0 rather than 2.
+That is not the only structural difference a hole makes: it also brings a cylindrical face whose seam edge is traversed twice within one loop, and two circular edges that start and end at the same vertex.
+The plain count $V - E + F$ still comes to 2, because the two inner loops cancel the through-hole; it is the corrected count below that reads 0.
 
 ## Sharing {#sec-brep-sharing}
 
@@ -77,7 +78,8 @@ The face record carries a Boolean, `same_sense`: `.T.` if the surface normal alr
 A **curve** has a direction: a line from a point along a vector, a circle counter-clockwise about its axis.
 An **edge** is a piece of a curve between two vertices, and `EDGE_CURVE` carries its own `same_sense`: whether the edge runs from its start vertex to its end vertex in the curve's direction or against it.
 
-A **loop** is a cycle of edges, and the cycle has a direction: it is traversed counter-clockwise when viewed from outside the solid — equivalently, walking the loop with the outward normal as "up," the face is on your left.
+A **loop** is a cycle of edges, and the cycle has a direction: walking it with the outward normal as "up," the material of the face is on your left.
+For an outer bound that means counter-clockwise seen from outside; an inner bound, around a hole, runs the other way.
 Each `ORIENTED_EDGE` in the loop says whether the edge is to be traversed forwards or backwards to make that true.
 And each `FACE_BOUND` carries one more Boolean that can reverse the whole loop.
 
@@ -90,7 +92,8 @@ This is the most common defect in hand-written or badly converted STEP files.
 ## Closed and manifold {#sec-brep-closed-manifold}
 
 A `CLOSED_SHELL` claims that its faces enclose a volume with no gaps.
-**Manifold** means, informally, that the surface is everywhere locally like a sheet: every edge is shared by exactly two faces, every vertex is surrounded by a single fan of faces, and no face touches itself.
+**Manifold** means, informally, that the surface is everywhere locally like a sheet: every edge is traversed exactly twice by the loops of the shell, once in each direction, every vertex is surrounded by a single fan of faces, and no face touches itself.
+Usually the two traversals belong to two different faces; on a seam they belong to the same face twice.
 A `MANIFOLD_SOLID_BREP` claims both.
 
 Neither claim is checked by the file format.

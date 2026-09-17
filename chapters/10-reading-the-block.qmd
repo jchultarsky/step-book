@@ -155,7 +155,8 @@ Forty-eight for six faces.
 ## Composing the orientation {#sec-reading-the-block-composing-orientation}
 
 Now the flags together.
-The rule is: after applying the edge orientations *and* the bound orientation, the loop runs counter-clockwise when viewed from outside — with the outward normal pointing at the viewer.
+The rule is: after applying the edge orientations *and* the bound orientation, an outer loop runs counter-clockwise when viewed from outside — with the outward normal pointing at the viewer.
+An inner loop, around a hole, runs the other way.
 
 Take `#17` again.
 The plane's normal is +X and `same_sense` is `.F.`, so the outward normal is −X.
@@ -222,6 +223,6 @@ Loop = cycle of oriented edges.
 Bound = loop + orientation.
 Face = bounds + surface + sense.
 Shell = faces; solid = shell.
-Outward normal is the surface normal flipped by `same_sense`; the loop, after edge flags and bound flag, runs counter-clockwise around it; each shared edge is traversed oppositely by its two faces.
+Outward normal is the surface normal flipped by `same_sense`; an outer loop, after edge flags and bound flag, runs counter-clockwise around it and an inner loop clockwise; each edge is traversed twice, once in each direction.
 Eight, twelve, six: V − E + F = 2.
 :::

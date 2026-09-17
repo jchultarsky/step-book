@@ -86,7 +86,7 @@ From a small part whose top edge is a free-form spline extruded downward:
 #58 = CARTESIAN_POINT('',(0.,0.,0.));
 #59 = CARTESIAN_POINT('',(3.579071051472,4.965892889794,5.));
 #60 = CARTESIAN_POINT('',(3.579071051472,4.965892889794,0.));
-    /* ... four more pairs ... */
+    /* ... three more pairs ... */
 #67 = CARTESIAN_POINT('',(30.,3.,5.));
 #68 = CARTESIAN_POINT('',(30.,3.,0.));
 ```
@@ -103,7 +103,8 @@ From a small part whose top edge is a free-form spline extruded downward:
 
 Read it as two curves at right angles.
 Along *u*: degree 3, six control points, knots expanding to (0, 0, 0, 0, 10.77, 22.43, 33.61, 33.61, 33.61, 33.61) — ten entries, $6 + 3 + 1$, clamped at both ends, with two interior knots dividing the curve into three cubic pieces.
-The interior knot values are the cumulative chord lengths of the original spline, which is how the exporter's kernel parametrised it; they carry no geometric meaning beyond spacing.
+The interior knot values are the cumulative chord lengths of the points the original spline was fitted through, which is how the exporter's kernel parametrised it.
+A reader never has to know that; the knots only have to be non-decreasing.
 Along *v*: degree 1, two control points, knots (−5, −5, 0, 0).
 A straight line.
 
@@ -156,7 +157,7 @@ The signs:
 - A degree-2 rational curve with 7 control points, weights (1, ½)\*, and knots of multiplicity 2 at 120° intervals is a **full circle**. Quarter-circles use 3 control points and weights (1, $\sqrt{2}/2$, 1). Other arc splits exist.
 - A surface with degree 1 in one direction and control rows that are translates of each other is an **extrusion**.
 - A surface with degree 2 rational in one direction with the circle pattern, and degree 1 in the other, is a **cylinder**.
-- A surface whose control net is planar is a **plane** (a bilinear 2 × 2 patch, as `#69` in the same file: degree 1 in both directions, four points).
+- A surface whose control net is planar is a **plane** (a bilinear 2 × 2 patch, as `#92` in the same file: degree 1 in both directions, four points).
 
 None of this is required.
 Any reader that can evaluate a NURBS can evaluate these.

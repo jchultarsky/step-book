@@ -46,13 +46,13 @@ It can compute that by projecting each edge's 3D curve onto the surface, but pro
 So kernels store the 2D curve directly, for every edge, on every face it bounds.
 Those are the pcurves.
 Writing them into the exchange file spares the importing kernel the projection and, more importantly, removes the ambiguities.
-It also roughly doubles the number of records, since every edge acquires two 2D curves, two 2D contexts, two representations, two vectors and two directions — fifteen extra records per edge in this file.
+It also roughly doubles the number of records: each edge's `LINE` becomes a `SURFACE_CURVE`, and the edge gains two `PCURVE`s, two representations, two 2D contexts, and a 2D line, point, vector and direction for each — fifteen extra records per edge in this file.
 :::
 
-Three subtypes of `SURFACE_CURVE` appear.
+Three forms of surface curve turn up in files.
 Plain `SURFACE_CURVE` is the ordinary case.
 `SEAM_CURVE` is the seam of @sec-curves-surfaces: a surface curve whose *two* pcurves lie on the *same* surface, one on each side of the cut.
-The pin's seam, with pcurves on:
+A cylinder's seam, written with pcurves — the pin of @sec-curves-surfaces was exported without them, so these records are constructed rather than quoted:
 
 ```step
 #26 = SEAM_CURVE('',#27,(#31,#43),.PCURVE_S1.);
@@ -102,14 +102,15 @@ If `pnindex` is empty, the triangles index the coordinates directly.
 
 `TESSELLATED_SHELL` and `TESSELLATED_SOLID` are alternatives rather than levels, and each holds its tessellated faces directly: a shell cannot be an item of a solid, because the schema admits only tessellated faces, edges and vertices there.
 A shell carries an optional `topological_link` to the exact `CLOSED_SHELL`; a solid carries an optional `geometric_link` to the exact `MANIFOLD_SOLID_BREP`.
-Here both links are filled (`#141` and `#15`): this is a **hybrid** file that carries the exact B-rep *and* a mesh of it, and says which is which.
-A `COMPLEX_TRIANGULATED_FACE` is the alternative to `TRIANGULATED_FACE` rather than an extension of it: it carries triangle strips and fans instead of a plain triangle list, and must have at least one of them.
+Here the solid's `geometric_link` points at the exact `MANIFOLD_SOLID_BREP` `#15`, and the face's own at the exact `ADVANCED_FACE` `#141`: this is a **hybrid** file that carries the exact B-rep *and* a mesh of it, and says which is which.
+A `COMPLEX_TRIANGULATED_FACE` is an alternative to `TRIANGULATED_FACE` rather than an extension of it: it carries triangle strips and fans instead of a plain triangle list, and must have at least one of them.
  `TRIANGULATED_SURFACE_SET` and `TESSELLATED_CURVE_SET` cover meshes and polylines with no solid behind them; `TESSELLATED_POINT_SET` covers scanned points.
 
 Tessellated PMI — annotations drawn as triangles rather than curves — uses the same records and is in @sec-pmi.
 
 Two things to know when meeting a tessellated file.
-First, the mesh is *approximate* and carries no statement of how approximate: there is no chordal tolerance attribute, and the deviation from the true surface is whatever the writer chose.
+First, the mesh is *approximate*, and in most files it carries no statement of how approximate.
+AP242 does provide `TESSELLATED_SHAPE_REPRESENTATION_WITH_ACCURACY_PARAMETERS`, which can state a chordal deviation, an angular deviation or a maximum edge length, but writers seldom use it, and a plain `TESSELLATED_SHAPE_REPRESENTATION` records nothing.
 Second, in a hybrid file the mesh and the B-rep are independent representations of the same `PRODUCT_DEFINITION_SHAPE`; nothing requires them to agree, and a reader that wants to trust the mesh should check it against the exact geometry or against the validation properties of @sec-properties-validation.
 
 ::: {.callout-important title="In brief"}

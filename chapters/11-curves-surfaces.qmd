@@ -174,7 +174,7 @@ The top circle `#110` is shared: it bounds the top face's inner loop and the hol
 
 The bracket has 8 + 2 = 10 vertices (the hole adds one on each circle), 12 + 2 + 1 = 15 edges (two circles and a seam), and 6 + 1 = 7 faces.
 V − E + F = 10 − 15 + 7 = 2.
-That is *not* the 0 that @sec-brep promised for a solid with a through-hole, and the reason is instructive.
+That is *not* the 0 you might expect for a solid with a through-hole, and the reason is instructive.
 The simple formula assumes every face is a disc — one outer loop, nothing inside it.
 The bracket's top and bottom faces are *rings*: each has an inner loop.
 The general form of the check subtracts them:
