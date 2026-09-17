@@ -47,7 +47,7 @@ Shells, loops and solids have no geometry of their own; they are pure connectivi
 
 The block: one solid, one shell, six faces, six loops (one per face), twelve edges, eight vertices.
 Every face is bounded by exactly one loop because a box has no holes.
-The bracket's top and bottom faces each have two loops — an outer rectangle and an inner circle.
+The bracket of @sec-curves-surfaces-hole-in-bracket has top and bottom faces with two loops each — an outer rectangle and an inner circle.
 That is not the only structural difference a hole makes: it also brings a cylindrical face whose seam edge is traversed twice within one loop, two circular edges that start and end at the same vertex, and an Euler count of 0 rather than 2.
 
 ## Sharing {#sec-brep-sharing}

@@ -58,6 +58,8 @@ Instance names such as `#22` refer to the record with that number in whichever f
 
 Boxed sections headed *Engineering background* supply the mechanical-engineering or geometry context for the section that follows.
 Sections headed *In the wild* describe what real exporters do that the standard does not say, or says differently.
+Where those sections name a CAD system, they report what has been observed in files rather than anything the vendor publishes or guarantees, and exporters change.
+Where the text says a string or a pattern is prescribed, it says whether the schema enforces it or the recommended practices merely ask for it; the two are not the same, and only the first is checkable.
 Each chapter closes with a short summary headed *In brief*.
 
 ## About this book {.unnumbered}
