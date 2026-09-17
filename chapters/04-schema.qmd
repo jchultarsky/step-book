@@ -141,7 +141,9 @@ Attribute slots are positional, so the file cannot simply omit it; it writes `*`
 #166 = ( LENGTH_UNIT() NAMED_UNIT(*) SI_UNIT(.MILLI.,.METRE.) );
 ```
 
-`*` is "there is a value here, but you compute it." `$` is "there is no value." A reader that does not evaluate derivations treats `*` as a gap; nothing that matters for reading geometry or product structure lives behind one.
+`*` is "there is a value here, but you compute it." `$` is "there is no value."
+What sits behind a `*` is not always unimportant: in `ORIENTED_EDGE('',*,*,#21,.F.)` the two starred slots are the edge's start and end vertices, which every reader of a B-rep needs.
+The point of a derived attribute is that the value is always recoverable from what the record does store — here from the edge `#21` and the orientation flag — so nothing is lost by not writing it.
 
 ## Inverse attributes {#sec-schema-inverse}
 
@@ -285,7 +287,7 @@ A parameter is wrapped when **both** hold:
 1. the attribute's declared type is a `SELECT`, and
 2. the alternative chosen is *not* an entity type.
 
-The second attribute of `#169`, `unit_component`, is also a SELECT — `TYPE unit = SELECT (named_unit, derived_unit)` — but both alternatives are entities, so the value is a bare reference: `#166`.
+The second attribute of `#169`, `unit_component`, is also a SELECT — `TYPE unit = SELECT (derived_unit, named_unit)` — but both alternatives are entities, so the value is a bare reference: `#166`.
 The record at `#166` already says what it is.
 Wrappers exist only for values that have no record of their own to carry a type.
 
@@ -297,6 +299,8 @@ A SELECT can include another SELECT, so wrappers can in principle nest; in pract
 EXPRESS identifiers are case-insensitive, and published schemas are written in lower case: `representation_context`.
 Part 21 keywords — entity names, enumeration values, the wrapper names — are required to be **upper case**; the grammar admits nothing else.
 So the mapping from schema to file is "upper-case the name," and the mapping back is the reverse.
+With one caveat: Part 21 also lets an AP define **short names**, abbreviations that a file may use in place of entity type names and enumeration values.
+Nothing in mechanical CAD writes them, and a file declaring `'2;1'` is promising it has not, but the abbreviation cannot be derived from the name, so a reader that meets one needs the AP's short-name table.
 Strings, being data, keep their case: `'BLOCK'` and `'block'` are different values.
 
 ## What to skip, and where to find the rest {#sec-schema-what-to-skip}
