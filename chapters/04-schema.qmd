@@ -262,17 +262,20 @@ The first attribute, `value_component`, is declared with a **SELECT** type — E
 
 ```express
 TYPE measure_value = SELECT
-  (length_measure, mass_measure, plane_angle_measure, solid_angle_measure,
-   area_measure, volume_measure, parameter_value, context_dependent_measure,
-   descriptive_measure, positive_length_measure, positive_plane_angle_measure,
-   count_measure);
+  (amount_of_substance_measure, area_measure, celsius_temperature_measure,
+   context_dependent_measure, count_measure, descriptive_measure,
+   electric_current_measure, length_measure, luminous_intensity_measure,
+   mass_measure, numeric_measure, non_negative_length_measure, parameter_value,
+   plane_angle_measure, positive_length_measure, positive_plane_angle_measure,
+   positive_ratio_measure, ratio_measure, solid_angle_measure,
+   thermodynamic_temperature_measure, time_measure, volume_measure);
 END_TYPE;
 
 TYPE length_measure      = REAL; END_TYPE;
 TYPE plane_angle_measure = REAL; END_TYPE;
 ```
 
-A `measure_value` is any one of those.
+A `measure_value` is any one of those twenty-two; AP242's list runs to forty-two.
 But `length_measure` and `plane_angle_measure` are both plain `REAL` underneath, so a bare `1.E-07` would be ambiguous — a length or an angle?
 The file resolves this by wrapping the value in the name of the alternative chosen: `LENGTH_MEASURE(1.E-07)`.
 
