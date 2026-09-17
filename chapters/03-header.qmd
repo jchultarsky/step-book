@@ -31,10 +31,12 @@ Two parameters.
 The first is a list of free-text strings describing the file's contents; exporters put their own name there, or a product name, or leave it as `('')`.
 Nothing reads it.
 
-The second is the **implementation level**, and it matters: `'2;1'` means Part 21 *edition 2, conformance class 1*.
-It tells a reader which version of the file grammar to expect.
-Edition 2 (2002) is what virtually every file in existence uses.
-Edition 3 (2016) added optional sections between the header and the data — anchors, external references, digital signatures — and a file using them declares `'3;1'` or `'3;2'`.
+The second is the **implementation level**, and it matters, though not in the way the digits suggest.
+The first number is the registered version of Part 21 whose features the file uses; the second is the syntactical conformance class.
+It is not the edition of the document the writer worked from.
+`'2;1'` says the file stays inside what edition 1 defined: one data section, no optional header records, no short names.
+That is what virtually every file in existence declares, including files written long after edition 2 appeared in 2002.
+A file that uses edition 2's multiple data sections or optional header records declares `'3;1'`, and a file that uses anything edition 3 added declares `'4;1'`, `'4;2'` or `'4;3'` according to which of the three conformance classes it needs.
 @sec-beyond-edition-2 covers what changed; until then, `'2;1'`.
 
 ## `FILE_NAME` {#sec-header-file-name}
@@ -87,7 +89,7 @@ Every record in the `DATA` section must be an entity type from this schema.
 The string has two parts.
 The name before the brace is the schema's EXPRESS identifier, upper-cased.
 The braces hold an *object identifier* — a sequence of integers registered with ISO that pins the exact schema and edition.
-The three you will see:
+The ones you will see:
 
 | Schema name | Protocol |
 |---|---|
@@ -128,7 +130,7 @@ There is no rule in the standard that permits this, and it is what every widely 
 Edition 2 defines three more header entities that may follow `FILE_SCHEMA`:
 
 ```step
-FILE_POPULATION('AUTOMOTIVE_DESIGN',('...'),$);
+FILE_POPULATION('AUTOMOTIVE_DESIGN','section boundary',$);
 SECTION_LANGUAGE($,'en');
 SECTION_CONTEXT($,('...'));
 ```
@@ -136,7 +138,8 @@ SECTION_CONTEXT($,('...'));
 `FILE_POPULATION` describes which subset of the schema is actually used; `SECTION_LANGUAGE` declares the natural language of the strings; `SECTION_CONTEXT` is a free-form context list.
 They are rare enough that many readers do not implement them and a few reject files that contain them.
 Edition 3 adds more.
-The standard also says that anything else in the header section is an error — and some exporters put things there regardless.
+The standard allows user-defined header records as well, provided the keyword begins with an exclamation mark, as in `!A_SPECIAL_ENTITY('ABC',123);`.
+Anything else in the header section is an error — and some exporters put things there regardless.
 
 ## The record that repeats the claim {#sec-header-repeats-the-claim}
 
@@ -160,7 +163,7 @@ In practice there is one application context per file and it agrees with the hea
 When it does not, believe the header, and note that the exporter was careless.
 
 The strings inside `#1` and `#2` are prescribed by each AP and are exactly the ones above for AP214.
-AP203 writes `'config control design'` and `1994`; AP242 writes the strings shown earlier and `2013` or later.
+AP203 writes `'config_control_design'` and `1994`; AP242 writes the strings shown earlier and `2013` or later.
 They are the second place, after the header, where you can identify the protocol — and a place where files that have been converted between protocols often still show their origin.
 
 ::: {.callout-important title="In brief"}

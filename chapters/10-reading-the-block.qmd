@@ -56,7 +56,7 @@ The line is a point and a vector.
 The `VECTOR` is a `DIRECTION` and a magnitude — `(0,0,1)` scaled by `1.` — which is more structure than a line needs and exactly what the schema requires.
 Note that `#27` duplicates the coordinates of `#23`: the exporter has written the line's base point as a separate record rather than reusing the vertex's point.
 It could have shared; it chose not to.
-Real files are full of such duplicated points, and a reader that de-duplicates by coordinate will find the 51 `CARTESIAN_POINT`s in this file collapse to about 20 distinct locations.
+Real files are full of such duplicated points, and a reader that de-duplicates by coordinate will find the 27 `CARTESIAN_POINT`s in this file collapse to just 8 distinct locations — the eight corners, which is where every line base and every plane origin sits too.
 
 The twelve edges of the block, from the file:
 
@@ -210,7 +210,6 @@ When a file's record counts do *not* match a pattern like this — 13 edges for 
 ::: {.callout-warning title="In the wild: What varies between exporters"}
 The structure above is universal; the habits are not.
 Other writers use `FACE_OUTER_BOUND` for the outer loop (the standard's intent), share `CARTESIAN_POINT`s between a vertex and the lines that start there, write `same_sense = .F.` on edges rather than choosing curve directions to avoid it, and put the plane's origin at a face corner rather than the part origin.
-SolidWorks tends to write `.TRUE.` and `.FALSE.`.
 Some CATIA exports write every face's `same_sense` as `.T.` and flip the plane's normal instead.
 All of these describe the same box; a reader has to compose the flags and not pattern-match the habits.
 :::

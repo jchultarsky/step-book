@@ -10,7 +10,7 @@ This chapter is about where they differ, and about the gap between what a protoc
 
 ## Three protocols, one lineage {#sec-application-protocols-lineage}
 
-|                         | AP203 ed. 1 (1994)      | AP214 (2001, 2010)     | AP242 (2014, 2020, 2025)                          |
+|                         | AP203 ed. 1 (1994)      | AP214 (2001, 2003, 2010)     | AP242 (2014, 2020, 2022, 2025)                          |
 |-------------------------|-------------------------|------------------------|---------------------------------------------------|
 | Schema name             | `CONFIG_CONTROL_DESIGN` | `AUTOMOTIVE_DESIGN`    | `AP242_MANAGED_MODEL_BASED_3D_ENGINEERING_MIM_LF` |
 | Product structure, B-rep | yes                    | yes                    | yes                                               |
@@ -64,9 +64,9 @@ The documents are at the forum's site (now part of the MBx Interoperability Foru
 With the header's `originating_system` as confirmation, each exporter has a signature.
 What follows is characteristic rather than guaranteed; versions change.
 
-**Open CASCADE** (and FreeCAD, CadQuery, and many small tools): `FACE_BOUND` rather than `FACE_OUTER_BOUND` for every bound; duplicated `CARTESIAN_POINT`s for line origins; duplicated surfaces for pcurves; product names defaulting to `Open CASCADE STEP translator N`; one geometric context per product; `-0.` in directions; category `'part'` for assemblies too.
+**Open CASCADE** (and FreeCAD, CadQuery, and many small tools): `FACE_BOUND` rather than `FACE_OUTER_BOUND` for every bound; duplicated `CARTESIAN_POINT`s for line origins; one surface record shared between a face and the pcurves on it; product names defaulting to `Open CASCADE STEP translator N`; one geometric context per product; `-0.` in directions; category `'part'` for assemblies too.
 
-**SolidWorks**: `.TRUE./.FALSE.` spelled out; product `id` and `name` from the filename; `FACE_OUTER_BOUND` used; colours per face when face colours exist, otherwise per body; a `SHAPE_REPRESENTATION` with only an axis placement for each part alongside the B-rep representation.
+**SolidWorks**: product `id` and `name` from the filename; `FACE_OUTER_BOUND` used; colours per face when face colours exist, otherwise per body; a `SHAPE_REPRESENTATION` with only an axis placement for each part alongside the B-rep representation.
 
 **NX** (via ST-Developer): very clean, spec-conformant structure; `FACE_OUTER_BOUND`; shared points; product number in `id`; comprehensive validation properties; the best semantic PMI coverage of the mainstream systems.
 

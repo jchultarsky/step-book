@@ -38,7 +38,7 @@ Each level is bounded by the level below it.
 | Solid | `MANIFOLD_SOLID_BREP` | one closed shell (plus optional voids) |
 | Shell | `CLOSED_SHELL`, `OPEN_SHELL` | a set of faces |
 | Face | `ADVANCED_FACE` (a `FACE_SURFACE`) | one or more loops (`FACE_BOUND`) |
-| Loop | `EDGE_LOOP`, `VERTEX_LOOP` | a sequence of oriented edges |
+| Loop | `EDGE_LOOP`, `VERTEX_LOOP` | a sequence of oriented edges, or (`VERTEX_LOOP`) one vertex |
 | Edge | `EDGE_CURVE`, via `ORIENTED_EDGE` | two vertices |
 | Vertex | `VERTEX_POINT` | — |
 
@@ -47,7 +47,8 @@ Shells, loops and solids have no geometry of their own; they are pure connectivi
 
 The block: one solid, one shell, six faces, six loops (one per face), twelve edges, eight vertices.
 Every face is bounded by exactly one loop because a box has no holes.
-The bracket’s top face, in the next chapter, has two loops — an outer rectangle and an inner circle — and that is the only structural difference a hole makes.
+The bracket’s top and bottom faces each have two loops — an outer rectangle and an inner circle.
+That is not the only structural difference a hole makes: it also brings a cylindrical face whose seam edge is traversed twice within one loop, two circular edges that start and end at the same vertex, and an Euler count of 0 rather than 2.
 
 ## Sharing {#sec-brep-sharing}
 
@@ -106,7 +107,7 @@ A torus gives 0; so does the bracket, once its two ring-shaped faces are account
 
 A B-rep in STEP is *evaluated* geometry.
 There is no record of how the box was made, no parameters, no features, no dimensions in the engineering sense.
-The 60, 20 and 10 of the block appear only as coordinates of vertices.
+The 60, 20 and 10 of the block appear only as point coordinates — in vertices, in line base points, in plane origins — never as a length.
 If the designer had constrained the block’s length to twice its width, that fact is gone.
 This is a limitation and a strength: it is why STEP files from any CAD system can be read by any other, and why they cannot be edited the way the original model could.
 Design intent lives in the CAD system’s native format, or — for tolerances and dimensions specifically — in the PMI of @sec-pmi.

@@ -8,7 +8,7 @@ ISO 10303-242:2025 is the current AP242 publication and is consulted rather than
 
 **The schemas.**
 STEP Tools publishes the long-form EXPRESS for AP203, AP214 and AP242 at <https://steptools.com/stds/step/>, with an entity-by-entity browser.
-Every declaration quoted in this book was checked against those files.
+Every declaration quoted in this book was checked against those files, and the book's source repository vendors them so the checks can be re-run.
 
 **Recommended practices.**
 The CAx Implementor Forum's documents — now under the MBx Interoperability Forum at <https://mbx-if.org> — cover assembly structure, colours and layers, user-defined attributes, geometric and assembly validation properties, PMI representation and presentation, tessellated geometry, external references and more.
@@ -19,5 +19,5 @@ NIST's MBE PMI Validation and Conformance Testing project publishes CAD models w
 The CAx-IF test rounds publish files from each participating vendor for each capability.
 
 **Reading files.**
-Open CASCADE Technology (<https://dev.opencascade.org>) is the open-source kernel used to produce every example in this book and reads and writes AP203, AP214 and AP242; FreeCAD and CadQuery expose it.
+Open CASCADE Technology (<https://github.com/Open-Cascade-SAS/OCCT>) is the open-source kernel used to produce every example in this book and reads and writes AP203, AP214 and AP242; FreeCAD and CadQuery expose it.
 The NIST analyzer above is the best tool for inspecting a file's structure without a kernel.

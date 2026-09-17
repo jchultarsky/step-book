@@ -55,14 +55,14 @@ Learn the ranges once and you can find anything.
 | 11–14 | Description methods | **11**, the EXPRESS language |
 | 21–28 | Implementation methods | **21**, the clear-text file; 26, 28 |
 | 31–35 | Conformance testing | rarely |
-| 41–49 | Integrated generic resources | **41, 42, 43, 44, 46, 47** |
+| 41–59 | Integrated generic resources | **41, 42, 43, 44, 46, 47** |
 | 101–112 | Integrated application resources | 101 (draughting), 105 (kinematics) |
 | 2xx | Application protocols | **203, 214, 242** |
 | 3xx | Abstract test suites | rarely |
 | 4xx, 1xxx | Application modules | the building blocks of AP242 |
 | 5xx | Application interpreted constructs | when tracing where an entity came from |
 
-The *integrated resources* in the 41–49 and 101–112 ranges are the heart of it.
+The *integrated resources* in the 41–59 and 101–112 ranges are the heart of it.
 Part 41 defines products, versions and contexts; Part 42 geometry and topology; Part 43 the notion of a *representation*; Part 44 product structure and assemblies; Part 46 visual presentation; Part 47 shape tolerances.
 Every entity in a mechanical STEP file comes from one of these.
 The application protocols do not define geometry; they *use* Part 42's.
@@ -107,7 +107,7 @@ AP214, driven by the German automotive industry and published in 2001, took a br
 Its `FILE_SCHEMA` name, `AUTOMOTIVE_DESIGN`, appears on files for products that have never been near a car.
 
 AP242, first published in 2014, merged AP203 and AP214 into a single protocol and added the things model-based engineering needs: semantic product manufacturing information (tolerances and datums as data rather than pictures), tessellated geometry, and a business-object XML form for product data management.
-Edition 2 (2020) and the 2025 publication extended it further.
+Editions 2 (2020), 3 (2022) and 4 (2025) extended it further.
 A file claiming AP242 can carry everything an AP214 file can and more; a reader that handles AP242 handles the older two almost for free, since the geometry and product-structure entities are the same.
 
 For the purposes of this book the differences are small until Part III.

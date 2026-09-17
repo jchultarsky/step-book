@@ -143,7 +143,8 @@ The trailing-dot form `10.` is standard and ubiquitous.
 A parameter that is a real is *never* written as an integer, so `3` and `3.` are different tokens for different attribute types.
 
 **Enumerations** are upper-case names between dots: `.T.`, `.F.`, `.MILLI.`, `.METRE.`, `.RADIAN.`.
-The two most common are the Booleans, `.T.` and `.F.`; some exporters write them out as `.TRUE.` and `.FALSE.`, and both are correct.
+The two most common are the Booleans, `.T.` and `.F.`.
+Part 21 is strict here: a `BOOLEAN` is encoded by the single character `T` or `F` between the dots, so `.TRUE.` is not a legal spelling of one.
 Enumeration values come from a fixed list in the schema — `.MILLI.` is one of about twenty SI prefixes.
 
 **Binary** values are hexadecimal in double quotes: `"0F3A"`.

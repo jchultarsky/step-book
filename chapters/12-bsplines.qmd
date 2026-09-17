@@ -2,7 +2,7 @@
 
 ::: {.chapter-abstract}
 The one non-analytic shape STEP needs, because every CAD kernel converges on it.
-What the seven numbers in a B-spline record are, why a circle written as a spline has seven control points and weights of one-half, and how to tell a real free-form surface from an analytic one in disguise.
+What the eight parameters after the name in a B-spline record are, why a circle written as a spline has seven control points and weights of one-half, and how to tell a real free-form surface from an analytic one in disguise.
 :::
 
 A plane, a cylinder and a sphere can each be written down with a handful of numbers because each is a closed-form equation.
@@ -17,7 +17,8 @@ Three things fix its shape:
 
 **Degree.** The polynomial degree of the pieces.
 Degree 1 gives straight segments between control points; degree 2 gives parabolic arcs; degree 3, cubic, is the usual choice for free-form work because it is the lowest degree that can be smooth in curvature.
-A degree-$p$ curve with $n$ control points is made of $n - p$ polynomial pieces joined end to end.
+The number of polynomial pieces is the number of distinct knot intervals inside the curve's parameter range.
+For a clamped curve whose interior knots are all distinct, a degree-$p$ curve with $n$ control points has $n - p$ of them; repeated interior knots reduce the count.
 
 **Knots.** A non-decreasing list of parameter values that says where one piece ends and the next begins.
 The knot vector has $n + p + 1$ entries.
@@ -139,7 +140,9 @@ Knots expanding to (−2.094, 0, 0, 2.094, 2.094, 4.189, 4.189, 6.283, 6.283, 8.
 Three pieces, each a quadratic rational arc spanning 120° (2.094 radians), joined at the knots of multiplicity 2, meeting to form a full circle.
 The half-weight points are the corners of the circumscribing triangle; the unit-weight points lie on the circle.
 `closed_curve` is `.T.`.
-The knot values are angles in radians because that is how the kernel parametrised the original circle; the negative first knot is the clamp extending one span past the start.
+The knot values are angles in radians because that is how the kernel parametrised the original circle.
+This curve is *not* clamped: its end multiplicities are 1, not $p + 1$, and the outer knots at −2.094 and 8.378 lie outside the curve's actual range of 0 to 2π.
+That is how a closed periodic curve is written, and it is the common exception to the rule that CAD curves are clamped.
 
 The equivalent surface — the pin's cylindrical side as a rational B-spline — is the same construction in *u* with a degree-1 straight line in *v*, and its weights are a 7 × 2 grid.
 

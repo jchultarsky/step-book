@@ -56,8 +56,8 @@ The pin's seam, with pcurves on:
 
 ```step
 #26 = SEAM_CURVE('',#27,(#31,#43),.PCURVE_S1.);
-#31 = PCURVE('',#32,#37);                     /* on the cylinder, at angle 0 */
-#43 = PCURVE('',#44,#49);                     /* on the cylinder, at angle 2π */
+#31 = PCURVE('',#32,#37);                     /* the cylinder #32, at angle 0 */
+#43 = PCURVE('',#32,#49);                     /* the same cylinder, at angle 2*pi */
 ```
 
 `INTERSECTION_CURVE` marks an edge where two surfaces meet, which is nearly all of them; some exporters write it, most write plain `SURFACE_CURVE`.
@@ -86,24 +86,26 @@ A tessellated shape lives in a `TESSELLATED_SHAPE_REPRESENTATION` and is built f
 
 ```step
 #500 = TESSELLATED_SHAPE_REPRESENTATION('',(#501),#165);
-#501 = TESSELLATED_SOLID('',(#502),#15);
-#502 = TESSELLATED_SHELL('',(#503),#16);
-#503 = TRIANGULATED_FACE('',#504,4,((0.,0.,-1.)),#141,(1,2,3,4),((1,2,3),(1,3,4)));
+#501 = TESSELLATED_SOLID('',(#503),#15);
+#503 = TRIANGULATED_FACE('',#504,4,((0.,0.,-1.)),#141,(1,2,3,4),((1,3,2),(1,4,3)));
 #504 = COORDINATES_LIST('',4,((0.,0.,0.),(60.,0.,0.),(60.,20.,0.),(0.,20.,0.)));
 ```
 
-*(These five records are hand-written to the AP242 schema — the bottom face of the block as two triangles — rather than exported; the exporter used in this book does not write tessellation.)*
+*(These four records are hand-written to the AP242 schema — the bottom face of the block as two triangles — rather than exported; the exporter used in this book does not write tessellation.)*
 
 `COORDINATES_LIST` is the vertex buffer: a count and a list of 3D points, as bare lists of reals rather than `CARTESIAN_POINT` records — the first place in the format where geometry is written *without* a record per point, precisely because a mesh may have a million of them.
 
 `TRIANGULATED_FACE` is the index buffer.
 Its attributes: the coordinates list; `pnmax`, the number of points used; `normals`, a list of either one normal (flat shading, as here) or one per point; an optional `geometric_link` back to the exact `ADVANCED_FACE` it approximates (`#141`, the bottom face); `pnindex`, a list of 1-based indices into the coordinates list selecting the points this face uses; and `triangles`, a list of triples of 1-based indices *into* `pnindex`.
-So `(1,2,3)` means the first, second and third entries of `pnindex`, which are points 1, 2 and 3 of the coordinates list.
+So `(1,3,2)` means the first, third and second entries of `pnindex`, which are points 1, 3 and 2 of the coordinates list.
+That order winds the triangle clockwise seen from $+Z$, which is counter-clockwise about this face's own $-Z$ normal: the recommended practice is that a triangle's vertex order follows the right-hand rule about the stated normal, and a mesh wound the other way renders inside out.
 If `pnindex` is empty, the triangles index the coordinates directly.
 
-`TESSELLATED_SHELL` groups faces, with an optional `topological_link` to the exact shell; `TESSELLATED_SOLID` wraps a shell, with an optional link to the exact solid.
-Here all three links are filled (`#141`, `#16`, `#15`): this is a **hybrid** file that carries the exact B-rep *and* a mesh of it, and says which is which.
-A `COMPLEX_TRIANGULATED_FACE` adds triangle strips and fans to the plain triangle list; `TRIANGULATED_SURFACE_SET` and `TESSELLATED_CURVE_SET` cover meshes and polylines with no solid behind them; `TESSELLATED_POINT_SET` covers scanned points.
+`TESSELLATED_SHELL` and `TESSELLATED_SOLID` are alternatives rather than levels, and each holds its tessellated faces directly: a shell cannot be an item of a solid, because the schema admits only tessellated faces, edges and vertices there.
+A shell carries an optional `topological_link` to the exact `CLOSED_SHELL`; a solid carries an optional `geometric_link` to the exact `MANIFOLD_SOLID_BREP`.
+Here both links are filled (`#141` and `#15`): this is a **hybrid** file that carries the exact B-rep *and* a mesh of it, and says which is which.
+A `COMPLEX_TRIANGULATED_FACE` is the alternative to `TRIANGULATED_FACE` rather than an extension of it: it carries triangle strips and fans instead of a plain triangle list, and must have at least one of them.
+ `TRIANGULATED_SURFACE_SET` and `TESSELLATED_CURVE_SET` cover meshes and polylines with no solid behind them; `TESSELLATED_POINT_SET` covers scanned points.
 
 Tessellated PMI — annotations drawn as triangles rather than curves — uses the same records and is in @sec-pmi.
 

@@ -247,7 +247,7 @@ END_TYPE;
 ```
 
 In the file the chosen name is upper-cased and dotted: `.MILLI.`, `.METRE.`.
-The base type `BOOLEAN` is written as an enumeration too — `.T.`/`.F.` or `.TRUE.`/`.FALSE.` — and its cousin `LOGICAL` adds a third value, `.U.` for unknown.
+The base type `BOOLEAN` is written as an enumeration too — `.T.` or `.F.`, and only those — and its cousin `LOGICAL` adds a third value, `.U.` for unknown.
 
 ## SELECT types and the typed wrapper {#sec-schema-select}
 
