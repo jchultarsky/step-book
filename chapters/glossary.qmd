@@ -1,0 +1,22 @@
+# Glossary {#sec-glossary}
+
+Application protocol (AP)
+:   A part of ISO 10303 that defines the scope and the schema for a particular use, for example AP 242 for mechanical design.
+
+Entity
+:   A type declared in an EXPRESS schema. Instances of entities make up the data section of a STEP file.
+
+Entity instance
+:   One record in the data section, identified by a number such as `#42`.
+
+EXPRESS
+:   The data modelling language, defined in ISO 10303-11, used to write every schema in the standard.
+
+Part 21 file
+:   A file encoded according to ISO 10303-21, the clear text encoding. This is what people mean by "a STEP file".
+
+PMI
+:   Product manufacturing information: dimensions, tolerances, surface finish, notes, and other annotations attached to the geometry.
+
+Schema
+:   A collection of EXPRESS declarations. A STEP file names the schema it conforms to in its `FILE_SCHEMA` header entity.

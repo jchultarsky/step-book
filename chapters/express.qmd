@@ -1,0 +1,31 @@
+# The EXPRESS schema language {#sec-express}
+
+Every entity that can appear in a STEP file is declared in a schema written in EXPRESS, the data modelling language defined by ISO 10303-11 [@iso10303-11].
+You do not need to write EXPRESS to use STEP, but being able to read it turns the standard from an opaque wall of text into a precise reference.
+
+## A first schema
+
+```{#lst-express .default lst-cap="An EXPRESS declaration of the placement entity from @sec-anatomy"}
+ENTITY axis2_placement_3d
+  SUBTYPE OF (placement);
+  axis      : OPTIONAL direction;
+  ref_direction : OPTIONAL direction;
+DERIVE
+  p : LIST [3:3] OF direction := build_axes(axis, ref_direction);
+WHERE
+  WR1 : self\placement.location.dim = 3;
+  WR2 : (NOT (EXISTS (axis))) OR (axis.dim = 3);
+  WR3 : (NOT (EXISTS (ref_direction))) OR (ref_direction.dim = 3);
+  WR4 : (NOT (EXISTS (axis))) OR (NOT (EXISTS (ref_direction))) OR
+        (cross_product(axis, ref_direction).magnitude > 0.0);
+END_ENTITY;
+```
+
+Compare this with instance `#4` in @lst-minimal: the attribute order in the file follows the declaration, including the `location` inherited from the supertype `placement`.
+
+## Topics covered in this chapter
+
+::: {.callout-note}
+This chapter is under construction.
+Planned sections: entities and attributes, supertypes and subtypes, defined types and enumerations, aggregates, derived attributes, `WHERE` rules and global rules, and how to find the schema for a given application protocol.
+:::

@@ -1,0 +1,34 @@
+# Preface {.unnumbered}
+
+STEP, formally ISO 10303, is the international standard for representing and exchanging product data.
+Almost every mechanical CAD system can read and write it, and a large share of the world's engineering data crosses company boundaries as `.stp` files.
+Yet the standard itself is vast, expensive, and written for implementers rather than for the people who use it day to day.
+
+This book is an attempt to fill that gap.
+It explains what a STEP file actually contains, how it is structured, what the standard does and does not guarantee, and how to work with it in practice.
+
+## Who this book is for {.unnumbered}
+
+- Engineers and designers who exchange CAD data and want to understand what happens to it.
+- Software developers writing importers, exporters, or tooling for STEP data.
+- Students and researchers who need an approachable introduction before reading the standard itself.
+
+No prior knowledge of ISO 10303 is assumed.
+Familiarity with 3D CAD concepts such as solids, faces, and assemblies will help.
+
+## How the book is organized {.unnumbered}
+
+**Part I, Foundations**, introduces the standard and dissects a real STEP file line by line.
+**Part II, The Standard**, covers the EXPRESS modelling language and the Application Protocols that define which entities may appear in a file.
+The appendices collect a glossary and reference material.
+
+## Conventions {.unnumbered}
+
+Entity names from the standard are written in `SMALL_CAPS_WITH_UNDERSCORES`, exactly as they appear in a Part 21 file.
+Listings that show file contents are complete and can be saved and opened in a CAD system unless stated otherwise.
+
+## Source and contributions {.unnumbered}
+
+This book is open source.
+The text is written in Quarto Markdown and lives at <https://github.com/jchultarsky/step-book>.
+Corrections and contributions are welcome; see the contributing guide in the repository.

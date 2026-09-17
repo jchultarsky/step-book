@@ -1,0 +1,15 @@
+# Quarto build output
+/_book/
+/.quarto/
+/_freeze/
+/*_files/
+/chapters/*_files/
+*.quarto_ipynb
+
+# Editor and OS files
+.DS_Store
+.idea/
+.vscode/
+*.swp
+
+**/*.quarto_ipynb

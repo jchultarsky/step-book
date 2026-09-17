@@ -1,0 +1,24 @@
+# Application protocols {#sec-application-protocols}
+
+An application protocol (AP) is the part of ISO 10303 that turns the generic resources into something a CAD system can implement.
+It defines the scope, the information requirements, and a concrete EXPRESS schema whose name appears in the `FILE_SCHEMA` header entity.
+
+## The protocols you will encounter
+
+| AP | Title | Status |
+|---:|-------|--------|
+| 203 | Configuration controlled 3D design of mechanical parts and assemblies | Superseded by AP 242 |
+| 214 | Core data for automotive mechanical design processes | Superseded by AP 242 |
+| 242 | Managed model-based 3D engineering | Current, edition 3 published 2022 [@iso10303-242] |
+
+: Common application protocols for mechanical CAD {#tbl-aps}
+
+Files conforming to AP 203 and AP 214 remain in circulation and every serious importer still reads them.
+AP 242 merges the two and adds semantic PMI, tessellated geometry, kinematics, and other capabilities.
+
+## Topics covered in this chapter
+
+::: {.callout-note}
+This chapter is under construction.
+Planned sections: how an AP is structured (ARM, MIM, conformance classes), reading a `FILE_SCHEMA` line, the differences between AP 203, AP 214, and AP 242, and the CAx Interoperability Forum recommended practices [@caxif].
+:::

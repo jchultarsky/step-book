@@ -1,0 +1,56 @@
+project:
+  type: book
+  output-dir: _book
+
+lang: en
+
+book:
+  title: "The STEP Book"
+  subtitle: "A practical guide to the ISO 10303 file format"
+  author: "Julian Chultarsky"
+  date: today
+  date-format: "D MMMM YYYY"
+  repo-url: https://github.com/jchultarsky/step-book
+  repo-branch: main
+  repo-actions: [edit, issue]
+  site-url: https://jchultarsky.github.io/step-book/
+  search: true
+  downloads: [pdf]
+  sharing: []
+  page-footer:
+    left: "© 2026 Julian Chultarsky. Text licensed under MIT."
+    right: "Built with [Quarto](https://quarto.org/)."
+  chapters:
+    - index.qmd
+    - part: "Foundations"
+      chapters:
+        - chapters/introduction.qmd
+        - chapters/anatomy.qmd
+    - part: "The Standard"
+      chapters:
+        - chapters/express.qmd
+        - chapters/application-protocols.qmd
+    - references.qmd
+  appendices:
+    - chapters/glossary.qmd
+
+bibliography: references.bib
+csl: ieee.csl
+
+format:
+  html:
+    theme:
+      light: cosmo
+      dark: darkly
+    toc: true
+    toc-depth: 3
+    number-sections: true
+    code-copy: true
+    code-overflow: wrap
+    link-external-newwindow: true
+  typst:
+    papersize: a4
+    toc: true
+    toc-depth: 2
+    number-sections: true
+    keep-typ: false
