@@ -1,5 +1,9 @@
 # Glossary {#sec-glossary}
 
+Aggregate
+:   a collection-valued attribute: `SET` (unordered), `BAG` (unordered, duplicates allowed), `LIST` (ordered) or `ARRAY` (ordered, fixed bounds).
+    The file writes all four as a parenthesised list.
+
 AIM
 :   Application Interpreted Model: an AP's data model expressed in integrated-resource entities.
     What the file contains.
@@ -15,6 +19,10 @@ ARM
 :   Application Reference Model: an AP's data model in domain vocabulary.
     What the committee designed.
 
+Attribute
+:   one named slot of an entity, declared in the schema.
+    A record supplies one parameter per attribute, in declaration order; the file writes the values and never the names.
+
 B-rep
 :   boundary representation: a solid described by its bounding faces, edges and vertices.
 
@@ -27,8 +35,19 @@ Conformance class
 Datum
 :   a theoretically exact reference plane, axis or point derived from a real feature.
 
+Defined type
+:   a name given to a base type so the schema can say what a value is *for*, as in `TYPE label = STRING;`.
+    The file does not distinguish them; a string is a string.
+
 Derived attribute
 :   one whose value is computed from others; written `*`.
+
+Entity
+:   a type declared in the schema, with an ordered list of attributes.
+    One record in the data section is one instance of one entity.
+
+Enumeration
+:   an attribute whose value comes from a fixed set of names, written in the file between full stops: `.MILLI.`, `.T.`.
 
 EXPRESS
 :   the schema language of ISO 10303 (Part 11).
@@ -47,7 +66,7 @@ Instance name
 :   the `#n` identifier of a record; file-local.
 
 Integrated resources
-:   the shared library of entity definitions (Parts 41–49, 101–112) from which every AP is built.
+:   the shared library of entity definitions (Parts 41–59, 101–112) from which every AP is built.
 
 Internal mapping
 :   the ordinary one-type record form with all inherited attributes flattened.
@@ -77,14 +96,26 @@ PMI
 Representation
 :   a set of representation items in a context; the Part 43 container for geometry and properties.
 
+Schema
+:   a collection of EXPRESS declarations naming every entity a conforming file may use, and the constraints on them.
+    A file names the schema it claims to follow in `FILE_SCHEMA`.
+
 Seam
 :   an edge along which a periodic surface is cut, traversed twice by one loop.
+
+SELECT
+:   a type that admits any one of several alternatives.
+    A value is wrapped in the name of the alternative chosen when that alternative is not an entity, as in `LENGTH_MEASURE(1.E-07)`.
 
 Semantic PMI
 :   PMI as data; contrast graphical PMI, PMI as drawn symbols.
 
 Shape aspect
 :   a named region of a shape that a tolerance or property can refer to.
+
+Subtype, supertype
+:   an entity that extends another, and the one it extends.
+    A record carries the supertypes' attributes first, from the root of the chain down; see internal mapping.
 
 Uncertainty
 :   the writing kernel's coincidence tolerance, carried in the representation context.
