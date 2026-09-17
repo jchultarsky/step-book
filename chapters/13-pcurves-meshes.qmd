@@ -116,5 +116,5 @@ Second, in a hybrid file the mesh and the B-rep are independent representations 
 ::: {.callout-important title="In brief"}
 A `SURFACE_CURVE` is a 3D curve plus its images in the parameter spaces of the faces it bounds (`PCURVE`s, each a 2D curve in a unitless 2D context); a `SEAM_CURVE` has both images on one surface.
 They help importing kernels trim faces and roughly double a file.
-AP242 tessellation stores a mesh as a `COORDINATES_LIST` and `TRIANGULATED_FACE`s with 1-based indices, optionally linked to the exact topology; it is approximate, with no stated tolerance.
+AP242 tessellation stores a mesh as a `COORDINATES_LIST` and `TRIANGULATED_FACE`s with 1-based indices, optionally linked to the exact topology; it is approximate, and in practice states no tolerance, though AP242 has records for one.
 :::

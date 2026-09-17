@@ -118,6 +118,6 @@ Design intent lives in the CAD system's native format, or — for tolerances and
 ::: {.callout-important title="In brief"}
 A B-rep is a skin described in two layers: geometry (infinite surfaces, curves, points) and topology (finite faces, edges, vertices connected to each other).
 Connectivity is by shared records, not shared coordinates.
-Everything has a direction and the directions must compose to "outward normal, counter-clockwise loops."
+Everything has a direction, and the directions must compose to an outward normal with the face's material on the left of every loop.
 A closed shell of a solid without holes satisfies $V - E + F = 2$.
 :::
