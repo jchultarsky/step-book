@@ -17,3 +17,6 @@
 # Python bytecode
 __pycache__/
 *.pyc
+
+# Local Claude Code settings
+.claude/
