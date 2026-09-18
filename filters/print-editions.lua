@@ -37,7 +37,8 @@ function Code(code)
   end
   if quarto.doc.is_format("typst") then
     local breakable = code.text:gsub("_", "_\u{200B}")
-    return pandoc.RawInline("typst", "#raw(" .. typst_string(breakable) .. ")")
+    -- NormalTok is how Quarto writes inline code, so it keeps the same colour.
+    return pandoc.RawInline("typst", "#NormalTok(" .. typst_string(breakable) .. ");")
   end
   if quarto.doc.is_format("epub") and #code.classes == 0 then
     local breakable = html_escape(code.text):gsub("_", "_<wbr/>")
