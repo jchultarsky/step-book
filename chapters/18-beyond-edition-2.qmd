@@ -14,7 +14,7 @@ Its instance names mean nothing outside it, it cannot refer to anything in anoth
 **UTF-8.**
 Edition 2 strings were nominally 8-bit ISO 8859 with escape sequences for anything else; edition 3 makes UTF-8 the native encoding.
 Most writers had already switched.
-A file declaring `'4;1'` may contain `'Ångström'` directly; a file declaring `'2;1'` or `'3;1'` must spell every character above ASCII with `\X2\` or `\X4\`, as `'\X2\00C5\X0\ngstr\X2\00F6\X0\m'`, and usually does not.
+A file declaring `'4;1'` may contain `'Ångström'` directly; a file declaring `'2;1'` or `'3;1'` should escape every character above ASCII, as `'\X2\00C5\X0\ngstr\X2\00F6\X0\m'`, and usually does not.
 Writers that emit UTF-8 while still declaring `'2;1'` are common, and are strictly wrong.
 
 **Anchors.**
@@ -66,10 +66,13 @@ A reader that does not implement edition 3 will meet files it cannot read; a rea
 Before anchors, a master file referred to a part in another file through the document entities of Part 41 and the AP's own file-reference extensions to them:
 
 ```step
-#900 = DOCUMENT_FILE('bracket.stp','',$,#901,'',$);
+#900 = DOCUMENT_FILE('bracket','',$,#901,'',$);
 #901 = DOCUMENT_TYPE('geometry');
 #902 = DOCUMENT_REPRESENTATION_TYPE('digital',#900);
 #903 = APPLIED_DOCUMENT_REFERENCE(#900,'',(#35));
+#904 = IDENTIFICATION_ROLE('external document id and location',$);
+#905 = APPLIED_EXTERNAL_IDENTIFICATION_ASSIGNMENT('bracket.stp',#904,#906,(#900));
+#906 = EXTERNAL_SOURCE('./parts/');
 ```
 
 A `DOCUMENT_FILE` names the external file (six parameters, because it is both a `document` and a `characterized_object`, flattened), and an `APPLIED_DOCUMENT_REFERENCE` attaches it to the product definition whose geometry it contains.
@@ -77,7 +80,8 @@ The `DOCUMENT_REPRESENTATION_TYPE` is not decoration: a rule on `document_file` 
 The document type is free text; `'geometry'` is what the recommended practice uses for an external shape file.
 There is a `DOCUMENT_PRODUCT_EQUIVALENCE` as well, but only when the document itself is managed as a product, which CAD exporters do not do.
 The master file carries the product chains and NAUOs for the whole assembly and no geometry; each part file carries one product and its shape.
-The filename and its directory travel on an `APPLIED_EXTERNAL_IDENTIFICATION_ASSIGNMENT` attached to the `DOCUMENT_FILE`, not in the document's id.
+The filename travels on an `APPLIED_EXTERNAL_IDENTIFICATION_ASSIGNMENT` attached to the `DOCUMENT_FILE`, and the directory on the `EXTERNAL_SOURCE` it names.
+The document's own id usually repeats the filename, and a reader falls back to it when the assignment is absent.
 There is no anchor, so the reader must then find the right `PRODUCT_DEFINITION` in the external file by matching `product.id`, `product_definition_formation.id` and `product_definition.id`.
 This is fragile and it is what AP214 multi-file exports actually did.
 
@@ -113,6 +117,6 @@ The core — the Part 21 file, the EXPRESS schema, the B-rep in Part 42 — is t
 
 ::: {.callout-important title="In brief"}
 Edition 3 (2016) adds UTF-8, an `ANCHOR` section naming instances for external use, a `REFERENCE` section importing instances from other files by URI, a trailing signature section, and a ZIP container; a file using them declares `'4;1'` or higher.
-Edition 2 files refer to external parts by filename via `DOCUMENT_FILE`.
+Edition 2 files refer to external parts by filename, carried on an identification assignment attached to a `DOCUMENT_FILE`.
 The AP242 XML business object model carries product structure for PDM with geometry left in Part 21; Part 28 XML and Part 26 binary exist and are little used.
 :::

@@ -45,7 +45,7 @@ Every CAD system can export this, and every viewer can show it, and it carries e
 **Semantic (representation) PMI** is the tolerance as *data*: a `POSITION_TOLERANCE` record with a magnitude of 0.2 millimetres, referring to a `SHAPE_ASPECT` that is linked to a specific face, with a datum system whose datums are linked to other faces.
 A program can read it, check it, feed it to an inspection planner.
 Only some systems export it and only some readers consume it.
-AP214 and AP203 second edition already carry the basic tolerance records; what AP242 adds is the datum system — `DATUM_SYSTEM` and its compartments — along with tolerance modifiers and the machinery for linking the semantic data to the drawn callout.
+AP214 and AP203 second edition already carry the basic tolerance records; what AP242 adds is the datum system — `DATUM_SYSTEM` and its compartments — and the tolerance modifiers; the record that links semantic data to a drawn callout is already in all three.
 
 A file may have either, both, or — best — both with a link from each graphical callout to the semantic data it depicts.
 The CAx Implementor Forum's PMI recommended practice specifies how to write all three, and the records below follow it.
@@ -96,7 +96,9 @@ And all annotations, planes and callouts are collected in a **`DRAUGHTING_MODEL`
 #631 = MECHANICAL_DESIGN_AND_DRAUGHTING_RELATIONSHIP('','',#10,#630);
 ```
 
-The relationship record puts the shape representation and the draughting model side by side; by convention the global container goes in `rep_2`.
+The relationship record puts the shape representation and the draughting model side by side, in either order.
+Where two draughting models are related instead, the recommended practice puts the global one in `rep_2` and a saved view in `rep_1`.
+`MECHANICAL_DESIGN_AND_DRAUGHTING_RELATIONSHIP` does not exist in AP214, where a plain `REPRESENTATION_RELATIONSHIP` does the job.
 A reader looking for "all the PMI drawn on this part" finds the draughting models that share the part's geometric context and walks their items.
 
 That is graphical PMI: geometry that happens to look like symbols, organised so a viewer knows to draw it and where.
@@ -161,7 +163,7 @@ A flatness tolerance on the top face:
 
 `GEOMETRIC_TOLERANCE`, the supertype, has `name`, `description`, `magnitude` (a measure with unit: the zone width) and `toleranced_shape_aspect`.
 `FLATNESS_TOLERANCE` adds nothing; it is the *type* that says which characteristic this is.
-There are fifteen subtypes, roughly one per symbol: the schema keeps coaxiality and concentricity apart where ISO 1101 gives them a single symbol and ASME Y14.5 has only concentricity.
+There are fifteen subtypes, roughly one per symbol: the schema keeps coaxiality and concentricity apart where ISO 1101 gives them a single symbol and ASME Y14.5 had only concentricity until the 2018 edition dropped it.
 
 A position tolerance on the hole, referred to datums, with a modifier and a cylindrical zone, is where the complex instance returns:
 
@@ -229,6 +231,7 @@ Drawings have views; models with PMI have *saved views*: a camera position and t
 #802 = AXIS2_PLACEMENT_3D('',#804,#805,#806);       /* where the camera is,
 looking along its axis */
 #803 = VIEW_VOLUME(.PARALLEL.,#807,1.,1.,.T.,1.,.T.,.T.,#808);
+#809 = MODEL_GEOMETRIC_VIEW('Front','',#801,#800);
 ```
 
 A saved view is a `DRAUGHTING_MODEL` paired with a `CAMERA_MODEL_D3` among its items: the model says what is shown, the camera says from where.
@@ -239,7 +242,7 @@ This is why a viewer sometimes shows six annotations out of ninety: it has opene
 
 ::: {.callout-warning title="In the wild: What actually arrives"}
 Every mainstream CAD system exports graphical PMI when asked, and most produce it as polylines; the tessellated form is less common.
-Semantic PMI is exported by NX, Creo, CATIA and SolidWorks in their current versions, with coverage that varies by tolerance type and is documented, system by system, in the CAx Implementor Forum's test results.
+Semantic PMI is exported by NX, Creo, CATIA and SolidWorks in their current versions, with coverage that varies by tolerance type and is documented, system by system, in the CAx Implementor Forum's implementation coverage matrix.
 NIST's MBE PMI test models — a set of parts with known PMI and published answer keys — are the standard way to find out what a particular exporter gets right.
 It is normal for a file to have complete graphical PMI and partial semantic PMI: the graphical side is drawn from the CAD system's display and is always complete, the semantic side requires the system to have modelled the tolerance as data in the first place, and many drawings-first workflows never did.
 :::
