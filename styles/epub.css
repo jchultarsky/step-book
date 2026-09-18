@@ -8,8 +8,16 @@
   border-left: 3px solid #d0d7de;
 }
 
-/* Part 21 listings are wide; scroll rather than wrap mid-record. */
-pre { white-space: pre; overflow-x: auto; font-size: 0.8em; }
+/* Part 21 listings are wider than a phone screen.  Wrap them: a reading system
+   pages a book in columns, where a scrolling box is either clipped at the edge
+   or, because it cannot be split across pages, pushed whole onto the next page.
+   Pandoc's own highlighting rules, embedded in every chapter, make listings
+   scroll on screens and wrap only in print; these take its print behaviour,
+   continuation lines indented under the record they continue. */
+div.sourceCode, pre.sourceCode, .sourceCode { overflow: visible !important; }
+pre > code.sourceCode { white-space: pre-wrap !important; overflow-wrap: anywhere; }
+pre > code.sourceCode > span { display: inline-block !important; text-indent: -2em; padding-left: 2em; }
+pre { white-space: pre-wrap; overflow-wrap: anywhere; font-size: 0.8em; }
 
 /* The records a listing refers to, added beneath it by filters/referenced-records.lua. */
 div.referenced-records {
@@ -22,3 +30,11 @@ div.referenced-records p { margin: 0.3em 0; }
 
 /* Part drawings: keep them inside the page. */
 img { max-width: 100%; min-width: 5em; height: auto; }
+
+/* Tables must fit the page: a reading system cannot scroll one sideways, and
+   a table wider than its column is cut off or overprints the next rows. */
+table { table-layout: fixed; width: 100%; border-collapse: collapse; }
+th, td { overflow-wrap: anywhere; vertical-align: top; padding: 0.2em 0.4em 0.2em 0; }
+
+/* Glossary terms. */
+dt { font-weight: bold; margin-top: 0.6em; }

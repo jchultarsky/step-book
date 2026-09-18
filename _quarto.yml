@@ -62,7 +62,7 @@ filters:
   - filters/project-paths.lua
   - include-code-files
   - filters/referenced-records.lua
-  - filters/typst-print.lua
+  - filters/print-editions.lua
 
 format:
   html:
