@@ -83,7 +83,7 @@ For an outer bound that means counter-clockwise seen from outside; an inner boun
 Each `ORIENTED_EDGE` in the loop says whether the edge is to be traversed forwards or backwards to make that true.
 And each `FACE_BOUND` carries one more Boolean that can reverse the whole loop.
 
-Three layers of direction on an edge alone — the curve's, the edge's, the oriented edge's — plus one on the loop and one on the face.
+Three layers of direction on an edge alone — the curve's, the edge's, the oriented edge's — plus one on the face bound and one on the face.
 The redundancy is deliberate: it lets records be shared.
 One `EDGE_CURVE` serves two faces because each face wraps it in its own `ORIENTED_EDGE`; one `PLANE` could serve two faces on opposite sides of a slab because each face has its own `same_sense`.
 The cost is that a reader must compose the flags correctly, and a writer that gets one wrong produces a solid whose faces point inwards — which renders as black, meshes inside-out, and reports a negative volume.
@@ -92,12 +92,12 @@ This is the most common defect in hand-written or badly converted STEP files.
 ## Closed and manifold {#sec-brep-closed-manifold}
 
 A `CLOSED_SHELL` claims that its faces enclose a volume with no gaps.
-**Manifold** means, informally, that the surface is everywhere locally like a sheet: every edge is traversed exactly twice by the loops of the shell, once in each direction, every vertex is surrounded by a single fan of faces, and no face touches itself.
+**Manifold** means, informally, that the surface is everywhere locally like a sheet: every edge is traversed exactly twice by the loops of the shell, once in each direction, and every vertex is surrounded by a single fan of faces.
 Usually the two traversals belong to two different faces; on a seam they belong to the same face twice.
 A `MANIFOLD_SOLID_BREP` claims both.
 
 Neither claim is checked by the file format.
-But there is a quick test a reader can apply to a closed shell of a solid without holes through it:
+But there is a quick test a reader can apply to a closed shell whose faces are each bounded by a single loop:
 
 $$V - E + F = 2$$
 
@@ -119,5 +119,5 @@ Design intent lives in the CAD system's native format, or — for tolerances and
 A B-rep is a skin described in two layers: geometry (infinite surfaces, curves, points) and topology (finite faces, edges, vertices connected to each other).
 Connectivity is by shared records, not shared coordinates.
 Everything has a direction, and the directions must compose to an outward normal with the face's material on the left of every loop.
-A closed shell of a solid without holes satisfies $V - E + F = 2$.
+A closed shell whose faces each have one loop satisfies $V - E + F = 2$; a face with an inner loop needs the corrected form.
 :::

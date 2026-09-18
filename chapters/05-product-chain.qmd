@@ -99,7 +99,7 @@ Two records exist only to anchor the chain in a domain:
 `PRODUCT_CONTEXT` says what discipline the product belongs to; its `discipline_type` is `'mechanical'` and its `frame_of_reference` is the application context `#2`.
 `PRODUCT_DEFINITION_CONTEXT` says what life-cycle stage the definition is in; `life_cycle_stage` is `'design'`, again pointing at `#2`.
 Both strings are convention rather than rule.
-AP203 and AP242 fix them on the subtypes `MECHANICAL_CONTEXT` and `DESIGN_CONTEXT`, which exporters rarely write; AP214, the schema of this file, does not define those subtypes at all, and leaves both values as unconstrained labels.
+AP203 and AP242 fix them on the subtypes `MECHANICAL_CONTEXT` and `DESIGN_CONTEXT`, which both schemas list as deprecated and no exporter writes; AP214, the schema of this file, does not define those subtypes at all, and leaves both values as unconstrained labels.
 What AP214 does say runs the other way: a definition whose context is named `'part definition'` or `'part occurrence'` must belong to a product categorised `'part'`, `'raw material'` or `'tool'`.
 Both records are boilerplate that you will learn to skim.
 Some exporters write one pair per product, as OCCT does; others share one pair across every product in the file.
@@ -115,8 +115,8 @@ The last non-geometric record in the file classifies the product:
 
 A `PRODUCT_RELATED_PRODUCT_CATEGORY` has a `name`, an optional `description`, and a list of the products in the category.
 The name is an unconstrained string, but the APs constrain it from outside, and differently.
-AP214 requires every product to carry exactly one category named from a fixed list: `'part'`, `'raw material'`, `'tool'`, `'document'` and five more for requirements, functions and conceptual products.
-AP203 and AP242 impose no such list; they only require `'assembly'` on a product whose definition is declared an assembly definition, and `'part'`, `'raw material'` or `'tool'` on a part occurrence.
+AP214 requires every product to carry exactly one category named from a fixed list: `'part'`, `'raw material'`, `'tool'`, `'document'`, and five more for requirements, functions, concepts, alternative solutions and physically realised products.
+AP203 and AP242 impose no such list; they tie particular names to particular kinds of definition — `'assembly'` on a product whose definition is declared an assembly definition, `'part'`, `'raw material'` or `'tool'` on a part occurrence, and a handful more for collections and support structures.
 Either way the category does not tell a leaf from an assembly: OCCT writes `'part'` for the assembly as well as for its components.
 The assembly structure is in the `NEXT_ASSEMBLY_USAGE_OCCURRENCE` records of @sec-assemblies, and nowhere else.
 
@@ -145,6 +145,7 @@ The practical rule for finding the part *number* is `product.id`, and it is only
 
 ::: {.callout-warning title="In the wild: Formations with a source"}
 All three protocols define a subtype, `PRODUCT_DEFINITION_FORMATION_WITH_SPECIFIED_SOURCE`, which adds a `make_or_buy` enumeration: `.MADE.`, `.BOUGHT.` or `.NOT_KNOWN.`.
+AP203's first edition required it; its second edition and AP242 both list it as deprecated, which is why it turns up in AP203 exports and almost nowhere else.
 It is written mostly in AP203 exports, almost always with `.NOT_KNOWN.`, so a file's formation records look like `PRODUCT_DEFINITION_FORMATION_WITH_SPECIFIED_SOURCE('','',#7,.NOT_KNOWN.)`.
 It is the same record with one more attribute, and a reader should treat it as a formation.
 :::

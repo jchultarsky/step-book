@@ -47,7 +47,7 @@ A reader that assumes one context per file will be right most of the time and wr
 - `GLOBAL_UNIT_ASSIGNED_CONTEXT((#166,#167,#168))` — the units in force for every item in this context.
 - `GLOBAL_UNCERTAINTY_ASSIGNED_CONTEXT((#169))` — the tolerance in force.
 
-AP214 requires the unit set to hold exactly one length unit and exactly one plane angle unit; AP203 and AP242 leave the combination to the recommended practices.
+AP214 requires the unit set to hold exactly one length unit and exactly one plane angle unit; AP203 and AP242 state no such rule, and exporters write the same combination anyway.
 It says nothing about solid angle.
 Nothing in a mechanical file ever measures one either, but exporters write a steradian anyway, so you will see `#168` in nearly every file.
 
@@ -89,7 +89,8 @@ So an inch file contains the millimetre after all — as the thing the inch is d
 Three details.
 First, `NAMED_UNIT(#167)` is an explicit reference where the SI record had `*`.
 An SI unit's dimensions are always derived from its name, so that slot is `*`.
-For a conversion-based unit AP203 and AP242 require the exponents to be written out and to agree with the factor's unit, which is what this file does; AP214 edition 3 derives them instead, so a file written to that edition would carry `NAMED_UNIT(*)` and no `DIMENSIONAL_EXPONENTS` record.
+For a conversion-based unit AP203 and AP242 require the exponents to be written out and to agree with the factor's unit; AP214 edition 3 derives them instead, so a conversion-based unit written to that edition carries `NAMED_UNIT(*)` and no `DIMENSIONAL_EXPONENTS` record at all.
+This file, an older AP214, writes them out.
 Here `DIMENSIONAL_EXPONENTS(1.,0.,0.,0.,0.,0.,0.)` says length$^{1}$ mass$^{0}$ time$^{0}$ current$^{0}$ temperature$^{0}$ substance$^{0}$ luminosity$^{0}$ — a length.
 Second, the string `'INCH'` is a label.
 What makes it an inch is the `25.4`.
@@ -155,7 +156,8 @@ These appear with validation properties in @sec-properties-validation and almost
 
 The clamp assembly of @sec-assemblies has three geometric contexts, one per product, all textually identical to `#165`.
 Each product's shape representation points at its own.
-This is not merely common but forced: the transformation record that places a component requires its two representations to sit in different context records, so an assembly written that way cannot share one.
+One context for the whole file is not even legal here: the transformation record that places a component requires its two representations to sit in different context records, so the assembly's context cannot also be a component's.
+Writing one per product, as this exporter does, is the simplest way to satisfy that.
 It has a consequence that is easy to state and easy to forget: **units are a property of the representation, not of the file.**
 A file may, in principle, hold one part in millimetres and another in inches, each in its own context, and an assembly that places both.
 Readers that read the first context they find and apply it to everything will get the second part wrong by a factor of 25.4.
