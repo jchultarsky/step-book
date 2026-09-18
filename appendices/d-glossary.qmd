@@ -9,7 +9,7 @@ AIM
     What the file contains.
 
 Anchor
-:   (edition 3) a stable public name for an instance, for reference from other files.
+:   (edition 3) a stable public name for an instance or value, for reference from other files.
 
 AP
 :   Application Protocol: a scoped data model for a domain.
@@ -21,7 +21,8 @@ ARM
 
 Attribute
 :   one named slot of an entity, declared in the schema.
-    A record supplies one parameter per attribute, in declaration order; the file writes the values and never the names.
+    A record supplies one parameter per *explicit* attribute, in declaration order; the file writes the values and never the names.
+    Attributes an entity derives itself, and inverse attributes, take no parameter at all.
 
 B-rep
 :   boundary representation: a solid described by its bounding faces, edges and vertices.
@@ -31,13 +32,14 @@ Complex entity instance
 
 Conformance class
 :   a named subset of an AP that an implementation can claim to support.
+    Part 21 uses the term separately, for the three syntactical conformance classes of the file format itself.
 
 Datum
 :   a theoretically exact reference plane, axis or point derived from a real feature.
 
 Defined type
 :   a name given to a base type so the schema can say what a value is *for*, as in `TYPE label = STRING;`.
-    The file does not distinguish them; a string is a string.
+    The file does not distinguish them, except where a defined type is the alternative chosen for a `SELECT`, when its name is written around the value.
 
 Derived attribute
 :   one whose value is computed from others rather than stored.

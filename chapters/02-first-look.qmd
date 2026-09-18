@@ -147,12 +147,12 @@ The trailing-dot form `10.` is standard and ubiquitous.
 A parameter that is a real is *never* written as an integer, so `3` and `3.` are different tokens for different attribute types.
 
 **Enumerations** are upper-case names between dots: `.T.`, `.F.`, `.MILLI.`, `.METRE.`, `.RADIAN.`.
-The two most common are the Booleans, `.T.` and `.F.`.
+The two most common look like enumerations but are not: the Booleans, `.T.` and `.F.`.
 Part 21 is strict here: a `BOOLEAN` is encoded by the single character `T` or `F` between the dots, so `.TRUE.` is not a legal spelling of one.
 Enumeration values come from a fixed list in the schema — `.MILLI.` is one of the sixteen SI prefixes the schema defines.
 
 **Binary** values are hexadecimal in double quotes, with one extra leading digit: `"0F3A"`.
-That first digit is not data — it says how many zero bits were added on the left to fill the last group of four, so `"0F3A"` is the twelve bits `F3A`.
+That first digit is not data — it counts the zero bits added on the left so the bits divide evenly into groups of four, so `"0F3A"` is the twelve bits `F3A`.
 They do not occur in this file, and are rare in mechanical files generally; you meet them in PMI for encoded text and in a few presentation entities.
 
 **Wrapped values** are a type name with one value in parentheses: the `LENGTH_MEASURE(1.E-07)` in `#169`.
@@ -216,7 +216,7 @@ Four records near the end have several:
 The pattern: after `#166 =` comes an opening parenthesis, then a sequence of *type-name-with-parameters* groups, with no commas between them, then a closing parenthesis.
 This is a **complex entity instance**, and it describes **one object that is several entity types at once**.
 `#166` is a `LENGTH_UNIT` *and* a `NAMED_UNIT` *and* an `SI_UNIT`.
-Each group carries the attributes that its own type declares: `LENGTH_UNIT` declares none, `NAMED_UNIT` declares one (the derived `dimensions`), `SI_UNIT` declares two (prefix and name).
+Each group carries the attributes that its own type declares: `LENGTH_UNIT` declares none, `NAMED_UNIT` declares one, `dimensions`, which `SI_UNIT` redeclares as derived — hence the `*` — and `SI_UNIT` declares two of its own, prefix and name.
 
 Why an object would need to be three types at once, why the groups are in alphabetical order, and why the file does not simply say `SI_UNIT` and let you infer the rest, are questions about the schema, and they are answered in @sec-schema.
 The point here is to recognise the form when you see it.

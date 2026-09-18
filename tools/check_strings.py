@@ -39,11 +39,7 @@ CLAIMS_SCHEMA = re.compile(
 #: Strings that appear on a sentence claiming schema enforcement but are
 #: deliberately named as the thing the schema does *not* fix.  Each needs a
 #: reason; anything else on such a sentence is a defect.
-CONTRASTED = {
-    # Named as what edition 1 files wrote, in contrast to the edition 3 rule
-    # requiring 'AUTOMOTIVE_DESIGN_LF' in the same sentence.
-    "automotive_design",
-}
+CONTRASTED: set[str] = set()
 
 
 def load_schema_text() -> str:

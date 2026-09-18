@@ -52,17 +52,19 @@ Learn the ranges once and you can find anything.
 | Range | Contents | You will meet |
 |---|---|---|
 | 1 | Overview and fundamental principles | — |
-| 11–14 | Description methods | **11**, the EXPRESS language |
-| 21–28 | Implementation methods | **21**, the clear-text file; 26, 28 |
-| 31–35 | Conformance testing | rarely |
-| 41–62 | Integrated generic resources | **41, 42, 43, 44, 46, 47** |
-| 101–112 | Integrated application resources | 101 (draughting), 105 (kinematics) |
-| 2xx | Application protocols | **203, 214, 242** |
-| 3xx | Abstract test suites | rarely |
-| 4xx, 1xxx | Application modules | the building blocks of AP242 |
-| 5xx | Application interpreted constructs | when tracing where an entity came from |
+| 11–19 | Description methods | **11**, the EXPRESS language |
+| 21–29 | Implementation methods | **21**, the clear-text file; 26, 28 |
+| 31–39 | Conformance testing | rarely |
+| 41–99 | Integrated generic resources | **41, 42, 43, 44, 46, 47** |
+| 101–199 | Integrated application resources | 101 (draughting), 105 (kinematics) |
+| 201–299 | Application protocols | **203, 214, 242** |
+| 301–399 | Abstract test suites | rarely |
+| 401–499 | Application protocol modules | the building blocks of AP242 |
+| 501–599 | Application interpreted constructs | when tracing where an entity came from |
+| 1001–1999 | Application modules | the building blocks of AP242 |
 
-The *integrated resources* in the 41–62 and 101–112 ranges are the heart of it, and the first range is still growing: Part 62, on equivalence validation, was published in 2025.
+The *integrated resources* in the 41–99 and 101–199 ranges are the heart of it.
+These are the ranges the standard sets aside, not the parts published: ISO has reached Part 62 in the first and Part 113 in the second, and both keep growing.
 Part 41 defines products, versions and contexts; Part 42 geometry and topology; Part 43 the notion of a *representation*; Part 44 product structure and assemblies; Part 46 visual presentation; Part 47 shape tolerances.
 Every entity in a mechanical STEP file comes from one of these.
 The application protocols do not define geometry; they *use* Part 42's.

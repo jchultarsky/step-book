@@ -163,8 +163,9 @@ In practice there is one application context per file and it agrees with the hea
 When it does not, believe the header, and note that the exporter was careless.
 
 Each AP's schema has a global rule fixing the schema-name string in `#1`, and it differs by edition.
-AP203 edition 1 writes `'config_control_design'`; edition 2 requires the long modular name.
-AP214 edition 1 files write `'automotive_design'`, as above, while the edition 3 schema requires `'AUTOMOTIVE_DESIGN_LF'`.
+AP203 edition 2's rule requires `'ap203_configuration_controlled_3d_design_of_mechanical_parts_and_assemblies'` — the long name, but *without* the `_mim_lf` that its schema name carries.
+Edition 1 files carry `'config_control_design'` instead.
+AP214 files write `'automotive_design'`, as above, which is the lower-cased schema name.
 AP242 requires `'ap242_managed_model_based_3d_engineering_mim_lf'` — and the export shown earlier writes it without the `_mim_lf`, which is a rule violation of exactly the kind @sec-what-step-is warned about.
 The year and the `APPLICATION_CONTEXT` text are convention: nothing in the schema checks either.
 They are the second place, after the header, where you can identify the protocol — and a place where files that have been converted between protocols often still show their origin.
