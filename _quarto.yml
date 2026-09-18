@@ -9,14 +9,15 @@ book:
   subtitle: "Products, shapes and tolerances, one record at a time"
   author: "Julian Chultarsky"
   date: today
-  date-format: "MMMM YYYY"
+  # A day is needed: EPUB metadata requires a full date and cannot parse "September 2026".
+  date-format: "D MMMM YYYY"
   output-file: inside-the-step-file
   repo-url: https://github.com/jchultarsky/step-book
   repo-branch: main
   repo-actions: [edit, issue]
   site-url: https://jchultarsky.github.io/step-book/
   search: true
-  downloads: [pdf]
+  downloads: [pdf, epub]
   sharing: []
   page-footer:
     left: "© 2026 Julian Chultarsky. Licensed under MIT."
@@ -58,8 +59,10 @@ syntax-definitions:
   - syntax/express.xml
 
 filters:
+  - filters/project-paths.lua
   - include-code-files
   - filters/referenced-records.lua
+  - filters/typst-print.lua
 
 format:
   html:
@@ -82,3 +85,12 @@ format:
     keep-typ: false
     include-in-header:
       - styles/typst-references.typ
+  epub:
+    # Fixed, so readers recognise a new build as the same book: uuid5 of the site URL.
+    identifier: "urn:uuid:e20d9c6b-a8bb-5e20-93f9-ada642b2b953"
+    toc: true
+    toc-depth: 2
+    number-sections: true
+    number-depth: 2
+    highlight-style: github
+    css: styles/epub.css

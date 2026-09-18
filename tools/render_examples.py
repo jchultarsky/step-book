@@ -344,6 +344,9 @@ def svg(drawing: Drawing, title: str) -> str:
         f'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 {width} {height}" '
         f'width="{width}" height="{height}" role="img">',
         f"<title>{title}</title>",
+        # An opaque background: e-readers' night modes put transparent
+        # drawings on black, where dark lines vanish.
+        '<rect width="100%" height="100%" fill="#ffffff"/>',
         f'<g fill="none" stroke="{OUTLINE_COLOUR}" stroke-width="1" stroke-linecap="round">',
         *(path(poly) for poly in drawing.outlines),
         "</g>",

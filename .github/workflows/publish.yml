@@ -44,6 +44,12 @@ jobs:
       - name: Render book
         run: quarto render
 
+      - name: Validate the EPUB
+        run: |
+          curl -sSL -o epubcheck.zip https://github.com/w3c/epubcheck/releases/download/v5.4.0/epubcheck-5.4.0.zip
+          unzip -q epubcheck.zip -d "$RUNNER_TEMP"
+          java -jar "$RUNNER_TEMP/epubcheck-5.4.0/epubcheck.jar" --failonwarnings _book/inside-the-step-file.epub
+
       - name: Upload site artifact
         uses: actions/upload-pages-artifact@v5
         with:

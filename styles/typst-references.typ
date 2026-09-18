@@ -22,17 +22,25 @@
   }
 }
 
-// Entity names in tables.
+// Names in tables.
 //
-// Names like SURFACE_OF_LINEAR_EXTRUSION are a single unbreakable word in a
-// monospaced face, so in a narrow table column Typst lets them run past the
-// column and collide with the next one.  Give them a break opportunity after
-// each underscore, inside tables only, so they wrap instead.  Code listings
-// are untouched.
+// Entity and attribute names like SURFACE_OF_LINEAR_EXTRUSION or
+// application_interpreted_model_schema_name are single unbreakable words, so
+// in a narrow column they run into the next one.  Give every underscore in a
+// table a break opportunity after it.  Code listings are not tables and are
+// untouched.
 #show table: it => {
-  show raw: r => {
-    show "_": "_" + "\u{200B}"
-    r
-  }
+  show "_": "_" + "\u{200B}"
   it
 }
+
+// Table cells are narrow; justifying them opens wide gaps between words.
+#show table: set par(justify: false)
+
+// Definition lists (the glossary).  The default layout hangs the term into the
+// margin and sets the description beside it, where a long term overprints it.
+// Put the term on its own line and indent the description beneath it.
+#show terms.item: it => block(below: 0.9em, breakable: false)[
+  #strong(it.term)
+  #block(above: 0.3em, inset: (left: 1.2em), it.description)
+]

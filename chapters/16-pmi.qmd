@@ -236,8 +236,7 @@ Drawings have views; models with PMI have *saved views*: a camera position and t
 ```{.step source="bracket-pmi.step"}
 #800 = DRAUGHTING_MODEL('view content 1',(#801,#610,#615),#204);
 #801 = CAMERA_MODEL_D3('Top',#802,#803);
-#802 = AXIS2_PLACEMENT_3D('',#804,#805,#806);       /* where the camera is,
-looking along its axis */
+#802 = AXIS2_PLACEMENT_3D('',#804,#805,#806);  /* the eye; it looks along its z axis */
 #803 = VIEW_VOLUME(.PARALLEL.,#807,100.,0.,.F.,0.,.F.,.F.,#808);
 #809 = MODEL_GEOMETRIC_VIEW('','',#801,#800);
 #814 = MECHANICAL_DESIGN_AND_DRAUGHTING_RELATIONSHIP('','',#800,#630);

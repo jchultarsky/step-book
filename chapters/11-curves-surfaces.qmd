@@ -33,7 +33,7 @@ Here is its entire solid, 53 records, with the placements' points and directions
 #25 = CARTESIAN_POINT('',(3.,0.,30.));
 #26 = LINE('',#27,#28);                          /* along +Z */
 #30 = ORIENTED_EDGE('',*,*,#31,.T.);
-#31 = EDGE_CURVE('',#24,#24,#32,.T.);            /* top circle: starts and ends at #24 */
+#31 = EDGE_CURVE('',#24,#24,#32,.T.);            /* top circle, from #24 to #24 */
 #32 = CIRCLE('',#33,3.);
 #33 = AXIS2_PLACEMENT_3D('',#34,#35,#36);        /* centre (0,0,30), axis +Z */
 #37 = ORIENTED_EDGE('',*,*,#21,.F.);             /* the seam again, reversed */
@@ -221,9 +221,9 @@ A `VERTEX_LOOP` is the standard's way of saying "this boundary has zero length."
 #17 = ADVANCED_FACE('',(#18),#38,.T.);
 #19 = EDGE_LOOP('',(#20,#29,#36,#37));
 #20 = ORIENTED_EDGE('',*,*,#21,.F.);
-#21 = EDGE_CURVE('',#22,#22,#24,.T.);              /* circle, radius 12: the outer equator */
+#21 = EDGE_CURVE('',#22,#22,#24,.T.);              /* radius 12: the outer equator */
 #29 = ORIENTED_EDGE('',*,*,#30,.F.);
-#30 = EDGE_CURVE('',#22,#22,#31,.T.);              /* circle, radius 2: a meridian */
+#30 = EDGE_CURVE('',#22,#22,#31,.T.);              /* radius 2: a meridian */
 #36 = ORIENTED_EDGE('',*,*,#21,.T.);
 #37 = ORIENTED_EDGE('',*,*,#30,.T.);
 #38 = TOROIDAL_SURFACE('',#39,10.,2.);

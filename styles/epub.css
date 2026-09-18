@@ -1,0 +1,24 @@
+/* EPUB edition. Readers restyle freely, so keep this to what carries meaning. */
+
+/* The italic lead-in under every chapter title. */
+.chapter-abstract {
+  font-style: italic;
+  margin: 0 0 1.5em;
+  padding-left: 0.8em;
+  border-left: 3px solid #d0d7de;
+}
+
+/* Part 21 listings are wide; scroll rather than wrap mid-record. */
+pre { white-space: pre; overflow-x: auto; font-size: 0.8em; }
+
+/* The records a listing refers to, added beneath it by filters/referenced-records.lua. */
+div.referenced-records {
+  margin: -0.5em 0 1.2em;
+  padding-left: 0.7em;
+  border-left: 2px solid #d0d7de;
+  font-size: 0.9em;
+}
+div.referenced-records p { margin: 0.3em 0; }
+
+/* Part drawings: keep them inside the page. */
+img { max-width: 100%; min-width: 5em; height: auto; }

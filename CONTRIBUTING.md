@@ -10,7 +10,7 @@ Every page of the published book has an **Edit this page** link that opens the s
 
 1. Open an issue first to describe what you want to add or change, so we can agree on scope before you invest time.
 2. Fork the repository and create a branch.
-3. Run `quarto preview` while writing; run `quarto render` before opening the pull request to confirm both the HTML and the PDF build.
+3. Run `quarto preview` while writing; run `quarto render` before opening the pull request to confirm the HTML, PDF and EPUB all build.
 4. Open a pull request. CI renders the book for every pull request.
 
 ## Writing guidelines
@@ -21,7 +21,7 @@ Every page of the published book has an **Edit this page** link that opens the s
 - **Keep examples real.** Listings are excerpts of the files in `examples/`, which were exported by Open CASCADE. If a listing is written to a published pattern rather than exported, the text must say so.
 - **Name each listing's file.** Open a Part 21 listing with ```` ```{.step source="bracket.step"} ````. The records it refers to but does not show are then printed beneath it from that file, and `tools/check_references.py` fails if one is missing, of the wrong type, or if the listing no longer matches the file. A record written for the book must use a number the file does not.
 - **Cross-reference, don't repeat.** Give sections, figures, tables, and listings an identifier (`{#sec-...}`, `{#tbl-...}`, `{#lst-...}`) and refer to them with `@sec-...`.
-- **Check both outputs.** Some Markdown renders differently in HTML and in the PDF. Look at both before submitting.
+- **Check both outputs.** Some Markdown renders differently in HTML, the PDF and the EPUB. Look at all three before submitting.
 
 ## License
 

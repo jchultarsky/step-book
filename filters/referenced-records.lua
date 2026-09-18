@@ -8,8 +8,9 @@ A listing names the example file it is taken from, or builds on:
 Every #n the listing's records mention that the listing does not define is
 looked up in examples/<source>, and so is everything those records refer to in
 turn, until nothing is left unresolved.  The HTML book shows all of them in a
-collapsed panel; the PDF shows the nearest ones, up to PRINT_BUDGET, and
-summarises the rest by entity type.  tools/check_references.py checks in CI
+collapsed panel.  The PDF and the EPUB, where a panel cannot be relied on to
+open, print them all when they fit in PRINT_BUDGET, and otherwise print the
+records the listing points at directly and summarise the rest by entity type.  tools/check_references.py checks in CI
 that every such record exists and is of a type its attribute admits.
 ]]
 
@@ -122,23 +123,18 @@ local function entity_of(text)
   return text:match("^#%d+%s*=%s*%(?%s*([%u%d_]+)") or "?"
 end
 
--- The records to print, in file order, and a summary of those left out.
+-- The records to print, and a summary of those left out.  A set that fits the
+-- budget is printed whole; a larger one, which usually means the listing
+-- reaches a whole solid, is cut to the records the listing points at directly.
 local function select_for_print(order, file)
   if #order <= PRINT_BUDGET then return order, nil end
-  local keep, count = {}, 0
-  local depth = 1
-  while true do
-    local level = {}
-    for _, entry in ipairs(order) do
-      if entry.depth == depth then level[#level + 1] = entry end
+  local keep, kept = {}, {}
+  for _, entry in ipairs(order) do
+    if entry.depth == 1 then
+      keep[#keep + 1] = entry
+      kept[entry.id] = true
     end
-    if #level == 0 or (count > 0 and count + #level > PRINT_BUDGET) then break end
-    for _, entry in ipairs(level) do keep[#keep + 1] = entry end
-    count = count + #level
-    depth = depth + 1
   end
-  local kept = {}
-  for _, entry in ipairs(keep) do kept[entry.id] = true end
   local tally, left = {}, 0
   for _, entry in ipairs(order) do
     if not kept[entry.id] then
@@ -187,7 +183,7 @@ local function panel(block)
 
   local url = file_url(name)
   local noun = #order == 1 and "record" or "records"
-  if quarto.doc.is_format("html") then
+  if quarto.doc.is_format("html") and not quarto.doc.is_format("epub") then
     local summary = string.format(
       '<details class="referenced-records"><summary>Referred to above: %d %s from <code>%s</code></summary>',
       #order, noun, name)
@@ -211,17 +207,28 @@ local function panel(block)
   end
   local caption = { pandoc.Str(string.format("Referred to above: %d %s from ", #order, noun)), pandoc.Code(name) }
   if rest then
-    caption[#caption + 1] = pandoc.Str(string.format(", the %d nearest shown", #keep))
+    caption[#caption + 1] = pandoc.Str(string.format("; the %d it points to directly are shown", #keep))
   end
   caption[#caption + 1] = pandoc.Str(".")
   if url then
     caption[#caption + 1] = pandoc.Space()
     caption[#caption + 1] = pandoc.Link("The complete file.", url)
   end
+  if not quarto.doc.is_format("typst") then
+    return {
+      block,
+      pandoc.Div({
+        pandoc.Para({ pandoc.Emph(caption) }),
+        pandoc.CodeBlock(text, pandoc.Attr("", { "step" })),
+      }, pandoc.Attr("", { "referenced-records" })),
+    }
+  end
   return {
     block,
     pandoc.RawBlock("typst", "#block(width: 100%, inset: (left: 0.8em), stroke: (left: 0.6pt + luma(170)))[#set text(size: 0.82em)"),
+    pandoc.RawBlock("typst", "#block(sticky: true)["),
     pandoc.Para({ pandoc.Emph(caption) }),
+    pandoc.RawBlock("typst", "]"),
     pandoc.CodeBlock(text, pandoc.Attr("", { "step" })),
     pandoc.RawBlock("typst", "]"),
   }

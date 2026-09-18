@@ -16,7 +16,7 @@ Without it, the same block is 350 records instead of 170, and edge `#21` looks l
 #31 = PCURVE('',#32,#37);
 #32 = PLANE('',#33);                          /* the x=0 face's own plane, shared */
 #37 = DEFINITIONAL_REPRESENTATION('',(#38),#42);
-#38 = LINE('',#39,#40);                       /* a 2D line in the plane's parameter space */
+#38 = LINE('',#39,#40);                       /* a 2D line in parameter space */
 #39 = CARTESIAN_POINT('',(0.,0.));
 #40 = VECTOR('',#41,1.);
 #41 = DIRECTION('',(1.,0.));

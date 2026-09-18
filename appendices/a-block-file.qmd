@@ -4,5 +4,5 @@ The running example of Part I and @sec-reading-the-block, exactly as written by 
 One hundred and seventy records.
 Open CASCADE wraps long records at commas to keep lines within 72 columns, except in the header, where the `FILE_NAME` strings leave it no break point.
 
-```{.step include="../examples/block.step"}
+```{.step include="/examples/block.step"}
 ```

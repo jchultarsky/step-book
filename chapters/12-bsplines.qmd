@@ -121,7 +121,8 @@ Convert the pin of @sec-curves-surfaces to NURBS and its circles come out like t
 #31 = ( BOUNDED_CURVE()
         B_SPLINE_CURVE(2,(#32,#33,#34,#35,#36,#37,#38),.UNSPECIFIED.,.T.,.F.)
         B_SPLINE_CURVE_WITH_KNOTS((1,2,2,2,2,1),
-          (-2.094395102393,0.,2.094395102393,4.188790204786,6.28318530718,8.377580409573),
+          (-2.094395102393,0.,2.094395102393,4.188790204786,
+           6.28318530718,8.377580409573),
           .UNSPECIFIED.)
         CURVE()
         GEOMETRIC_REPRESENTATION_ITEM()

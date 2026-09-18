@@ -6,6 +6,7 @@
 
 - **Read online:** <https://jchultarsky.github.io/step-book/>
 - **Download PDF:** <https://jchultarsky.github.io/step-book/inside-the-step-file.pdf>
+- **Download EPUB:** <https://jchultarsky.github.io/step-book/inside-the-step-file.epub>
 
 ## Building locally
 
@@ -13,7 +14,7 @@ The book is written in [Quarto](https://quarto.org/) Markdown. Install Quarto 1.
 
 ```bash
 quarto preview        # live-reloading HTML in your browser
-quarto render         # full build: HTML site and PDF into _book/
+quarto render         # full build: HTML site, PDF and EPUB into _book/
 ```
 
 The PDF is produced with Typst, which ships inside Quarto, so no LaTeX installation is required.
@@ -29,7 +30,7 @@ examples/            The STEP files every listing in the book is taken from
 filters/             Quarto filter that shows the records each listing refers to
 figures/             Part drawings generated from examples/ by tools/render_examples.py
 syntax/              Syntax-highlighting definitions for Part 21 files and EXPRESS
-styles/              Stylesheet for the HTML edition and typography fixes for the PDF
+styles/              Stylesheets for the HTML and EPUB editions and typography fixes for the PDF
 tools/               Checks that validate the book against published EXPRESS schemas
 docs/                The original PDF draft the book was converted from
 .github/workflows/   CI: runs the checks, renders the book, deploys it to GitHub Pages
