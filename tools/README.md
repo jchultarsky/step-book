@@ -63,6 +63,20 @@ names several and makes a claim about one.
 Edition-qualified claims are skipped, since the vendored schemas are one
 edition each.
 
+## `check_listings.py`
+
+Three separate errors came from one kind of drift: a record was removed from a
+listing and its explanation still described it, or an explanation named a
+record the listing never contained.
+
+```bash
+python3 tools/check_listings.py
+```
+
+For each Part 21 listing it collects the instance names defined, reads the
+prose up to the next listing or heading, and checks every `#n` that prose
+mentions against the listings above it and the example files.
+
 ## `express_schema.py`
 
 The shared EXPRESS parser, also usable directly to look an entity up:

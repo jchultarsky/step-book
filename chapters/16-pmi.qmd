@@ -110,6 +110,9 @@ Semantic PMI is built on **shape aspects** — named regions of a part's shape t
 ```step
 #700 = SHAPE_ASPECT('top face','',#4,.T.);
 #701 = GEOMETRIC_ITEM_SPECIFIC_USAGE('','',#700,#10,#153);
+#703 = SHAPE_ASPECT('hole wall','',#4,.T.);          /* the cylindrical face */
+#702 = DERIVED_SHAPE_ASPECT('hole axis','',#4,.F.);  /* its centre line */
+#704 = SHAPE_ASPECT_DERIVING_RELATIONSHIP('','',#702,#703);
 ```
 
 `SHAPE_ASPECT` has a `name`, a `description`, `of_shape` (the part's `PRODUCT_DEFINITION_SHAPE` — the abstract shape from @sec-product-to-shape, now earning its keep) and a `product_definitional` flag.
@@ -123,7 +126,8 @@ This is the record that connects a tolerance's *target* to a specific face in th
 
 A feature made of several faces (the two halves of a slot, a pattern of holes) is a `COMPOSITE_SHAPE_ASPECT` or a `COMPOSITE_GROUP_SHAPE_ASPECT` with `SHAPE_ASPECT_RELATIONSHIP`s to its members.
 A hole's axis, as opposed to its wall, is a `DERIVED_SHAPE_ASPECT` with `product_definitional` `.F.`, tied to the wall's shape aspect by a `SHAPE_ASPECT_DERIVING_RELATIONSHIP` whose *relating* aspect is the axis.
-The schema requires at least one such relationship for every derived shape aspect.
+That is `#702` and `#703` above, and the schema requires at least one such relationship for every derived shape aspect.
+The tolerances later in this chapter refer to both.
 Particular derivations have their own subtypes — `APEX`, `CENTRE_OF_SYMMETRY`, `TANGENT` and others — and the recommended practices ask for a meaningful `name` string without fixing one.
 The vocabulary is the standard's usual: general entities, fixed strings.
 
