@@ -26,6 +26,25 @@ That is exactly what an EXPRESS schema settles, so every row is checked against 
 python3 tools/check_appendix_b.py
 ```
 
+## `check_strings.py`
+
+The book names literal strings constantly, and says of each whether a schema
+rule fixes it or a recommended practice merely asks for it.
+The first kind is checkable: an enforced string appears in the schema text.
+This reports every quoted string in the prose and fails when a sentence claims
+schema enforcement for one that no schema contains.
+
+```bash
+python3 tools/check_strings.py
+```
+
+Most conventional strings come from the CAx-IF recommended practices, which are
+not machine-readable here, so a string absent from the schemas is not an error
+by itself.
+Claiming the schema enforces such a string is.
+Exceptions, for sentences that name a string precisely to say the schema does
+*not* fix it, are listed in the script with a reason.
+
 ## `express_schema.py`
 
 The shared EXPRESS parser, also usable directly to look an entity up:

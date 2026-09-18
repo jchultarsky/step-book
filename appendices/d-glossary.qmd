@@ -68,7 +68,7 @@ Instance name
 :   the `#n` identifier of a record; file-local.
 
 Integrated resources
-:   the shared library of entity definitions (Parts 41–61 and 101–112) from which every AP is built.
+:   the shared library of entity definitions (Parts 41–62 and 101–112, a range still being added to) from which every AP is built.
 
 Internal mapping
 :   the ordinary one-type record form with all inherited attributes flattened.

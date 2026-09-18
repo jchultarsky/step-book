@@ -55,14 +55,14 @@ Learn the ranges once and you can find anything.
 | 11–14 | Description methods | **11**, the EXPRESS language |
 | 21–28 | Implementation methods | **21**, the clear-text file; 26, 28 |
 | 31–35 | Conformance testing | rarely |
-| 41–61 | Integrated generic resources | **41, 42, 43, 44, 46, 47** |
+| 41–62 | Integrated generic resources | **41, 42, 43, 44, 46, 47** |
 | 101–112 | Integrated application resources | 101 (draughting), 105 (kinematics) |
 | 2xx | Application protocols | **203, 214, 242** |
 | 3xx | Abstract test suites | rarely |
 | 4xx, 1xxx | Application modules | the building blocks of AP242 |
 | 5xx | Application interpreted constructs | when tracing where an entity came from |
 
-The *integrated resources* in the 41–61 and 101–112 ranges are the heart of it.
+The *integrated resources* in the 41–62 and 101–112 ranges are the heart of it, and the first range is still growing: Part 62, on equivalence validation, was published in 2025.
 Part 41 defines products, versions and contexts; Part 42 geometry and topology; Part 43 the notion of a *representation*; Part 44 product structure and assemblies; Part 46 visual presentation; Part 47 shape tolerances.
 Every entity in a mechanical STEP file comes from one of these.
 The application protocols do not define geometry; they *use* Part 42's.
