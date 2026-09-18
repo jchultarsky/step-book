@@ -31,6 +31,7 @@ jobs:
           python3 tools/check_book.py
           python3 tools/check_appendix_b.py
           python3 tools/check_strings.py
+          python3 tools/check_availability.py
 
       - name: Set up Quarto
         uses: quarto-dev/quarto-actions/setup@v2

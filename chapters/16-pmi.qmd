@@ -45,7 +45,7 @@ Every CAD system can export this, and every viewer can show it, and it carries e
 **Semantic (representation) PMI** is the tolerance as *data*: a `POSITION_TOLERANCE` record with a magnitude of 0.2 millimetres, referring to a `SHAPE_ASPECT` that is linked to a specific face, with a datum system whose datums are linked to other faces.
 A program can read it, check it, feed it to an inspection planner.
 Only some systems export it and only some readers consume it.
-AP214 and AP203 second edition already carry the basic tolerance records; what AP242 adds is the datum system — `DATUM_SYSTEM` and its compartments — and the tolerance modifiers; the record that links semantic data to a drawn callout is already in all three.
+AP214 and AP203 second edition already carry the basic tolerance records; what AP242 adds is the datum system — `DATUM_SYSTEM` and its compartments — and the tolerance modifiers; the record that links semantic data to a drawn callout, `DRAUGHTING_MODEL_ITEM_ASSOCIATION`, is already in all three.
 
 A file may have either, both, or — best — both with a link from each graphical callout to the semantic data it depicts.
 The CAx Implementor Forum's PMI recommended practice specifies how to write all three, and the records below follow it.

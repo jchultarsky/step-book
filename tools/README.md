@@ -45,6 +45,24 @@ Claiming the schema enforces such a string is.
 Exceptions, for sentences that name a string precisely to say the schema does
 *not* fix it, are listed in the script with a reason.
 
+## `check_availability.py`
+
+The book says things like "AP242 adds this" and "that is in all three".
+Those are decidable, and they have been one of its most error-prone kinds of
+sentence.
+
+```bash
+python3 tools/check_availability.py
+```
+
+It fails on the two contradictions it can be sure of: a claim that an entity is
+in all three protocols when a schema does not declare it, and a claim that one
+is particular to AP242 when the older schemas declare it too.
+Each claim is attributed to the entity nearest it, because a sentence often
+names several and makes a claim about one.
+Edition-qualified claims are skipped, since the vendored schemas are one
+edition each.
+
 ## `express_schema.py`
 
 The shared EXPRESS parser, also usable directly to look an entity up:
