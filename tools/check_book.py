@@ -8,8 +8,10 @@ Three checks run over the .qmd sources:
     schema declares for it.
 2.  Every entity name written in inline code in prose exists in one of those
     schemas.  This catches typos and invented entities.
-3.  Every listing that claims to come from a file in ``examples/`` matches that
-    file record for record.
+3.  Every record in every file under ``examples/`` satisfies its schema.
+
+Whether a listing matches its file, and whether the records it refers to exist
+and are of the right type, is ``check_references.py``.
 
 Exit status is non-zero if any check fails, so this can gate CI.
 """

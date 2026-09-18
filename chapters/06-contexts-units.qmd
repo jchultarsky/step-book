@@ -8,7 +8,7 @@ Every number in the geometry of the block file — the `60.` in a corner point, 
 Nothing on the record says what unit it is in.
 That information lives in one place, and every geometric representation points at it:
 
-```step
+```{.step source="block.step"}
 #10 = ADVANCED_BREP_SHAPE_REPRESENTATION('',(#11,#15),#165);
     ...
 #165 = ( GEOMETRIC_REPRESENTATION_CONTEXT(3)
@@ -53,7 +53,7 @@ Nothing in a mechanical file ever measures a solid angle, but the oldest and mos
 
 ## The millimetre {#sec-contexts-units-millimetre}
 
-```step
+```{.step source="block.step"}
 #166 = ( LENGTH_UNIT() NAMED_UNIT(*) SI_UNIT(.MILLI.,.METRE.) );
 ```
 
@@ -71,7 +71,7 @@ This exact record — the millimetre as a three-way complex instance — is prob
 Imperial units cannot be spelled with an SI prefix and name, so an inch is a **conversion-based unit**: a named unit defined as a multiple of another unit.
 The block, exported by the same OCCT build with its output unit set to inches:
 
-```step
+```{.step source="block-inch.step"}
 #166 = ( CONVERSION_BASED_UNIT('INCH',#168) LENGTH_UNIT() NAMED_UNIT(#167) );
 #167 = DIMENSIONAL_EXPONENTS(1.,0.,0.,0.,0.,0.,0.);
 #168 = LENGTH_MEASURE_WITH_UNIT(25.4,#169);
@@ -114,7 +114,7 @@ A file that measures angles in degrees carries (this excerpt written to the same
 
 ## Uncertainty {#sec-contexts-units-uncertainty}
 
-```step
+```{.step source="block.step"}
 #169 = UNCERTAINTY_MEASURE_WITH_UNIT(LENGTH_MEASURE(1.E-07),#166,
   'distance_accuracy_value','confusion accuracy');
 ```
@@ -143,7 +143,7 @@ A `'confusion accuracy'` of $10^{-7}$ mm from one kernel and $10^{-4}$ mm from a
 Length, angle and solid angle cover geometry.
 Properties such as area, volume and mass need units that are products of the base ones, and Part 41 provides `DERIVED_UNIT`:
 
-```step
+```{.step source="block.step"}
 #300 = DERIVED_UNIT((#301));
 #301 = DERIVED_UNIT_ELEMENT(#166,3.);
 ```

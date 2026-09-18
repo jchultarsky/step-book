@@ -14,7 +14,7 @@ This chapter is about those forty.
 The file opens the way every file does, with a product chain.
 Then it has two more:
 
-```step
+```{.step source="clamp.step"}
 #5 = PRODUCT_DEFINITION('design','',#6,#9);
 #7 = PRODUCT('CLAMP-ASSY','CLAMP-ASSY','',(#8));
     ...
@@ -34,7 +34,7 @@ Each product also has its shape.
 The bracket's and pin's are `ADVANCED_BREP_SHAPE_REPRESENTATION`s containing solids, exactly as in the single-part files.
 The assembly's is different:
 
-```step
+```{.step source="clamp.step"}
 #3 = SHAPE_DEFINITION_REPRESENTATION(#4,#10);
 #4 = PRODUCT_DEFINITION_SHAPE('','',#5);
 #10 = SHAPE_REPRESENTATION('',(#11,#15,#19,#23),#27);
@@ -56,7 +56,7 @@ This representation is the assembly's coordinate space, and the placements in it
 
 The parent–child relationships are three records:
 
-```step
+```{.step source="clamp.step"}
 #239 = NEXT_ASSEMBLY_USAGE_OCCURRENCE('1','bracket','',#5,#35,$);
 #311 = NEXT_ASSEMBLY_USAGE_OCCURRENCE('2','pin-1','',#5,#243,$);
 #317 = NEXT_ASSEMBLY_USAGE_OCCURRENCE('3','pin-2','',#5,#243,$);
@@ -115,7 +115,7 @@ Position is a separate structure, attached to each NAUO from the side.
 
 For the bracket:
 
-```step
+```{.step source="clamp.step"}
 #238 = PRODUCT_DEFINITION_SHAPE('Placement','Placement of an item',#239);
 #235 = CONTEXT_DEPENDENT_SHAPE_REPRESENTATION(#236,#238);
 #236 = ( REPRESENTATION_RELATIONSHIP('','',#40,#10)
@@ -157,7 +157,7 @@ From a NAUO, finding its position means asking "what `PRODUCT_DEFINITION_SHAPE` 
 
 ## The frame as a transform {#sec-assemblies-frame-transform}
 
-```step
+```{.step source="clamp.step"}
 #19 = AXIS2_PLACEMENT_3D('',#20,#21,#22);
 #20 = CARTESIAN_POINT('',(15.,10.,10.));
 #21 = DIRECTION('',(0.,0.,1.));
@@ -214,7 +214,7 @@ The NAUOs are the truth: a definition with children is an assembly whatever its 
 Everything above is the *product-structure* way of placing components, and it is what the recommended practices call for.
 There is a second, older mechanism that some exporters use for assemblies and some for repeated geometry *within* a part, and a reader must know both.
 
-```step
+```{.step source="clamp.step"}
 #400 = MAPPED_ITEM('',#401,#19);
 #401 = REPRESENTATION_MAP(#11,#248);
 ```

@@ -59,6 +59,7 @@ syntax-definitions:
 
 filters:
   - include-code-files
+  - filters/referenced-records.lua
 
 format:
   html:

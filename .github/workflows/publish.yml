@@ -33,6 +33,7 @@ jobs:
           python3 tools/check_strings.py
           python3 tools/check_availability.py
           python3 tools/check_listings.py
+          python3 tools/check_references.py
 
       - name: Set up Quarto
         uses: quarto-dev/quarto-actions/setup@v2

@@ -25,7 +25,7 @@ The chapter reads it from the bottom up.
 
 ## Vertices {#sec-reading-the-block-vertices}
 
-```step
+```{.step source="block.step"}
 #22 = VERTEX_POINT('',#23);
 #23 = CARTESIAN_POINT('',(0.,0.,0.));
 ```
@@ -40,7 +40,7 @@ That is in the edges.
 
 ## Edges {#sec-reading-the-block-edges}
 
-```step
+```{.step source="block.step"}
 #21 = EDGE_CURVE('',#22,#24,#26,.T.);
 #26 = LINE('',#27,#28);
 #27 = CARTESIAN_POINT('',(0.,0.,0.));
@@ -83,7 +83,7 @@ Sixty records for twelve edges.
 
 ## Loops {#sec-reading-the-block-loops}
 
-```step
+```{.step source="block.step"}
 #19 = EDGE_LOOP('',(#20,#30,#38,#46));
 #20 = ORIENTED_EDGE('',*,*,#21,.F.);
 #30 = ORIENTED_EDGE('',*,*,#31,.T.);
@@ -114,7 +114,7 @@ The full rule needs the next level.
 
 ## Faces {#sec-reading-the-block-faces}
 
-```step
+```{.step source="block.step"}
 #17 = ADVANCED_FACE('',(#18),#52,.F.);
 #18 = FACE_BOUND('',#19,.F.);
 #52 = PLANE('',#53);
@@ -182,7 +182,7 @@ This is the condition that makes the two faces' normals agree about which side i
 
 ## Shell and solid {#sec-reading-the-block-shell-solid}
 
-```step
+```{.step source="block.step"}
 #16 = CLOSED_SHELL('',(#17,#57,#97,#119,#141,#153));
 #15 = MANIFOLD_SOLID_BREP('',#16);
 ```

@@ -40,7 +40,7 @@ None of this is needed to *read* a STEP file — the records are just lists of n
 
 From the cone of @sec-curves-surfaces, its straight seam written as a spline:
 
-```step
+```{.step source="cone.step"}
 #33 = B_SPLINE_CURVE_WITH_KNOTS('',1,(#34,#35),.UNSPECIFIED.,.F.,.F.,
         (2,2),(0.,1.),.PIECEWISE_BEZIER_KNOTS.);
 #34 = CARTESIAN_POINT('',(5.,0.,0.));
@@ -75,7 +75,7 @@ It, too, is a hint; the multiplicities are the truth.
 
 From a small part whose top edge is a free-form spline extruded downward:
 
-```step
+```{.step source="spline-nurbs.step"}
 #56 = B_SPLINE_SURFACE_WITH_KNOTS('',3,1,
         ((#57,#58),(#59,#60),(#61,#62),(#63,#64),(#65,#66),(#67,#68)),
         .UNSPECIFIED.,.F.,.F.,.F.,
@@ -117,7 +117,7 @@ Nothing in the record says "extrusion"; you can only tell from the degree-1 *v* 
 
 Convert the pin of @sec-curves-surfaces to NURBS and its circles come out like this:
 
-```step
+```{.step source="pin-nurbs.step"}
 #31 = ( BOUNDED_CURVE()
         B_SPLINE_CURVE(2,(#32,#33,#34,#35,#36,#37,#38),.UNSPECIFIED.,.T.,.F.)
         B_SPLINE_CURVE_WITH_KNOTS((1,2,2,2,2,1),

@@ -9,7 +9,7 @@ The same three-record pattern that attaches a shape attaches anything else, and 
 
 ## The property pattern {#sec-properties-validation-pattern}
 
-```step
+```{.step source="block.step"}
 #420 = PROPERTY_DEFINITION('Material','',#5);
 #421 = PROPERTY_DEFINITION_REPRESENTATION(#420,#422);
 #422 = REPRESENTATION('',(#423),#165);
@@ -29,7 +29,7 @@ A plain `PROPERTY_DEFINITION` may use the whole of it: a `PRODUCT_DEFINITION_SHA
 
 For a numeric property the item is a **`MEASURE_REPRESENTATION_ITEM`**, and the unit comes back:
 
-```step
+```{.step source="block.step"}
 #430 = PROPERTY_DEFINITION('Mass','',#5);
 #431 = PROPERTY_DEFINITION_REPRESENTATION(#430,#432);
 #432 = REPRESENTATION('',(#433),#165);
@@ -54,7 +54,7 @@ The writer computes a few numbers that summarise the geometry — volume, surfac
 The reader, after importing, computes the same numbers from what it built and compares.
 If they match to within tolerance, the geometry survived; if the volume is off by a face's worth, a face was lost; if the centroid moved, a component is misplaced.
 
-```step
+```{.step source="block.step"}
 #400 = PROPERTY_DEFINITION('geometric validation property',
   'volume of part',#4);
 #401 = PROPERTY_DEFINITION_REPRESENTATION(#400,#402);

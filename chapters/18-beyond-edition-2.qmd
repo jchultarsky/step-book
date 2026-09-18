@@ -65,7 +65,7 @@ A reader that does not implement edition 3 will meet files it cannot read; a rea
 
 Before anchors, a master file referred to a part in another file through the document entities of Part 41 and the AP's own file-reference extensions to them:
 
-```step
+```{.step source="clamp.step"}
 #900 = DOCUMENT_FILE('bracket','',$,#901,'',$);
 #901 = DOCUMENT_TYPE('geometry');
 #902 = DOCUMENT_REPRESENTATION_TYPE('digital',#900);

@@ -30,7 +30,7 @@ END_ENTITY;
 
 Lay record `#7` from the block file against it:
 
-```step
+```{.step source="block.step"}
 #7 = PRODUCT('BLOCK','block 60x20x10','',(#8));
 ```
 
@@ -93,7 +93,7 @@ EXPRESS allows multiple inheritance, including the diamond.
 
 Now the record:
 
-```step
+```{.step source="block.step"}
 #17 = ADVANCED_FACE('',(#18),#52,.F.);
 ```
 
@@ -137,7 +137,7 @@ END_ENTITY;
 `si_unit` inherits that attribute and *redeclares it as derived*: an SI unit knows its dimensions from its name, so the value is computed by a function rather than stored.
 Attribute slots are positional, so the file cannot simply omit it; it writes `*` in the slot:
 
-```step
+```{.step source="block.step"}
 #166 = ( LENGTH_UNIT() NAMED_UNIT(*) SI_UNIT(.MILLI.,.METRE.) );
 ```
 
@@ -194,7 +194,7 @@ A millimetre is an SI unit *and* a length unit.
 There is no entity named `si_length_unit`; the schema deliberately does not enumerate the thirty combinations.
 So there is no leaf type to name in an internal-mapping record, and the file falls back to the **external mapping**:
 
-```step
+```{.step source="block.step"}
 #166 = ( LENGTH_UNIT() NAMED_UNIT(*) SI_UNIT(.MILLI.,.METRE.) );
 ```
 
@@ -213,7 +213,7 @@ The rules of the external mapping:
 The other complex record in the block file works the same way with a different reason.
 `representation_context` has *no* supertype clause, so any combination of its subtypes is legal, and a 3D context that also carries units and an uncertainty is three of them at once:
 
-```step
+```{.step source="block.step"}
 #165 = ( GEOMETRIC_REPRESENTATION_CONTEXT(3)
   GLOBAL_UNCERTAINTY_ASSIGNED_CONTEXT((#169))
   GLOBAL_UNIT_ASSIGNED_CONTEXT((#166,#167,#168))
@@ -255,7 +255,7 @@ The base type `BOOLEAN` is written as an enumeration too — `.T.` or `.F.`, and
 
 One record in the block file has a value that is wrapped in a type name:
 
-```step
+```{.step source="block.step"}
 #169 = UNCERTAINTY_MEASURE_WITH_UNIT(LENGTH_MEASURE(1.E-07),#166,
   'distance_accuracy_value','confusion accuracy');
 ```

@@ -6,7 +6,7 @@ Eight records that say "there is a part called BLOCK" — and why a CAD file nee
 
 Strip the geometry out of the block file and what remains is this:
 
-```step
+```{.step source="block.step"}
 #1 = APPLICATION_PROTOCOL_DEFINITION('international standard',
   'automotive_design',2000,#2);
 #2 = APPLICATION_CONTEXT(
@@ -29,7 +29,7 @@ Every STEP file has this structure, once per product, and it is the same in AP20
 
 The chain has a spine of three records, and understanding why there are three rather than one is most of the chapter.
 
-```step
+```{.step source="block.step"}
 #7 = PRODUCT('BLOCK','block 60x20x10','',(#8));
 #6 = PRODUCT_DEFINITION_FORMATION('','',#7);
 #5 = PRODUCT_DEFINITION('design','',#6,#9);
@@ -91,7 +91,7 @@ Most CAD exports use none of this, which is why the middle level is nearly alway
 
 Two records exist only to anchor the chain in a domain:
 
-```step
+```{.step source="block.step"}
 #8 = PRODUCT_CONTEXT('',#2,'mechanical');
 #9 = PRODUCT_DEFINITION_CONTEXT('part definition',#2,'design');
 ```
@@ -109,7 +109,7 @@ Both are legal.
 
 The last non-geometric record in the file classifies the product:
 
-```step
+```{.step source="block.step"}
 #170 = PRODUCT_RELATED_PRODUCT_CATEGORY('part',$,(#7));
 ```
 

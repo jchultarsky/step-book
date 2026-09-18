@@ -9,7 +9,7 @@ The clamp assembly was exported with the bracket grey and the pins orange.
 Both colours are in the file, and neither is anywhere near the geometry it colours.
 Here is the pin's:
 
-```step
+```{.step source="clamp.step"}
 #318 = MECHANICAL_DESIGN_GEOMETRIC_PRESENTATION_REPRESENTATION('',(#319),#302);
 #319 = STYLED_ITEM('color',(#320),#249);
 #320 = PRESENTATION_STYLE_ASSIGNMENT((#321));
@@ -85,11 +85,11 @@ The schema gives the eight names no RGB values, but the CAx-IF recommended pract
 
 CAD systems group entities onto named layers, and Part 46 carries them:
 
-```step
-#350 = PRESENTATION_LAYER_ASSIGNMENT('Fasteners','pins and bolts',(#249,#41));
+```{.step source="clamp.step"}
+#350 = PRESENTATION_LAYER_ASSIGNMENT('Pins','locating pins',(#249));
 ```
 
-A name, a description, and a set of the representation items on the layer.
+A name, a description, and a set of the representation items on the layer: here only `#249`, the pin's solid, and not the bracket's solid `#41`.
 As always, the layer points at its members; a face does not know its layer.
 A file's layers are found by collecting every `PRESENTATION_LAYER_ASSIGNMENT` and inverting.
 Layer assignments are far less common in STEP than in native CAD files: many exporters do not write them, and when they do the members are typically solids rather than faces.
@@ -99,7 +99,7 @@ AP203 first edition has no layer entity at all.
 
 A layer can be switched off, or an item hidden, with `INVISIBILITY`:
 
-```step
+```{.step source="clamp.step"}
 #360 = INVISIBILITY((#319));
 ```
 

@@ -8,7 +8,7 @@ The standard, the application protocol and the file; how the parts are numbered;
 Open a STEP file in a text editor and the first thing you see is that it is text, and the second is that the text does not help.
 Here are three lines from the middle of a small one:
 
-```step
+```{.step source="block.step"}
 #22 = VERTEX_POINT('',#23);
 #23 = CARTESIAN_POINT('',(0.,0.,0.));
 #165 = ( GEOMETRIC_REPRESENTATION_CONTEXT(3)

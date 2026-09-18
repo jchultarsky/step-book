@@ -10,7 +10,7 @@ The geometry begins at `#10`, a shape representation.
 Nothing in either record refers to the other.
 What joins them is a pair of records that Part 41 and Part 43 supply for exactly this purpose:
 
-```step
+```{.step source="block.step"}
 #3 = SHAPE_DEFINITION_REPRESENTATION(#4,#10);
 #4 = PRODUCT_DEFINITION_SHAPE('','',#5);
 #5 = PRODUCT_DEFINITION('design','',#6,#9);
@@ -43,7 +43,7 @@ It is the concrete reason a reader needs an index of "who points at me," because
 
 ## `PRODUCT_DEFINITION_SHAPE` {#sec-product-to-shape-pds}
 
-```step
+```{.step source="block.step"}
 #4 = PRODUCT_DEFINITION_SHAPE('','',#5);
 ```
 
@@ -69,7 +69,7 @@ It is the one node in the product graph that stands for "the geometry of this pa
 
 ## `SHAPE_DEFINITION_REPRESENTATION` {#sec-product-to-shape-sdr}
 
-```step
+```{.step source="block.step"}
 #3 = SHAPE_DEFINITION_REPRESENTATION(#4,#10);
 ```
 
@@ -82,7 +82,7 @@ Readers that take "the first SDR" get the first one the exporter happened to wri
 
 ## The shape representation {#sec-product-to-shape-shape-rep}
 
-```step
+```{.step source="block.step"}
 #10 = ADVANCED_BREP_SHAPE_REPRESENTATION('',(#11,#15),#165);
 ```
 
@@ -108,7 +108,7 @@ For the purposes of walking the file they are all `SHAPE_REPRESENTATION`s, and a
 
 `#10` has two items.
 
-```step
+```{.step source="block.step"}
 #11 = AXIS2_PLACEMENT_3D('',#12,#13,#14);
 #12 = CARTESIAN_POINT('',(0.,0.,0.));
 #13 = DIRECTION('',(0.,0.,1.));
@@ -121,7 +121,7 @@ Nearly every shape representation carries one as its first item.
 It does not move the geometry; the solid's coordinates are already in this frame.
 It exists so that an assembly can say "put the frame of this part at *that* position," and it is what the placement transforms in @sec-assemblies refer to.
 
-```step
+```{.step source="block.step"}
 #15 = MANIFOLD_SOLID_BREP('',#16);
 #16 = CLOSED_SHELL('',(#17,#57,#97,#119,#141,#153));
 ```

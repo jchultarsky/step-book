@@ -3,7 +3,7 @@
 These scripts keep the book honest.
 They compare what the text claims against published EXPRESS schemas and against the example files the listings are drawn from, so an error in an entity name, an attribute order or a parameter count fails the build rather than reaching a reader.
 
-Both run in CI on every push and pull request.
+All of them run in CI on every push and pull request.
 
 ## `check_book.py`
 
@@ -77,6 +77,26 @@ For each Part 21 listing it collects the instance names defined, reads the
 prose up to the next listing or heading, and checks every `#n` that prose
 mentions against the listings above it and the example files.
 
+## `check_references.py`
+
+A listing shows a few records; what they refer to is printed beneath it at
+render time by `filters/referenced-records.lua`, from the file the listing
+names in `{.step source="…"}`.
+This makes that promise hold.
+
+```bash
+python3 tools/check_references.py
+```
+
+It fails when a listing refers to a record it does not show and names no
+source; when a record it shows differs from the same record in its source, so
+excerpts cannot drift; when a record it refers to is in neither; and when any
+reference, in a listing or anywhere in `examples/`, points at an instance of
+an entity type its attribute does not admit in the file's schema.
+That last check resolves SELECTs and aggregates through the schema, so a
+`PCURVE` whose surface is a `DEFINITIONAL_REPRESENTATION`, or a usage record
+pointing at an edge loop instead of a face, fails the build.
+
 ## `express_schema.py`
 
 The shared EXPRESS parser, also usable directly to look an entity up:
@@ -85,7 +105,7 @@ The shared EXPRESS parser, also usable directly to look an entity up:
 python3 tools/express_schema.py ap242 axis2_placement_3d
 ```
 
-It recovers supertypes and explicit attributes and resolves inheritance into Part 21 order.
+It recovers supertypes, explicit attributes with their types, and the underlying type of every TYPE declaration, and resolves inheritance into Part 21 order.
 Multiple inheritance contributes every supertype's attributes even when the names repeat, which is why `DOCUMENT_FILE` takes six parameters and not four.
 
 ## `schemas/`

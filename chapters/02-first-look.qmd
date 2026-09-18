@@ -9,7 +9,7 @@ The running example begins with the simplest thing worth exporting: a rectangula
 Open CASCADE writes it as 170 records.
 Here is the whole file with the middle cut out; the complete listing is in @sec-block-file.
 
-```step
+```{.step source="block.step"}
 ISO-10303-21;
 HEADER;
 FILE_DESCRIPTION(('Open CASCADE Model'),'2;1');
@@ -91,7 +91,7 @@ Real files almost never contain them; the ones above were added for the listing.
 
 Take one line:
 
-```step
+```{.step source="block.step"}
 #7 = PRODUCT('BLOCK','block 60x20x10','',(#8));
 ```
 
@@ -183,7 +183,7 @@ Most tools do not care.
 
 Look again at the first nine data records and note the *direction* of every reference.
 
-```step
+```{.step source="block.step"}
 #3 = SHAPE_DEFINITION_REPRESENTATION(#4,#10);
 #4 = PRODUCT_DEFINITION_SHAPE('','',#5);
 #5 = PRODUCT_DEFINITION('design','',#6,#9);
@@ -209,7 +209,7 @@ This is the single most important structural fact about the format, and the reas
 Every record so far has had one entity type.
 Four records near the end have several:
 
-```step
+```{.step source="block.step"}
 #166 = ( LENGTH_UNIT() NAMED_UNIT(*) SI_UNIT(.MILLI.,.METRE.) );
 ```
 

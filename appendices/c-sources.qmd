@@ -13,11 +13,12 @@ The declarations quoted in this book were checked against the published MIM long
 **Recommended practices.**
 The CAx Implementor Forum's documents — now under the MBx Interoperability Forum at <https://mbx-if.org> — cover assembly structure, colours and layers, user-defined attributes, geometric and assembly validation properties, PMI representation and presentation, tessellated geometry, external references and more.
 They are free, and they describe how real files are written.
+The PMI records in @sec-pmi follow the *Recommended Practices for the Representation and Presentation of Product Manufacturing Information (AP242)*, version 4.0, and its saved-view records were checked against NIST's PMI test models.
 
 **Test data.**
 NIST's MBE PMI Validation and Conformance Testing project publishes CAD models with fully specified PMI, exports from several systems, and the expected results; its STEP File Analyzer and Viewer (free) reports on a file's conformance, validation properties and PMI.
 The CAx-IF publishes its test suite definitions and an implementation coverage matrix for the participating systems.
 
 **Reading files.**
-Open CASCADE Technology (<https://github.com/Open-Cascade-SAS/OCCT>) is the open-source kernel used to produce every example in this book and reads and writes AP203, AP214 and AP242; FreeCAD and CadQuery expose it.
+Open CASCADE Technology (<https://github.com/Open-Cascade-SAS/OCCT>) is the open-source kernel used to produce every example in this book, apart from the hand-written PMI in `bracket-pmi.step`, and reads and writes AP203, AP214 and AP242; FreeCAD and CadQuery expose it.
 The NIST analyzer above is the best tool for inspecting a file's structure without a kernel.

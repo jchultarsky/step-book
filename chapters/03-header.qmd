@@ -103,7 +103,7 @@ The object identifier's digits differ between AP242 editions, which is how a rea
 
 The same block, exported by the same OCCT build with the schema set to AP242, has this header and a slightly different pair of opening records:
 
-```step
+```{.step source="block-ap242.step"}
 FILE_SCHEMA(
   ('AP242_MANAGED_MODEL_BASED_3D_ENGINEERING_MIM_LF {1 0 10303 442 1 1 4 }'));
 ENDSEC;
@@ -146,7 +146,7 @@ Anything else in the header section is an error — and some exporters put thing
 Strictly, the header is finished at `ENDSEC`.
 But the first two records of the data section belong with it in spirit, because they exist to say the same thing the header said:
 
-```step
+```{.step source="block.step"}
 #1 = APPLICATION_PROTOCOL_DEFINITION('international standard',
   'automotive_design',2000,#2);
 #2 = APPLICATION_CONTEXT(

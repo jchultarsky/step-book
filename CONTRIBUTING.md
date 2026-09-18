@@ -19,6 +19,7 @@ Every page of the published book has an **Edit this page** link that opens the s
 - **Cite the standard by part and edition.** Write "ISO 10303-21" or "Part 21" in the text and name the edition where it matters. New sources go in Appendix C, which is prose rather than a citation list.
 - **Use the standard's terminology.** Write entity names exactly as they appear in a Part 21 file, in backticks: `AXIS2_PLACEMENT_3D`.
 - **Keep examples real.** Listings are excerpts of the files in `examples/`, which were exported by Open CASCADE. If a listing is written to a published pattern rather than exported, the text must say so.
+- **Name each listing's file.** Open a Part 21 listing with ```` ```{.step source="bracket.step"} ````. The records it refers to but does not show are then printed beneath it from that file, and `tools/check_references.py` fails if one is missing, of the wrong type, or if the listing no longer matches the file. A record written for the book must use a number the file does not.
 - **Cross-reference, don't repeat.** Give sections, figures, tables, and listings an identifier (`{#sec-...}`, `{#tbl-...}`, `{#lst-...}`) and refer to them with `@sec-...`.
 - **Check both outputs.** Some Markdown renders differently in HTML and in the PDF. Look at both before submitting.
 

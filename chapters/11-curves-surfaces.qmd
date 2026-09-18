@@ -16,7 +16,7 @@ This chapter reads the analytic shapes, and the topology they force on a solid.
 Six millimetres in diameter, thirty long, standing on the origin.
 Here is its entire solid, 53 records, with the placements' points and directions elided where they are obvious:
 
-```step
+```{.step source="pin.step"}
 #15 = MANIFOLD_SOLID_BREP('',#16);
 #16 = CLOSED_SHELL('',(#17,#50,#59));
 #17 = ADVANCED_FACE('',(#18),#45,.T.);            /* the cylindrical side */
@@ -87,7 +87,7 @@ The cylindrical face in this file is *not* two faces; it is one face with a seam
 
 ## The cylinder record {#sec-curves-surfaces-cylinder-record}
 
-```step
+```{.step source="pin.step"}
 #45 = CYLINDRICAL_SURFACE('',#46,3.);
 #46 = AXIS2_PLACEMENT_3D('',#47,#48,#49);
 #47 = CARTESIAN_POINT('',(0.,0.,0.));
@@ -108,7 +108,7 @@ The surface normal of a cylinder points *away from* the axis regardless of which
 
 ## Circles {#sec-curves-surfaces-circles}
 
-```step
+```{.step source="pin.step"}
 #32 = CIRCLE('',#33,3.);
 #33 = AXIS2_PLACEMENT_3D('',#34,#35,#36);
 #34 = CARTESIAN_POINT('',(0.,0.,30.));
@@ -131,7 +131,7 @@ The bracket is the block with a 6 mm hole down through its centre.
 Two faces change and one is added.
 The top face:
 
-```step
+```{.step source="bracket.step"}
 #88 = ADVANCED_FACE('',(#89,#107),#118,.T.);
 #89 = FACE_BOUND('',#90,.T.);                     /* outer rectangle */
 #90 = EDGE_LOOP('',(#91,#92,#93,#101));
@@ -157,7 +157,7 @@ The standard offers `FACE_OUTER_BOUND` for that purpose, this exporter writes pl
 
 The hole's wall:
 
-```step
+```{.step source="bracket.step"}
 #187 = ADVANCED_FACE('',(#188),#199,.F.);
 #188 = FACE_BOUND('',#189,.F.);
 #189 = EDGE_LOOP('',(#190,#191,#197,#198));
@@ -189,7 +189,7 @@ Seams, it turns out, do not disturb the count — a seam adds an edge but the fa
 
 ## The sphere: a face with no edges {#sec-curves-surfaces-sphere}
 
-```step
+```{.step source="sphere.step"}
 #16 = CLOSED_SHELL('',(#17));
 #17 = ADVANCED_FACE('',(#18),#22,.T.);
 #18 = FACE_BOUND('',#19,.T.);
@@ -209,7 +209,7 @@ A `VERTEX_LOOP` is the standard's way of saying "this boundary has zero length."
 
 ## The torus: two seams {#sec-curves-surfaces-torus}
 
-```step
+```{.step source="torus.step"}
 #17 = ADVANCED_FACE('',(#18),#38,.T.);
 #19 = EDGE_LOOP('',(#20,#29,#36,#37));
 #20 = ORIENTED_EDGE('',*,*,#21,.F.);
@@ -229,7 +229,7 @@ One face, two edges, one vertex: V − E + F = 1 − 2 + 1 = 0, which for once i
 
 ## The cone {#sec-curves-surfaces-cone}
 
-```step
+```{.step source="cone.step"}
 #33 = B_SPLINE_CURVE_WITH_KNOTS('',1,(#34,#35),.UNSPECIFIED.,.F.,.F.,
         (2,2),(0.,1.),.PIECEWISE_BEZIER_KNOTS.);
 #34 = CARTESIAN_POINT('',(5.,0.,0.));

@@ -24,3 +24,19 @@ $code-font-size: 0.85em;
 
 // Part 21 listings are wide; let them scroll rather than wrap mid-record.
 div.sourceCode pre code { white-space: pre; }
+
+// The records a listing refers to, added beneath it by filters/referenced-records.lua.
+details.referenced-records {
+  margin: -0.5rem 0 1.25rem;
+  padding-left: 0.8rem;
+  border-left: 2px solid var(--bs-border-color);
+  font-size: 0.9em;
+
+  > summary {
+    color: var(--bs-secondary-color);
+    cursor: pointer;
+    margin-bottom: 0.5rem;
+  }
+  div.sourceCode { margin-top: 0; }
+  .referenced-records-file { margin: 0; }
+}

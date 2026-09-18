@@ -9,7 +9,7 @@ Two things a geometry chapter has to mention because they are in the files: the 
 The block of @sec-reading-the-block was exported with a setting that suppresses *parameter curves*.
 Without it, the same block is 350 records instead of 170, and edge `#21` looks like this:
 
-```step
+```{.step source="block-with-pcurves.step"}
 #21 = EDGE_CURVE('',#22,#24,#26,.T.);
 #26 = SURFACE_CURVE('',#27,(#31,#43),.PCURVE_S1.);
 #27 = LINE('',#28,#29);                       /* the 3D line, as before */
@@ -49,16 +49,35 @@ Writing them into the exchange file spares the importing kernel the projection a
 It also roughly doubles the number of records: each edge gains a `SURFACE_CURVE` above the 3D line it already had, two `PCURVE`s, two representations, two 2D contexts, and a 2D line, point, vector and direction for each — fifteen extra records per edge in this file.
 :::
 
+::: {.callout-warning title="In the wild: Shared or duplicated surfaces"}
+The pcurve `#31` points at `#32`, a `PLANE` — and that is the very record the face `#17` uses as its own surface.
+This exporter shares one plane between a face and every pcurve that lies on it, so the file still holds only six `PLANE` records for six faces.
+Other exporters write a fresh copy of the surface for each pcurve, and the same part then carries thirty planes instead of six.
+Neither is wrong, and this is one reason two files of the same part from two systems can differ by a factor of two in size while describing identical geometry.
+:::
+
 Three forms of surface curve turn up in files.
 Plain `SURFACE_CURVE` is the ordinary case.
 `SEAM_CURVE` is the seam of @sec-curves-surfaces: a surface curve whose *two* pcurves lie on the *same* surface, one on each side of the cut.
-A cylinder's seam, written with pcurves — the pin of @sec-curves-surfaces was exported without them, so these records are constructed rather than quoted:
+The pin of @sec-curves-surfaces was exported without pcurves.
+Exported again with them, as `pin-with-pcurves.step`, its seam is:
 
-```step
-#426 = SEAM_CURVE('',#427,(#431,#443),.PCURVE_S1.);
-#431 = PCURVE('',#432,#437);                  /* the cylinder #432, at angle 0 */
-#443 = PCURVE('',#432,#449);                  /* the same cylinder, at angle 2*pi */
+```{.step source="pin-with-pcurves.step"}
+#21 = EDGE_CURVE('',#22,#24,#26,.T.);
+#26 = SEAM_CURVE('',#27,(#31,#43),.PCURVE_S1.);
+#31 = PCURVE('',#32,#37);
+#32 = CYLINDRICAL_SURFACE('',#33,3.);
+#37 = DEFINITIONAL_REPRESENTATION('',(#38),#42);
+#38 = LINE('',#39,#40);
+#39 = CARTESIAN_POINT('',(-0.,0.));            /* u = 0 */
+#43 = PCURVE('',#32,#44);
+#44 = DEFINITIONAL_REPRESENTATION('',(#45),#49);
+#45 = LINE('',#46,#47);
+#46 = CARTESIAN_POINT('',(-6.28318530718,0.)); /* u = -2*pi */
 ```
+
+Both pcurves lie on the one cylinder `#32`, and both are the same line of constant *u* in its parameter space, a whole turn apart: *u* = 0 for the first, *u* = −2π for the second, the two sides of the cut.
+Both run in direction (0, −1), decreasing *v*; this cylinder's axis points down, so decreasing *v* is up the pin, the way the 3D line `#27` runs.
 
 `INTERSECTION_CURVE` marks an edge where two surfaces meet, which is nearly all of them; some exporters write it, most write plain `SURFACE_CURVE`.
 
@@ -69,13 +88,6 @@ Most CAD exporters write them.
 OCCT and a few others make it optional.
 A file without them is smaller, not wrong.
 
-::: {.callout-warning title="In the wild: Shared or duplicated surfaces"}
-The pcurve `#31` points at `#32`, a `PLANE` — and that is the very record the face `#17` uses as its own surface.
-This exporter shares one plane between a face and every pcurve that lies on it, so the file still holds only six `PLANE` records for six faces.
-Other exporters write a fresh copy of the surface for each pcurve, and the same part then carries thirty planes instead of six.
-Neither is wrong, and this is one reason two files of the same part from two systems can differ by a factor of two in size while describing identical geometry.
-:::
-
 ## Meshes: tessellated geometry {#sec-pcurves-meshes-tessellated}
 
 Everything so far has been exact geometry.
@@ -83,7 +95,7 @@ AP242 added a second kind: **tessellated** geometry, in which a shape is a set o
 It exists because the two things most often done with a CAD model downstream — viewing it, and comparing it — do not need surfaces and are far cheaper on a mesh; because lightweight visualisation formats (JT above all) had been carrying meshes for years and STEP could not; and because some geometry (scanned surfaces, simulation results) never had an exact form.
 A tessellated shape lives in a `TESSELLATED_SHAPE_REPRESENTATION` and is built from these records:
 
-```step
+```{.step source="block-ap242.step"}
 #500 = TESSELLATED_SHAPE_REPRESENTATION('',(#501),#165);
 #501 = TESSELLATED_SOLID('',(#503),#15);
 #503 = TRIANGULATED_FACE('',#504,4,((0.,0.,-1.)),#141,(1,2,3,4),((1,3,2),(1,4,3)));

@@ -6,8 +6,10 @@ declares, in order, so that the book's claims about entity names and attribute
 order can be checked mechanically against a published schema.
 
 Only the parts of the grammar the book depends on are handled: ENTITY headers
-with SUBTYPE OF, the explicit-attribute list, and enough of DERIVE / INVERSE /
-UNIQUE / WHERE to know where the explicit list ends.
+with SUBTYPE OF, the explicit-attribute list, enough of DERIVE / INVERSE /
+UNIQUE / WHERE to know where the explicit list ends, and the underlying type of
+every TYPE declaration, so that a reference in a file can be checked against
+the entity types its attribute admits.
 """
 
 from __future__ import annotations
@@ -26,6 +28,12 @@ _ATTRIBUTE = re.compile(
     re.S,
 )
 _COMMENT_BLOCK = re.compile(r"\(\*.*?\*\)", re.S)
+_TYPE_DECL = re.compile(r"\bTYPE\s+([A-Za-z_][A-Za-z0-9_]*)\s*=\s*(.*?);", re.I | re.S)
+_AGGREGATE = re.compile(
+    r"^(?:LIST|SET|BAG|ARRAY)\s*(?:\[[^\]]*\])?\s*OF\s+(?:UNIQUE\s+)?(?:OPTIONAL\s+)?(.*)$",
+    re.I | re.S,
+)
+_SIMPLE_TYPES = {"string", "real", "integer", "number", "boolean", "logical", "binary"}
 _COMMENT_LINE = re.compile(r"--[^\n]*")
 
 
@@ -54,6 +62,8 @@ class Schema:
         self.path = Path(path)
         self.entities: dict[str, Entity] = {}
         self.types: set[str] = set()
+        #: Underlying type text of each TYPE declaration, keyed by lower-case name.
+        self.type_defs: dict[str, str] = {}
         self._parse(self.path.read_text(errors="replace"))
 
     # -- parsing ---------------------------------------------------------
@@ -63,6 +73,8 @@ class Schema:
         text = _COMMENT_LINE.sub(" ", text)
         for match in re.finditer(r"\bTYPE\s+([A-Za-z_][A-Za-z0-9_]*)", text, re.I):
             self.types.add(match.group(1).lower())
+        for match in _TYPE_DECL.finditer(text):
+            self.type_defs[match.group(1).lower()] = " ".join(match.group(2).split())
 
         lines = text.splitlines()
         i = 0
@@ -149,6 +161,74 @@ class Schema:
             self._collect_attributes(sup, visited, out)
         for attr in entity.attributes:
             out.append(attr.name)
+
+    def attributes(self, name: str) -> list[Attribute]:
+        """Explicit attributes in Part 21 order, as ``attribute_order`` lists their names."""
+        out: list[Attribute] = []
+        self._collect_attribute_objects(name, set(), out)
+        return out
+
+    def _collect_attribute_objects(
+        self, name: str, visited: set[str], out: list[Attribute]
+    ) -> None:
+        key = name.lower()
+        if key in visited:
+            return
+        visited.add(key)
+        entity = self.get(name)
+        if entity is None:
+            return
+        for sup in entity.supertypes:
+            self._collect_attribute_objects(sup, visited, out)
+        out.extend(entity.attributes)
+
+    @lru_cache(maxsize=None)
+    def admits(self, type_text: str) -> frozenset[str] | None:
+        """Entity types a value of this attribute type may reference.
+
+        Returns the lower-case names of the entities named, directly or through
+        SELECTs and aggregates, by ``type_text``; an instance of any of them or
+        of their subtypes is acceptable.  Returns an empty set when the type
+        admits no entity at all, and ``None`` when it admits any entity
+        (``GENERIC_ENTITY``) or cannot be resolved, so that callers skip it.
+        """
+        text = " ".join(type_text.split())
+        text = re.sub(r"^OPTIONAL\s+", "", text, flags=re.I)
+        aggregate = _AGGREGATE.match(text)
+        if aggregate:
+            return self.admits(aggregate.group(1))
+        word = text.strip().lower()
+        if re.search(r"\bGENERIC_ENTITY\b", text, re.I):
+            return None
+        if word in _SIMPLE_TYPES or re.match(r"^(string|binary)\s*\(", word):
+            return frozenset()
+        if not re.fullmatch(r"[a-z_][a-z0-9_]*", word):
+            return None
+        if word in self.entities:
+            return frozenset({word})
+        underlying = self.type_defs.get(word)
+        if underlying is None:
+            return None
+        select = re.match(r"^(?:EXTENSIBLE\s+)?SELECT\s*\((.*)\)$", underlying, re.I | re.S)
+        if select:
+            out: set[str] = set()
+            for alternative in select.group(1).split(","):
+                admitted = self.admits(alternative.strip())
+                if admitted is None:
+                    return None
+                out |= admitted
+            return frozenset(out)
+        if re.match(r"^(?:EXTENSIBLE\s+)?ENUMERATION\b", underlying, re.I):
+            return frozenset()
+        return self.admits(underlying)
+
+    def is_a(self, instance_types: list[str], admitted: frozenset[str]) -> bool:
+        """Whether an instance of these entity types satisfies an admitted set."""
+        for name in instance_types:
+            key = name.lower()
+            if key in admitted or self.ancestors(key) & admitted:
+                return True
+        return False
 
     @lru_cache(maxsize=None)
     def ancestors(self, name: str) -> frozenset[str]:

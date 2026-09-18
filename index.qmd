@@ -27,12 +27,13 @@ Most of the book follows one small assembly: a rectangular bracket, 60 by 20 by 
 It is deliberately trivial as a mechanical object.
 As a STEP file it exercises almost everything the format has: product structure, repeated components, placement transforms, planar and cylindrical faces, seam edges, inner loops, colours, and enough boilerplate to show you what to skim.
 
-The files were produced with Open CASCADE Technology (OCCT), the open-source kernel behind FreeCAD and many commercial tools, rather than by hand.
+The files were produced with Open CASCADE Technology (OCCT), the open-source kernel behind FreeCAD and many commercial tools, rather than by hand; the one exception is the PMI in `bracket-pmi.step`, written by hand to the CAx Implementor Forum's recommended practice and checked by reading it back with OCCT.
 This matters.
 A hand-written example shows you what the standard permits; a real export shows you what a widely used writer actually does, including the quirks.
 Where other CAD systems do something different, the text says so.
 
 Every example file is included with the book's source, in the `examples/` directory of the repository, so you can open them beside the text.
+A listing shows only the records under discussion, but nothing it refers to is out of reach: beneath each one, the HTML edition has a panel with every record the listing points to, directly or through others, and the PDF prints the nearest of them.
 
 ## What is left out {.unnumbered}
 
