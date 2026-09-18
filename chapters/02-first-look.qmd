@@ -5,7 +5,10 @@ A complete file of 170 records, and how to read any one of them.
 Instance names, entity types, parameters; strings, references, lists; the two symbols that mean "nothing"; and the one kind of record that breaks the pattern.
 :::
 
-The running example begins with the simplest thing worth exporting: a rectangular block, 60 by 20 by 10 millimetres, sitting with one corner at the origin.
+The running example begins with the simplest thing worth exporting: a rectangular block, 60 by 20 by 10 millimetres, sitting with one corner at the origin (@fig-block).
+
+![`block.step`, drawn from its records: twelve edges and eight vertices.](../figures/block.svg){#fig-block width=75%}
+
 Open CASCADE writes it as 170 records.
 Here is the whole file with the middle cut out; the complete listing is in @sec-block-file.
 

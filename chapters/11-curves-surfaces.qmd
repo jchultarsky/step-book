@@ -13,7 +13,10 @@ This chapter reads the analytic shapes, and the topology they force on a solid.
 
 ## The pin {#sec-curves-surfaces-pin}
 
-Six millimetres in diameter, thirty long, standing on the origin.
+Six millimetres in diameter, thirty long, standing on the origin (@fig-pin).
+
+![`pin.step`: three edges, which are the two circles and the seam, and two vertices. The grey lines are the cylinder's outline, which is not an edge and is not in the file.](../figures/pin.svg){#fig-pin width=15%}
+
 Here is its entire solid, 53 records, with the placements' points and directions elided where they are obvious:
 
 ```{.step source="pin.step"}
@@ -127,7 +130,10 @@ An edge that is *part* of a circle — an arc — has two different vertices and
 
 ## The hole in the bracket {#sec-curves-surfaces-hole-in-bracket}
 
-The bracket is the block with a 6 mm hole down through its centre.
+The bracket is the block with a 6 mm hole down through its centre (@fig-bracket).
+
+![`bracket.step`: the block's twelve edges, and the hole's two circles and seam.](../figures/bracket.svg){#fig-bracket width=75%}
+
 Two faces change and one is added.
 The top face:
 
@@ -201,8 +207,10 @@ Seams, it turns out, do not disturb the count — a seam adds an edge but the fa
 
 A sphere of radius 5 as OCCT writes it with the parameter curves suppressed: one face, one bound, and the bound's loop is a **vertex loop** — a loop consisting of a single vertex and no edges.
 The spherical surface is closed in every direction; there is nothing to trim.
-But the schema requires a face to have at least one bound, so the face is "bounded" by a degenerate loop at the south pole (the coordinates are (0, 0, −5) with floating-point noise).
+But the schema requires a face to have at least one bound, so the face is "bounded" by a degenerate loop at the south pole (the coordinates are (0, 0, −5) with floating-point noise), the only thing in @fig-sphere that the file records.
 V − E + F = 1 − 0 + 1 = 2.
+
+![`sphere.step`: no edges, and one vertex at the south pole. The circle is the sphere's outline, which the file does not record.](../figures/sphere.svg){#fig-sphere width=35%}
 
 Vertex loops also appear at the apex of a cone and at the poles of a sphere that *has* been cut by a seam: the degenerate edge where a meridian meets the pole collapses to a point.
 A `VERTEX_LOOP` is the standard's way of saying "this boundary has zero length."
@@ -222,7 +230,10 @@ A `VERTEX_LOOP` is the standard's way of saying "this boundary has zero length."
 ```
 
 A torus is periodic in both directions, so a single face on it needs two seams: one around (the equator, `#21`, radius 12 = 10 + 2) and one across (a meridian, `#30`, radius 2).
-Both are closed edges on the single vertex `#22` where they cross, and both appear twice in the loop.
+Both are closed edges on the single vertex `#22` where they cross, and both appear twice in the loop (@fig-torus).
+
+![`torus.step`: the equator and a meridian, the two seams, crossing at its only vertex. The grey curves are the torus's outline.](../figures/torus.svg){#fig-torus width=70%}
+
 One face, two edges, one vertex: V − E + F = 1 − 2 + 1 = 0, which for once is the textbook genus-1 answer, because here every edge is a seam and they cancel.
 
 `TOROIDAL_SURFACE` has a `position`, a `major_radius` (centre to tube centre, 10) and a `minor_radius` (tube, 2).
@@ -241,7 +252,9 @@ One face, two edges, one vertex: V − E + F = 1 − 2 + 1 = 0, which for once i
 ```
 
 `CONICAL_SURFACE` has a `position`, a `radius` at the position's location, and a `semi_angle` in radians.
-This cone has radius 5 at z = 0 and half-angle 0.2915 rad (16.7°): over 10 mm of height it narrows to radius 2, and the axis, again, points down.
+This cone has radius 5 at z = 0 and half-angle 0.2915 rad (16.7°): over 10 mm of height it narrows to radius 2, and the axis, again, points down (@fig-cone).
+
+![`cone.step`: two circles, and a seam written as a degree-1 B-spline, which draws as the straight line it is. The grey lines are the cone's outline.](../figures/cone.svg){#fig-cone width=40%}
 
 The seam of this cone is a straight line from (5, 0, 0) to (2, 0, 10) — and the exporter has written it not as a `LINE` but as a **degree-1 B-spline with two control points**.
 It is a line in everything but name.

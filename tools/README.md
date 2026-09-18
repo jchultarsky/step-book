@@ -97,6 +97,19 @@ That last check resolves SELECTs and aggregates through the schema, so a
 `PCURVE` whose surface is a `DEFINITIONAL_REPRESENTATION`, or a usage record
 pointing at an edge loop instead of a face, fails the build.
 
+## `render_examples.py`
+
+Draws the part figures in `figures/` from the example files: every edge
+(lines, circles, B-splines), every vertex, and the outlines of cylinders,
+cones, spheres and tori, which are not edges and are drawn in grey.
+Assemblies are drawn by applying each component's
+`ITEM_DEFINED_TRANSFORMATION`.
+
+```bash
+python3 tools/render_examples.py          # regenerate figures/*.svg
+python3 tools/render_examples.py --check  # fail if a figure has drifted
+```
+
 ## `express_schema.py`
 
 The shared EXPRESS parser, also usable directly to look an entity up:

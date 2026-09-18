@@ -5,9 +5,11 @@ A bracket and two pins, exported as one file of 335 records.
 Where the tree is, where the positions are, why they are kept apart, and the second way exporters do it.
 :::
 
-The clamp is the bracket of @sec-curves-surfaces-hole-in-bracket with two pins standing on it: one at x = 15, one at x = 45, both on the top face.
+The clamp is the bracket of @sec-curves-surfaces-hole-in-bracket with two pins standing on it: one at x = 15, one at x = 45, both on the top face (@fig-clamp).
 As a STEP file it has three products but only two solids' worth of geometry — the pin's geometry appears once, not twice — and about forty records of structure that say how they fit together.
 This chapter is about those forty.
+
+![`clamp.step`, drawn by placing each component where the file's transformations put it: the bracket once, the pin twice.](../figures/clamp.svg){#fig-clamp width=60%}
 
 ## Three product chains {#sec-assemblies-product-chains}
 

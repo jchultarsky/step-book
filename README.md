@@ -27,6 +27,7 @@ chapters/            One .qmd file per chapter, numbered in reading order
 appendices/          Complete block file, entity quick reference, sources, glossary
 examples/            The STEP files every listing in the book is taken from
 filters/             Quarto filter that shows the records each listing refers to
+figures/             Part drawings generated from examples/ by tools/render_examples.py
 syntax/              Syntax-highlighting definitions for Part 21 files and EXPRESS
 styles/              Stylesheet for the HTML edition and typography fixes for the PDF
 tools/               Checks that validate the book against published EXPRESS schemas

@@ -25,6 +25,9 @@ $code-font-size: 0.85em;
 // Part 21 listings are wide; let them scroll rather than wrap mid-record.
 div.sourceCode pre code { white-space: pre; }
 
+// Part drawings are dark lines on transparent; lighten them on the dark theme.
+body.quarto-dark img[src*="figures/"] { filter: invert(0.88); }
+
 // The records a listing refers to, added beneath it by filters/referenced-records.lua.
 details.referenced-records {
   margin: -0.5rem 0 1.25rem;
