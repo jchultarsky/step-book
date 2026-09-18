@@ -59,7 +59,7 @@ Learn the ranges once and you can find anything.
 | 101–199 | Integrated application resources | 101 (draughting), 105 (kinematics) |
 | 201–299 | Application protocols | **203, 214, 242** |
 | 301–399 | Abstract test suites | rarely |
-| 401–499 | Application protocol modules | the building blocks of AP242 |
+| 401–499 | Application protocol modules | **442**, which is AP242 itself in modular form |
 | 501–599 | Application interpreted constructs | when tracing where an entity came from |
 | 1001–1999 | Application modules | the building blocks of AP242 |
 

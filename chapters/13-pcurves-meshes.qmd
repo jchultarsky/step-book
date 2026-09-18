@@ -55,17 +55,17 @@ Plain `SURFACE_CURVE` is the ordinary case.
 A cylinder's seam, written with pcurves — the pin of @sec-curves-surfaces was exported without them, so these records are constructed rather than quoted:
 
 ```step
-#26 = SEAM_CURVE('',#27,(#31,#43),.PCURVE_S1.);
-#31 = PCURVE('',#32,#37);                     /* the cylinder #32, at angle 0 */
-#43 = PCURVE('',#32,#49);                     /* the same cylinder, at angle 2*pi */
+#426 = SEAM_CURVE('',#427,(#431,#443),.PCURVE_S1.);
+#431 = PCURVE('',#432,#437);                  /* the cylinder #432, at angle 0 */
+#443 = PCURVE('',#432,#449);                  /* the same cylinder, at angle 2*pi */
 ```
 
 `INTERSECTION_CURVE` marks an edge where two surfaces meet, which is nearly all of them; some exporters write it, most write plain `SURFACE_CURVE`.
 
 Are pcurves needed?
 For a reader that only walks structure, no: an edge's 3D curve is `surface_curve.curve_3d`, one more hop than before, and everything else is unchanged.
-For a reader that rebuilds solids in a geometric kernel, they are a strong hint and occasionally the only way to trim a face correctly; the CAx Implementor Forum recommends writing them.
-Most CAD exporters do.
+For a reader that rebuilds solids in a geometric kernel, they are a strong hint and occasionally the only way to trim a face correctly.
+Most CAD exporters write them.
 OCCT and a few others make it optional.
 A file without them is smaller, not wrong.
 

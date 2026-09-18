@@ -51,7 +51,7 @@ Entity
 
 Enumeration
 :   a type whose values are a fixed set of names, written in the file between full stops: `.MILLI.`, `.METRE.`.
-    `BOOLEAN` and `LOGICAL` are written the same way but are base types, not enumerations.
+    `BOOLEAN` and `LOGICAL` are EXPRESS base types, but Part 21 encodes their values as enumeration values too.
 
 EXPRESS
 :   the schema language of ISO 10303 (Part 11).
@@ -70,7 +70,7 @@ Instance name
 :   the `#n` identifier of a record; file-local.
 
 Integrated resources
-:   the shared library of entity definitions (Parts 41–62 and 101–112, a range still being added to) from which every AP is built.
+:   the shared library of entity definitions (Parts 41–99 and 101–199) from which every AP is built.
 
 Internal mapping
 :   the ordinary one-type record form with all inherited attributes flattened.

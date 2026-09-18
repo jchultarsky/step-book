@@ -96,7 +96,7 @@ And all annotations, planes and callouts are collected in a **`DRAUGHTING_MODEL`
 #631 = MECHANICAL_DESIGN_AND_DRAUGHTING_RELATIONSHIP('','',#10,#630);
 ```
 
-The relationship record puts the shape representation and the draughting model side by side, in either order.
+The relationship record puts the shape representation and the draughting model side by side: `#10` in `rep_1`, the global draughting model in `rep_2`, which is the direction Part 43 gives the attributes and the one the recommended practices fix.
 Where two draughting models are related instead, the recommended practice puts the global one in `rep_2` and a saved view in `rep_1`.
 `MECHANICAL_DESIGN_AND_DRAUGHTING_RELATIONSHIP` does not exist in AP214, where a plain `REPRESENTATION_RELATIONSHIP` does the job.
 A reader looking for "all the PMI drawn on this part" finds the draughting models that share the part's geometric context and walks their items.

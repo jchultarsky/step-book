@@ -97,14 +97,18 @@ Usually the two traversals belong to two different faces; on a seam they belong 
 A `MANIFOLD_SOLID_BREP` claims both.
 
 Neither claim is checked by the file format.
-But there is a quick test a reader can apply to a closed shell whose faces are each bounded by a single loop:
+But there is arithmetic that will catch a badly built one.
+For a solid of $S$ shells with $R$ inner loops and $H$ through-holes:
 
-$$V - E + F = 2$$
+$$V - E + F - R = 2(S - H)$$
 
-eight vertices, twelve edges, six faces: $8 - 12 + 6 = 2$.
 This is the Euler–Poincaré characteristic, and it is the first thing a validator computes: a shell that fails it is missing an edge, has a duplicated vertex, or was never closed.
-The full form allows for faces with inner loops (rings, $R$), several shells ($S$) and through-holes ($H$): $V - E + F - R = 2(S - H)$.
-A torus gives 0; so does the bracket, once its two ring-shaped faces are accounted for — and in @sec-curves-surfaces it does.
+The familiar short form, $V - E + F = 2$, is what it becomes for a single shell with no inner loops and no through-holes — the block: eight vertices, twelve edges, six faces, $8 - 12 + 6 = 2$.
+Both of those conditions are needed, and neither alone is enough.
+A box with a blind pocket has no through-hole, but the pocket's mouth is an inner loop, and its plain count is 3.
+The torus has one loop on its single face, but it has a through-hole, and its plain count is 0.
+The bracket, with two inner loops and one through-hole, comes back to 2 by cancellation — which is why the short form is worth running only on a shell you already know is a plain closed skin.
+Run the general form and you never have to ask.
 
 ## What the file does not say {#sec-brep-not-said}
 
@@ -119,5 +123,5 @@ Design intent lives in the CAD system's native format, or — for tolerances and
 A B-rep is a skin described in two layers: geometry (infinite surfaces, curves, points) and topology (finite faces, edges, vertices connected to each other).
 Connectivity is by shared records, not shared coordinates.
 Everything has a direction, and the directions must compose to an outward normal with the face's material on the left of every loop.
-A closed shell whose faces each have one loop satisfies $V - E + F = 2$; a face with an inner loop needs the corrected form.
+The general count is $V - E + F - R = 2(S - H)$; the familiar $V - E + F = 2$ is its special case, for one shell with no inner loops and no through-holes.
 :::
