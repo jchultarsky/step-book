@@ -43,3 +43,11 @@ details.referenced-records {
   div.sourceCode { margin-top: 0; }
   .referenced-records-file { margin: 0; }
 }
+
+// On a phone, long names in prose and tables must be able to wrap, or the page
+// scrolls sideways.  filters/print-editions.lua puts a <wbr> after every
+// underscore; these let inline code wrap there and at spaces, and let table
+// cells shrink to the screen.  Listings are untouched and keep scrolling.
+:not(pre) > code { white-space: pre-wrap; overflow-wrap: break-word; }
+main table td, main table th { overflow-wrap: break-word; }
+.table-scroll { overflow-x: auto; }
