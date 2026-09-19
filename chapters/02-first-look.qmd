@@ -66,7 +66,7 @@ For now the aim is to be able to read any single line.
 
 ## The skeleton {#sec-first-look-skeleton}
 
-A Part 21 file has a fixed outer structure and two sections:
+A Part 21 file written to edition 2, which is nearly all of them, has a fixed outer structure and two sections:
 
 ```step
 ISO-10303-21;
@@ -82,7 +82,7 @@ END-ISO-10303-21;
 The `HEADER` says what the file is: who wrote it, when, and — crucially — which schema its records follow.
 It has its own chapter.
 The `DATA` section is the payload: a set of records, each with a number, that reference one another to form a graph.
-There is nothing else.
+There is nothing else in an edition 2 file; the sections edition 3 added are in @sec-beyond-edition-2.
 Line breaks and tabs are ignored everywhere, even inside a string, so a long record or a long string may be split across lines without changing what it means.
 The space character is the only whitespace that separates tokens, and inside a string it is data.
 The exporter above wraps long records at 72 columns because an old convention says so, and many do not.
@@ -199,7 +199,7 @@ Look again at the first nine data records and note the *direction* of every refe
 `#6` points at `#7`; `#5` points at `#6`; `#4` points at `#5`.
 The *version* knows which *product* it is a version of.
 The *product* has no idea that any versions exist.
-Every reference in a STEP file runs this way: from the more specific or dependent thing toward the more general or independent one.
+References in a STEP file run this way: from the more specific or dependent thing toward the more general or independent one, a shell to the faces it is made of as much as a version to its product.
 A face points at its surface; the surface does not list its faces.
 An edge points at its vertices; the vertex does not know which edges meet there.
 
@@ -244,6 +244,6 @@ In a real part with a few hundred faces the geometry becomes 99% of the file, an
 ::: {.callout-important title="In brief"}
 A record is `#id = TYPE(parameters);`.
 Parameters are strings, references, lists, reals, integers, enumerations or binaries; `$` is an absent optional value and `*` a derived one.
-References point from the specific to the general, so reading a file means walking against the arrows.
+References point from the dependent thing to the one it depends on, so finding what is attached to a product means walking against the arrows.
 A record beginning `#id = (` is one object with several types.
 :::

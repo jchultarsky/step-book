@@ -2,7 +2,7 @@
 
 ::: {.chapter-abstract}
 One hundred and fifty records, read from the bottom of the ladder up: points and vertices, lines and edges, loops, faces, shell, solid.
-Then the orientation flags, composed by hand, and the count that proves the shell is closed.
+Then the orientation flags, composed by hand, and the count that checks the shell.
 :::
 
 The block's eight corners, labelled with their vertex records:
@@ -206,7 +206,7 @@ Those, if present, are properties attached from outside, in @sec-properties-vali
 
 And the Euler check: V − E + F = 8 − 12 + 6 = 2.
 The shell is closed and has no through-holes, and the count of records is exactly what the structure predicts.
-When a file's record counts do *not* match a pattern like this — 13 edges for a box, say — something has been split or duplicated, and the shell is usually not what it claims.
+When a file's record counts do *not* match a pattern like this — 13 edges for a box, say — an edge or a face has been split, which is legal and common after Boolean operations; it is the connectivity, not the count, that decides whether the shell is sound.
 
 ::: {.callout-warning title="In the wild: What varies between exporters"}
 The structure above is universal; the habits are not.

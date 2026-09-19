@@ -40,7 +40,7 @@ Files claiming AP203 and AP214 will be in circulation for decades.
 It is one of several encodings — there is also an XML form and, in principle, a binary one — but it is the one everyone uses, and when this book says "a STEP file" it means a Part 21 file.
 
 The distinction matters in practice.
-"STEP can't carry colours" is true of AP203 and false of AP214 and AP242.
+"STEP can't carry colours" is true of AP203's first edition and false of its second, of AP214 and of AP242.
 "STEP files are huge" is true of Part 21 and not intrinsic to the data model.
 "Our STEP import failed" almost always means the *reader* did not support something the *AP* allowed and the *writer* used.
 

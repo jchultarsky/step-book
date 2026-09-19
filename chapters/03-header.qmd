@@ -172,7 +172,7 @@ They are the second place, after the header, where you can identify the protocol
 
 ::: {.callout-important title="In brief"}
 Three header records, no instance names, fixed order.
-`FILE_DESCRIPTION` gives the Part 21 edition.
+`FILE_DESCRIPTION` gives the implementation level: the Part 21 version whose features the file uses and its syntactical conformance class, not the edition the writer worked from.
 `FILE_NAME` names the translator and the CAD system, which predict the file's quirks.
 `FILE_SCHEMA` names the AP, and is a claim rather than a guarantee.
 `APPLICATION_CONTEXT` and `APPLICATION_PROTOCOL_DEFINITION`, the first two data records, repeat that claim from inside the data.

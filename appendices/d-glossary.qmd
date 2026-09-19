@@ -122,7 +122,8 @@ Subtype, supertype
     A record carries the supertypes' attributes first, from the root of the chain down; see internal mapping.
 
 Uncertainty
-:   the writing kernel's coincidence tolerance, carried in the representation context.
+:   the writing kernel's coincidence tolerance, carried in the representation context: two points closer than it are treated as the same point.
+    It is a geometric comparison, not a topological one; vertices are shared by reference, never merged by proximity.
 
 Validation property
 :   volume, area, centroid or count written by the exporter so the importer can check the transfer.

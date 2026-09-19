@@ -7,7 +7,8 @@ Why AP242 exists, in one chapter.
 
 A B-rep says what a part's nominal shape is.
 It does not say how far a real part may deviate from that shape and still be acceptable, which surfaces must be flat and how flat, which holes must line up with which faces and how closely.
-That information — **product manufacturing information**, PMI, or in older usage geometric dimensioning and tolerancing, GD&T — lived for a century on drawings, and moving it into the 3D model is the whole project of *model-based definition*.
+That information is **product manufacturing information**, PMI: dimensions, geometric tolerances, notes, surface texture and the other manufacturing requirements, of which geometric dimensioning and tolerancing, GD&T, is the largest part.
+It lived for a century on drawings, and moving it into the 3D model is the whole project of *model-based definition*.
 AP242 was created, more than for any other reason, to carry it.
 
 ::: {.callout-note title="Engineering background: Geometric dimensioning and tolerancing"}
@@ -21,7 +22,7 @@ Its core ideas:
 A **datum feature** is the actual surface (the bottom face of the bracket, say), and the **datum** is the perfect plane that surface is taken to represent.
 Datums are labelled A, B, C.
 
-A **datum reference frame** is an ordered set of datums — primary, secondary, tertiary — that fully locates the part.
+A **datum reference frame** is an ordered set of datums — primary, secondary, tertiary, as many as the tolerance needs — that locates the part for that tolerance.
 *A|B|C* means: sit the part on A, slide it against B, then against C.
 Order matters because it decides which contact takes precedence.
 
@@ -246,7 +247,8 @@ A saved view is a `DRAUGHTING_MODEL` paired with a `CAMERA_MODEL_D3` among its i
 The recommended practice puts the view's *name* on the camera, `'Top'`, and uses the draughting model's name for the set of things shown.
 AP242 also has `MODEL_GEOMETRIC_VIEW`, which ties the camera to its draughting model explicitly; the NIST test files that write it leave its name empty, so a reader should look for the view's name on the camera.
 The camera's `view_reference_system` is the eye: its location is where the camera stands, here 100 mm above the bracket, and its *z* axis is the direction of view, here straight down.
-The `VIEW_VOLUME` gives the rest, and the recommended practice fixes most of it: a parallel projection, the projection point `#807` at the camera's own origin, no front or back clipping, and a view-plane distance equal to the distance from the eye to what it looks at, 100 mm down to the top face, which sets the zoom.
+The `VIEW_VOLUME` gives the rest, and the recommended practice fixes most of it: a parallel projection, the projection point `#807` at the camera's own origin, no front or back clipping, and a view-plane distance equal to the distance from the eye to what it looks at, 100 mm down to the top face.
+In a parallel projection that distance does not set the zoom; the window does.
 Its window is a `PLANAR_BOX`, 80 mm by 40, centred on the line of sight.
 The part's geometry would appear in the view through a `MAPPED_ITEM` of its shape representation among the model's items; this view shows only the callout.
 The same callout may appear in several views.
@@ -258,7 +260,7 @@ This is why a viewer sometimes shows six annotations out of ninety: it has opene
 Every mainstream CAD system exports graphical PMI when asked, and most produce it as polylines; the tessellated form is less common.
 Semantic PMI is exported by NX, Creo, CATIA and SolidWorks in their current versions, with coverage that varies by tolerance type and is documented, system by system, in the CAx Implementor Forum's implementation coverage matrix.
 NIST's MBE PMI test models — a set of parts with known PMI and published answer keys — are the standard way to find out what a particular exporter gets right.
-It is normal for a file to have complete graphical PMI and partial semantic PMI: the graphical side is drawn from the CAD system's display and is always complete, the semantic side requires the system to have modelled the tolerance as data in the first place, and many drawings-first workflows never did.
+It is normal for a file to have complete graphical PMI and partial semantic PMI: the graphical side is drawn from the CAD system's display and is complete unless the export drops annotations, the semantic side requires the system to have modelled the tolerance as data in the first place, and many drawings-first workflows never did.
 :::
 
 ::: {.callout-important title="In brief"}

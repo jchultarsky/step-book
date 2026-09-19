@@ -4,11 +4,16 @@
 Three checks run over the .qmd sources:
 
 1.  Every Part 21 record in a ``step`` listing names an entity that exists in
-    AP242, AP214 or AP203e2, and supplies the number of parameters that the
-    schema declares for it.
+    AP242, AP214 or AP203e2.  Simple records must also supply a parameter
+    count that at least one of those schemas declares; complex records are
+    checked for their component entity names only.
 2.  Every entity name written in inline code in prose exists in one of those
     schemas.  This catches typos and invented entities.
-3.  Every record in every file under ``examples/`` satisfies its schema.
+3.  Every record in every file under ``examples/`` gets the same checks.
+
+This is not full schema validation: FILE_SCHEMA selection, scalar types,
+SELECT wrappers, WHERE and global rules and geometric validity are outside
+this script.
 
 Whether a listing matches its file, and whether the records it refers to exist
 and are of the right type, is ``check_references.py``.
@@ -248,7 +253,7 @@ def check_prose_entities(paths: list[Path], schemas: dict[str, Schema], report: 
 
 
 def check_examples(schemas: dict[str, Schema], report: Report) -> None:
-    """Every record in every bundled example file must satisfy its schema."""
+    """Check bundled examples for entity names and simple-record parameter counts."""
     for path in sorted((ROOT / "examples").glob("*.step")):
         text = path.read_text()
         data = text.split("DATA;", 1)[-1]
