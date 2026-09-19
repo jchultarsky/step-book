@@ -27,7 +27,7 @@ Read top down: *a three-dimensional coordinate space, measured in millimetres, r
 ## Representations and their contexts {#sec-contexts-units-representations}
 
 The word *representation* is Part 43's, and it is worth a moment because it organises half the file.
-A **representation** is a bag of **representation items** together with a **representation context** that says how to interpret them.
+A **representation** is a set of **representation items** together with a **representation context** that says how to interpret them.
 `#10` is a representation: its items are `#11` (an axis placement) and `#15` (a solid), and its context is `#165`.
 Every point, curve, surface, face and solid in the file is a representation item, and every one belongs to some representation, and every representation has exactly one context.
 
@@ -136,7 +136,9 @@ Much of the "healing" that STEP importers do is repairing exactly that.
 :::
 
 The uncertainty is what makes the same file behave differently in different tools.
-A `'confusion accuracy'` of $10^{-7}$ mm from one kernel and $10^{-4}$ mm from another describe geometry of very different quality, and the reader that ignores this value is the one whose imports mysteriously fail.
+A `'confusion accuracy'` of $10^{-7}$ mm from one kernel and $10^{-4}$ mm from another describe geometry fitted to very different thresholds, and the reader that ignores this value is the one whose imports mysteriously fail.
+The value is a declaration, not a measurement: OCCT, for one, can be set to write its default precision, a user-chosen value, or the smallest, average or largest tolerance among the shape's sub-shapes, and its reader can be told to ignore the file's value and use its own.
+It says nothing about topology either: vertices are shared by reference, and nothing in a file is merged because its coordinates are close.
 
 ## Derived units {#sec-contexts-units-derived-units}
 
@@ -166,7 +168,7 @@ Follow the reference from each representation to its context; never cache "the" 
 ::: {.callout-important title="In brief"}
 Units live in the representation context, which every geometric representation references.
 A geometric context carries a length unit and a plane angle unit — required by AP214, conventional elsewhere — and by convention a solid angle unit too; each is a complex instance.
-SI units derive their dimensions; conversion-based units (inch, degree) state them and define themselves as a multiple of an SI unit, so inch files contain the millimetre.
-The uncertainty is the writing kernel's coincidence tolerance, named `'distance_accuracy_value'`.
+SI units derive their dimensions; conversion-based units (inch, degree) define themselves as a multiple of another unit — this inch file carries 25.4 millimetres, another could carry 0.0254 metres — and whether their dimensions are written out or derived depends on the schema edition.
+The uncertainty is the writing kernel's coincidence tolerance, named `'distance_accuracy_value'`: a declaration of the writer's threshold, not a measurement of the geometry.
 A file can have several contexts; units belong to representations, not files.
 :::

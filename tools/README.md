@@ -9,9 +9,12 @@ All of them run in CI on every push and pull request.
 
 Three checks over every `.qmd` source:
 
-1. Every Part 21 record in a `step` listing names an entity that exists in AP242, AP214 or AP203e2, and supplies the number of parameters the schema declares for it.
+1. Every simple Part 21 record in a `step` listing names an entity that exists in AP242, AP214 or AP203e2, and supplies a parameter count that at least one of those schemas declares for it. Complex records are checked for their component entity names, not their parameter counts.
 2. Every entity name written in inline code in prose exists in one of those schemas, which catches typos and invented entities.
-3. Every record in every file under `examples/` satisfies its schema.
+3. Every record in every file under `examples/` gets the same entity-name and parameter-count checks.
+
+The script does not select a schema from `FILE_SCHEMA`, check scalar types or SELECT wrappers, evaluate WHERE or global rules, or validate geometry.
+`check_references.py` separately checks reference targets and listing consistency; neither is a conformance validator.
 
 ```bash
 python3 tools/check_book.py
@@ -20,7 +23,8 @@ python3 tools/check_book.py
 ## `check_appendix_b.py`
 
 Appendix B lists each entity's attributes in the order a Part 21 record supplies them.
-That is exactly what an EXPRESS schema settles, so every row is checked against it.
+That is exactly what an EXPRESS schema settles, so every row's attribute names and order are checked against it, accepting either the flattened attributes or a complex block's own.
+Parenthesised hints such as `(set)` are stripped before comparison and are not validated; rows the script cannot parse are skipped.
 
 ```bash
 python3 tools/check_appendix_b.py

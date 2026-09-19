@@ -114,7 +114,7 @@ If `pnindex` is empty, the triangles index the coordinates directly.
 
 `TESSELLATED_SHELL` and `TESSELLATED_SOLID` are alternatives rather than levels, and each holds its tessellated faces directly: a shell cannot be an item of a solid, because the schema admits only tessellated faces, edges and vertices there.
 A shell carries an optional `topological_link` to the exact `CONNECTED_FACE_SET`, closed or open; a solid carries an optional `geometric_link` to the exact `MANIFOLD_SOLID_BREP`.
-Here the solid's `geometric_link` points at the exact `MANIFOLD_SOLID_BREP` `#15`, and the face's own at the exact `ADVANCED_FACE` `#141`: this is a **hybrid** file that carries the exact B-rep *and* a mesh of it, and says which is which.
+Here the solid's `geometric_link` points at the exact `MANIFOLD_SOLID_BREP` `#15`, and the face's own at the exact `ADVANCED_FACE` `#141`: this is how a **hybrid** file carries the exact B-rep *and* a mesh of it, and says which is which.
 A `COMPLEX_TRIANGULATED_FACE` is an alternative to `TRIANGULATED_FACE` rather than an extension of it: it carries triangle strips and fans instead of a plain triangle list, and must have at least one of them.
  `TRIANGULATED_SURFACE_SET` and `TESSELLATED_CURVE_SET` cover meshes and polylines with no solid behind them; `TESSELLATED_POINT_SET` covers scanned points.
 

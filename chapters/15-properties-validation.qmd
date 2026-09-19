@@ -53,6 +53,7 @@ The most important use of the property pattern is one the standard's implementor
 The writer computes a few numbers that summarise the geometry — volume, surface area, centroid — and puts them in the file.
 The reader, after importing, computes the same numbers from what it built and compares.
 If they match to within tolerance, the geometry survived; if the volume is off by a face's worth, a face was lost; if the centroid moved, a component is misplaced.
+A match is evidence rather than proof — different shapes can share a volume, an area and a centroid — but a mismatch is a certain sign that something went wrong.
 
 ```{.step source="block.step"}
 #400 = PROPERTY_DEFINITION('geometric validation property',
@@ -116,10 +117,11 @@ Other names in a file:
 - **Occurrence names** — `'pin-1'`, `'pin-2'` — are in `NEXT_ASSEMBLY_USAGE_OCCURRENCE.name`.
 - **Body names**, in multi-body parts, are in `MANIFOLD_SOLID_BREP.name` when the exporter writes them, and in `SHAPE_REPRESENTATION.name` for some others.
 - **Face names**, rarely, in `ADVANCED_FACE.name`.
-- **Feature names** do not exist.
-  A STEP file has no features.
+- **Feature names** exist only where a `SHAPE_ASPECT` names a feature, as the PMI of @sec-pmi does for a datum feature.
+  There is no feature tree.
 - **Descriptions** of anything are in the entity's `description` attribute, which is `''` or `$` nearly everywhere.
-- **File-level metadata** — author, organisation, originating system — is in the header and nowhere else.
+- **File-level metadata** — author, organisation, originating system — is in the header.
+  People, organisations and approvals attached to the product itself are data-section records, which AP203 first edition required and the later protocols make optional.
 
 A reader that wants "the name of this thing" has to know which thing and look in the right slot; there is no universal name table.
 
@@ -133,5 +135,5 @@ What travels is the evaluated model and a set of labels on it.
 
 ::: {.callout-important title="In brief"}
 A property is `PROPERTY_DEFINITION` (name, and what it is a property of) → `PROPERTY_DEFINITION_REPRESENTATION` → `REPRESENTATION` → an item: `DESCRIPTIVE_REPRESENTATION_ITEM` for text, `MEASURE_REPRESENTATION_ITEM` with a wrapped value and a unit for numbers.
-Validation properties use this pattern with prescribed names — `'geometric validation property'`, `'volume'`, `'surface area'`, `'centroid'` — to carry a checksum of the geometry that the receiving system recomputes and compares.
+Validation properties use this pattern with prescribed names — `'geometric validation property'`, `'volume'`, `'surface area'`, `'centroid'` — to carry a checksum of the geometry that the receiving system recomputes and compares; it catches most transfer errors without proving equivalence.
 :::

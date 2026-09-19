@@ -111,8 +111,8 @@ A layer can be switched off, or an item hidden, with `INVISIBILITY`:
 Not appearance, but often asked about in the same breath: *where is the name of a face?*
 Every representation item has a `name` attribute, and it is almost always `''`.
 Some systems — NX and Creo among them, when asked — write the user's face or body name there: `ADVANCED_FACE('Mounting surface',(#18),#52,.F.)`.
-Nothing else in the standard carries "the name of face 7," and a system that does not put it in the name slot has no way to send it.
-The same is true of feature names, which do not survive export at all: a STEP file knows nothing about holes, fillets or pockets, only about faces.
+The only other place is from outside: a `SHAPE_ASPECT` whose name is the label and whose `GEOMETRIC_ITEM_SPECIFIC_USAGE` points at the face, the mechanism @sec-pmi uses for datum features; few exporters use it for plain names.
+Feature names go the same way or not at all: the B-rep knows nothing about holes, fillets or pockets, only about faces, and although AP242 defines feature records, mainstream exporters do not write them.
 
 ::: {.callout-warning title="In the wild: What AP203 files cannot say"}
 `STYLED_ITEM`, `COLOUR_RGB` and `PRESENTATION_LAYER_ASSIGNMENT` are not in AP203 first edition (`CONFIG_CONTROL_DESIGN`).

@@ -4,7 +4,7 @@
 What differs between an AP203, an AP214 and an AP242 file at the level of records; what "conformance class" means and why vendors care; and how to read a file's origin from its habits.
 :::
 
-Everything in this book so far has been written against records that are identical across the three mechanical application protocols.
+Most of this book has been written against records that are identical across the three mechanical application protocols; presentation, PMI and tessellation were the first places where the protocol mattered.
 The block's geometry is the same in all of them; so is its product chain, its units, its assembly structure.
 This chapter is about where they differ, and about the gap between what a protocol permits and what any given exporter writes.
 
@@ -27,14 +27,14 @@ AP242 was designed as the successor to both and is a superset of each for everyt
 
 The practical consequences for a reader:
 
-- A file declaring **AP203 first edition** has geometry and structure and nothing else.
+- A file declaring **AP203 first edition** has geometry, product structure and configuration-management data — people, approvals, security classification — and no presentation.
   If it contains colour records, the writer violated its own declaration.
 - A file declaring **AP214** may have everything in Parts I and II of this book plus colours, layers, graphical PMI and user properties.
   Its semantic PMI, if any, uses an older and less complete set of entities.
 - A file declaring **AP242** may have all of that plus tessellation, full semantic PMI, saved views, and the AP242-specific validation properties.
 
 And for a writer: if colours or PMI matter, write AP242.
-Writing AP214 for colour is still common and still works; writing AP203 for anything but bare geometry is a mistake that many exporters' default settings make.
+Writing AP214 for colour is still common and still works; writing AP203 first edition for anything beyond geometry and product structure is a mistake that many exporters' default settings make.
 
 ## Conformance classes {#sec-application-protocols-conformance-classes}
 
@@ -44,8 +44,8 @@ AP203's original classes were six shape levels — configuration-controlled desi
 AP214 has twenty.
 AP242's are organised by capability — geometry, assembly, PMI, tessellation — and a vendor's export dialog often exposes them as options.
 
-For a reader of files the classes matter in one way: they tell you what the *writer* was tested against.
-A CAD vendor who says their exporter conforms to AP242 "with semantic PMI" has passed the tests for that class, which means the records in @sec-pmi will be present and well-formed.
+For a reader of files the classes matter in one way: they tell you what the *writer* claims to support.
+A CAD vendor who says their exporter conforms to AP242 "with semantic PMI" is claiming that scope, and the CAx-IF test rounds are where such claims are checked; the claim alone does not mean every file will carry the records of @sec-pmi, which need the tolerances to have been modelled and the export option switched on.
 A vendor who does not make that claim may still write them, or may write some of them, or may write them wrongly.
 
 ## Recommended practices {#sec-application-protocols-recommended-practices}
@@ -55,7 +55,8 @@ It does not say, for most things, what is *good*.
 Two exporters can write the same assembly placement with `rep_1` and `rep_2` swapped, both legally, and a reader has to handle both.
 The gap is filled by the **recommended practices** of the CAx Implementor Forum (CAx-IF), a joint body of CAD vendors and users that has run interoperability test rounds since the 1990s and publishes, freely, documents that pin down how to write each capability so that it will actually be read: assembly structure, colours and layers, user-defined attributes, validation properties, PMI (graphical and semantic), tessellation, external references.
 
-Several things in this book are recommended practice rather than standard: the string `'geometric validation property'`, the names `'volume'`, `'surface area'` and `'centroid'`, the orientation of `rep_1` and `rep_2`, the `'PMI representation to presentation link'` association name, the tolerance zone form strings.
+Several things in this book are recommended practice rather than standard: the string `'geometric validation property'`, the names `'volume'`, `'surface area'` and `'centroid'`, the orientation of `rep_1` and `rep_2`, the `'PMI representation to presentation link'` association name.
+The tolerance zone form names are not among them: AP242 fixes that list with a global rule, as @sec-pmi says.
 A reader that follows the recommended practices reads every mainstream exporter's files; a reader that follows only the standard reads none of them reliably.
 The documents are at the forum's site (now part of the MBx Interoperability Forum), and for anyone working with real files they are more useful than the standard itself.
 
@@ -105,7 +106,7 @@ Between them they answer most "does system X write Y correctly?" questions witho
 
 ::: {.callout-important title="In brief"}
 AP203, AP214 and AP242 share geometry and structure; they differ in presentation, PMI and tessellation, with AP242 a superset of both older protocols.
-Conformance classes name what an implementation was tested for.
+Conformance classes name what an implementation claims to support; the CAx-IF test rounds are where the claims are checked.
 The recommended practices of the CAx Implementor Forum, not the standard, decide how real files are written, and a reader must follow them.
 Exporters have recognisable habits; none change the meaning of the records.
 :::

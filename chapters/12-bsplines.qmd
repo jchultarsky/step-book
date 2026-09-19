@@ -145,6 +145,7 @@ The half-weight points are the corners of the circumscribing triangle; the unit-
 The knot values are angles in radians because that is how the kernel parametrised the original circle.
 This curve is *not* clamped: its end multiplicities are 1, not $p + 1$, and the outer knots at −2.094 and 8.378 lie outside the curve's actual range of 0 to 2π.
 That is how a closed periodic curve is written, and it is the common exception to the rule that CAD curves are clamped.
+`closed_curve` itself only says that the ends meet; it is the periodic knot layout that makes them meet smoothly.
 
 The equivalent surface — the pin's cylindrical side as a rational B-spline — is the same construction in *u* with a degree-1 straight line in *v*, and its weights are a 7 × 2 grid.
 
@@ -152,13 +153,15 @@ The equivalent surface — the pin's cylindrical side as a rational B-spline —
 
 A file can legitimately contain a cylinder written as `CYLINDRICAL_SURFACE` or as a rational B-spline surface, and a reader may need to know that they are the same shape.
 Some exporters convert everything to NURBS on the way out (older CATIA translators did this for anything not planar).
-The signs:
+The signs, none of which is proof on its own:
 
 - A degree-1 curve with two control points is a **line**.
 - A degree-2 rational curve with 7 control points, weights (1, ½)\*, and knots of multiplicity 2 at 120° intervals is a **full circle**. Quarter-circles use 3 control points and weights (1, $\sqrt{2}/2$, 1). Other arc splits exist.
 - A surface with degree 1 in one direction and control rows that are translates of each other is an **extrusion**.
 - A surface with degree 2 rational in one direction with the circle pattern, and degree 1 in the other, is a **cylinder**.
 - A surface whose control net is planar is a **plane** (a bilinear 2 × 2 patch, as `#92` in the same file: degree 1 in both directions, four points).
+
+Each sign is necessary, not sufficient: stretch the circle's seven control points and the same degree, knots and weights describe an ellipse, and a cone frustum has the cylinder's degree pattern, so the control points have to be checked as well.
 
 None of this is required.
 Any reader that can evaluate a NURBS can evaluate these.
@@ -175,5 +178,5 @@ Each is what its name suggests, each is in the AP242 schema, and a reader that h
 A B-spline record is degree, control points, three flags, and a knot vector stored as distinct values plus multiplicities; the full vector has $n + p + 1$ entries and is almost always clamped.
 A surface is the same in two directions with a grid of control points.
 Rational splines add a weight per control point and are written as complex instances because the rational and with-knots subtypes are siblings.
-Circles are seven points with weights 1, ½ alternating; lines are degree 1 with two points; extrusions are degree 1 in one direction.
+Circles are seven points with weights 1, ½ alternating; lines are degree 1 with two points; extrusions are degree 1 in one direction — patterns that suggest a shape, which the control points then confirm.
 :::

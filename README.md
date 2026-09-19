@@ -38,8 +38,8 @@ docs/                The original PDF draft the book was converted from
 
 ## Checking the book
 
-Every entity name, listing and attribute claim is verified against the published AP242, AP214 and AP203 schemas, which are vendored under `tools/schemas/`.
-CI runs these before rendering, so a wrong entity name or parameter count fails the build instead of reaching a reader.
+CI checks entity names, simple-record parameter counts, reference targets, listing consistency and Appendix B attribute order against the AP242, AP214 and AP203 edition-2 schemas vendored under `tools/schemas/`, so a wrong entity name or parameter count fails the build instead of reaching a reader.
+These are focused checks, not full EXPRESS or geometric validation: a passing build does not prove that every claim or example conforms to its declared schema and edition.
 
 ```bash
 python3 tools/check_book.py

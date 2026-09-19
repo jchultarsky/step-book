@@ -1,7 +1,7 @@
 # Sources and Further Reading {#sec-sources}
 
 **The standard.**
-ISO 10303-21:2016 (Part 21, the file format) is the one document worth buying if you work with the files directly; the final edition-3 text is also hosted freely by STEP Tools.
+ISO 10303-21:2016 (Part 21, the file format) is the one document worth buying if you work with the files directly; the final edition-3 text is also [hosted freely by STEP Tools](https://www.steptools.com/stds/step/IS_final_p21e3.html).
 ISO 10303-11 (EXPRESS) is useful once, for the grammar of the schema language.
 ISO 10303-42 (geometry and topology) is the reference for Part II and is readable as prose.
 ISO 10303-242:2025 is the current AP242 publication and is consulted rather than read.
@@ -22,3 +22,7 @@ The CAx-IF publishes its test suite definitions and an implementation coverage m
 **Reading files.**
 Open CASCADE Technology (<https://github.com/Open-Cascade-SAS/OCCT>) is the open-source kernel used to produce every example in this book, apart from the hand-written PMI in `bracket-pmi.step`, and reads and writes AP203, AP214 and AP242; FreeCAD and CadQuery expose it.
 The NIST analyzer above is the best tool for inspecting a file's structure without a kernel.
+
+**Checking interpretations.**
+The frame defaults in @sec-assemblies follow the functions `build_axes` and `first_proj_axis` in Part 42's EXPRESS, and the tolerance zone names in @sec-pmi are the list in the AP242 rule `tolerance_zone_form_name_constraint`; both are in the schema text itself.
+The [OCCT STEP translator guide](https://dev.opencascade.org/doc/overview/html/occt_user_guides__step.html) documents the read and write precision modes discussed in @sec-contexts-units.

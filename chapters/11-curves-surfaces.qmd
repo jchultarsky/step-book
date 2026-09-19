@@ -62,7 +62,7 @@ Three faces: a cylinder and two planar caps.
 Three edges: two circles and one straight line.
 Two vertices, both on the line.
 The Euler check: V − E + F = 2 − 3 + 3 = 2.
-Closed, no holes.
+Consistent with a closed shell and no holes.
 
 The count looks wrong for a moment — how does a cylinder have only three edges? — and the answer is the most important idea in this chapter.
 
@@ -251,7 +251,7 @@ One face, two edges, one vertex: V − E + F = 1 − 2 + 1 = 0, which for once i
 #47 = DIRECTION('',(-0.,-0.,-1.));
 ```
 
-`CONICAL_SURFACE` has a `position`, a `radius` at the position's location, and a `semi_angle` in radians.
+`CONICAL_SURFACE` has a `position`, a `radius` at the position's location, and a `semi_angle` in the context's plane angle unit, here radians.
 This cone has radius 5 at z = 0 and half-angle 0.2915 rad (16.7°): over 10 mm of height it narrows to radius 2, and the axis, again, points down (@fig-cone).
 
 ![`cone.step`: two circles, and a seam written as a degree-1 B-spline, which draws as the straight line it is. The grey lines are the cone's outline.](../figures/cone.svg){#fig-cone width=40%}
@@ -284,7 +284,7 @@ The swept surfaces at the foot of the table are the exception: they carry a curv
 
 | Entity | Attributes | Notes |
 |--------|------------|-------|
-| `LINE` | `pnt`, `dir` (a `VECTOR`) | infinite; parameter is distance along `dir` |
+| `LINE` | `pnt`, `dir` (a `VECTOR`) | infinite; the point at parameter $t$ is `pnt` + $t$ × `dir`, so the parameter is a distance only when the vector's magnitude is 1 |
 | `CIRCLE` | `position`, `radius` | in the position's XY plane, CCW about its axis |
 | `ELLIPSE` | `position`, `semi_axis_1`, `semi_axis_2` | |
 | `TRIMMED_CURVE` | `basis_curve`, `trim_1`, `trim_2`, `sense_agreement`, `master_representation` | a piece of another curve, trimmed by points or parameters |
@@ -298,13 +298,13 @@ Inside a B-rep, trimming is done by the topology — the edge's vertices — and
 The sphere's pole is at `(3.061616997868E-16, -7.498798913309E-32, -5.)`.
 The torus's vertex is at `(12., -2.939152317954E-15, -4.898587196589E-16)`.
 These are zeros, written as the kernel computed them — the residue of a cosine of 90° that came out as $6 \times 10^{-17}$ rather than 0.
-They are harmless, they are everywhere, and they are why comparing coordinates for equality is never the right operation on STEP geometry; comparing within the file's uncertainty is.
+They are harmless, they are everywhere, and they are why comparing coordinates for equality is never the right operation on STEP geometry; comparing within a tolerance is, and the file's uncertainty is the natural starting value for one.
 :::
 
 ::: {.callout-important title="In brief"}
 Analytic surfaces are positioned by an axis placement plus one or two radii or an angle; their normals point away from the axis (cylinder, cone), outward from the centre (sphere), away from the tube's centre circle (torus, so inward on the inside of the ring), or along the axis (plane), and `same_sense` reconciles that with the solid.
 A periodic surface that has been cut is bounded by a single loop that traverses each **seam** edge twice, once in each direction.
-A circular edge is **closed**: one vertex, start = end.
+A full-circle edge is **closed**: one vertex, start = end; an arc has two.
 A surface with nothing to trim gets a **vertex loop**.
 Lines sometimes arrive as degree-1 B-splines.
 :::

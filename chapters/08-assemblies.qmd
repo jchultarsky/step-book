@@ -89,7 +89,8 @@ END_ENTITY;
 `NEXT_ASSEMBLY_USAGE_OCCURRENCE` declares nothing of its own; all six parameters are inherited.
 Six parameters: an id, a name, a description, the **relating** (parent) definition, the **related** (child) definition, and an optional reference designator.
 One record is one **occurrence** of one child inside one parent.
-That is the entire assembly tree: a set of directed edges between product definitions.
+These records form a directed acyclic graph of product definitions, with a separate edge for each usage.
+The occurrence tree is that graph expanded from a root; a reused subassembly is expanded once per occurrence, each with its own world transform.
 There is no record for "the assembly structure" as a whole; there are only edges, and the tree is whatever they add up to.
 
 Three things to notice.
@@ -107,7 +108,7 @@ The `reference_designator` is `$`.
 It is meant for the position label on an electrical schematic or a drawing balloon — `'R12'`, `'B3'` — and most mechanical exporters leave it empty.
 
 A tree with only NAUOs is unplaced.
-Every child would sit at its parent's origin.
+The NAUOs say nothing about where each child sits; a viewer that draws them at the parent's origin is falling back, not reading a placement.
 Position is a separate structure, attached to each NAUO from the side.
 
 ## The position: five records per occurrence {#sec-assemblies-position}
@@ -163,8 +164,9 @@ From a NAUO, finding its position means asking "what `PRODUCT_DEFINITION_SHAPE` 
 ```
 
 An `AXIS2_PLACEMENT_3D` has a `location`, an optional `axis` and an optional `ref_direction`.
-The axis is the frame's Z; the reference direction is projected perpendicular to it to give X; Y is their cross product.
-If the axis is omitted it is (0, 0, 1); if the reference direction is omitted it is (1, 0, 0) or whatever is perpendicular.
+The axis, normalised, is the frame's Z; the reference direction is projected perpendicular to Z and normalised to give X; Y is Z × X.
+If the axis is omitted, Z is (0, 0, 1).
+If the reference direction is omitted, Part 42's `first_proj_axis` projects (1, 0, 0), or (0, 1, 0) when Z is itself (±1, 0, 0): the fallback is specified, not an arbitrary perpendicular.
 Three references, and the result is a complete right-handed coordinate frame — which is to say a rigid transformation: a rotation plus a translation, with no scaling and no reflection.
 
 Placing pin-1, then, means: take the pin's geometry, whose coordinates are in its own frame (`#11` in the pin's representation — the pin stands on the origin with its axis along Z), and move it so that frame lands on `#19`.
@@ -187,9 +189,12 @@ With the records understood, the procedure for reconstructing the assembly:
 
 1. **Find the roots.** A root is a product definition that is nobody's `related_product_definition`. Here `#5`. A file may have several roots (a multi-body export, or several unrelated assemblies).
 2. **Children of a definition** are the NAUOs whose `relating_product_definition` is it. For `#5`: `#239`, `#311`, `#317`.
-3. **For each NAUO**, find the `PRODUCT_DEFINITION_SHAPE` that points at it, the `CONTEXT_DEPENDENT_SHAPE_REPRESENTATION` that points at *that*, and from there forward to the relationship, the transformation, and the two frames. If any link is missing, the child is at identity.
+3. **For each NAUO**, find the `PRODUCT_DEFINITION_SHAPE` that points at it, the `CONTEXT_DEPENDENT_SHAPE_REPRESENTATION` that points at *that*, and from there forward to the relationship, the transformation, and the two frames. If the chain is absent, try the mapped-item route below; if there is neither, readers place the child at identity, which is a convention of readers rather than a statement in the file.
 4. **Geometry of a definition** is found through its own `PRODUCT_DEFINITION_SHAPE` and `SHAPE_DEFINITION_REPRESENTATION`, as in @sec-product-to-shape.
 5. **World position of a child** = parent's world transform composed with the local one. Recurse into the child's own NAUOs.
+
+Convert translations and geometry to consistent length units before composing transforms between contexts.
+Detect cycles along the active recursion path, but do not use a global visited set to suppress repeated definitions: that would drop legitimate occurrences and undercount a reused subassembly's children.
 
 The **bill of materials** is steps 1, 2 and 5 without the geometry: walk the tree, group occurrences by `related_product_definition`, count.
 For the clamp: bracket × 1, pin × 2.
@@ -223,7 +228,8 @@ Same information as `#235`–`#237`, two records instead of three, and no `PRODU
 
 When an exporter uses mapped items for an assembly, the NAUOs are still written — the product structure is unchanged — but the positions are in the parent's representation items rather than hanging off the NAUOs.
 A reader that only knows the `CONTEXT_DEPENDENT_SHAPE_REPRESENTATION` route will find no placements and put every child at the origin.
-The check is simple: if a NAUO has no placement chain, look in the parent's shape representation for `MAPPED_ITEM`s whose map's source is the child's representation.
+If a NAUO has no placement chain, look in the parent's shape representation for `MAPPED_ITEM`s whose map's source is the child's representation.
+That finds the placements; when several occurrences share one child representation, nothing in the file says which mapped item is which NAUO, and the pairing has to be left open.
 
 Mapped items also appear where there is no assembly at all: a repeated sub-model, or a block of annotation geometry drawn once and placed a dozen times.
 What they cannot do is instance a *feature*: a mapped item places a whole representation, and the faces of a bolt-hole pattern belong to the solid's one closed shell.
@@ -238,7 +244,7 @@ World transforms compose down the tree.
 Variations you will meet:
 
 - **Several shape representations per part** — a B-rep and a tessellation, say. The `REPRESENTATION_RELATIONSHIP` in the placement chain names *which* representation of the child is being placed, and a part may need a placement per representation.
-- **A NAUO with no placement chain at all.** Legal; the child is at identity. Common in files exported from systems that flatten everything to the world frame first.
+- **A NAUO with no placement chain at all.** Legal: product structure may be exchanged without positions. Readers put the child at identity, which is right for files from systems that flatten everything to the world frame first and a guess otherwise.
 - **`ASSEMBLY_COMPONENT_USAGE` with quantity.** All three protocols allow a `QUANTIFIED_ASSEMBLY_COMPONENT_USAGE` — one relationship carrying a count instead of one NAUO per occurrence — for parts like fasteners where individual positions are not modelled. Rare in CAD exports.
 - **Promissory and specified-higher usages.** `SPECIFIED_HIGHER_USAGE_OCCURRENCE` names an occurrence deeper in the tree from a level above, carrying both the upper usage and the next usage it derives from; `PROMISSORY_USAGE_OCCURRENCE` adds nothing to a NAUO and marks a usage that is intended rather than realised. They exist for configuration management and almost never appear in geometry exchange.
 

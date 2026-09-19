@@ -2,7 +2,7 @@
 
 ::: {.chapter-abstract}
 Before reading a solid, what a solid is.
-Why the file keeps "what touches what" and "where it is" in separate records, what orientation means and why it is stored three times over, and the arithmetic that tells you a shell is closed.
+Why the file keeps "what touches what" and "where it is" in separate records, what orientation means and why it is stored three times over, and the arithmetic that checks a shell.
 :::
 
 The 150 records of geometry in the block file describe a rectangular box.
@@ -17,7 +17,8 @@ STEP, like every major CAD kernel, exchanges solids as boundary representations 
 A system that has no "fillet" operation can still accept a torus patch.
 
 A B-rep has two layers.
-**Geometry** is the set of infinite, unbounded shapes the skin is made of: this plane, that cylinder, this line, that circle.
+**Geometry** is the set of mathematical shapes the skin is made of: this plane, that cylinder, this line, that circle.
+Planes, cylinders and lines are unbounded; circles, spheres and tori are not.
 **Topology** is the description of how finite pieces of them connect: this *face* is the part of that plane inside this *loop*; this *edge* is the part of that line between these two *vertices*; these six faces together form a closed *shell*.
 Geometry says where things are; topology says what touches what.
 
@@ -85,7 +86,7 @@ And each `FACE_BOUND` carries one more Boolean that can reverse the whole loop.
 
 Three layers of direction on an edge alone — the curve's, the edge's, the oriented edge's — plus one on the face bound and one on the face.
 The redundancy is deliberate: it lets records be shared.
-One `EDGE_CURVE` serves two faces because each face wraps it in its own `ORIENTED_EDGE`; one `PLANE` could serve two faces on opposite sides of a slab because each face has its own `same_sense`.
+One `EDGE_CURVE` serves two faces because each face wraps it in its own `ORIENTED_EDGE`; one `PLANE` can serve two coplanar faces whose normals oppose — a pocket's floor and an undercut's ceiling at the same height — because each face has its own `same_sense`.
 The cost is that a reader must compose the flags correctly, and a writer that gets one wrong produces a solid whose faces point inwards — which renders as black, meshes inside-out, and reports a negative volume.
 This is the most common defect in hand-written or badly converted STEP files.
 
@@ -103,6 +104,7 @@ For a solid of $S$ shells with $R$ inner loops and $H$ through-holes:
 $$V - E + F - R = 2(S - H)$$
 
 This is the Euler–Poincaré characteristic, and it is the first thing a validator computes: a shell that fails it is missing an edge, has a duplicated vertex, or was never closed.
+Passing it proves less than failing it: a count that comes out right says nothing about orientation, self-intersection or whether the geometry actually meets along the shared edges.
 The familiar short form, $V - E + F = 2$, is what it becomes for a single shell with no inner loops and no through-holes — the block: eight vertices, twelve edges, six faces, $8 - 12 + 6 = 2$.
 Both of those conditions are needed, and neither alone is enough.
 A box with a blind pocket has no through-hole, but the pocket's mouth is an inner loop, and its plain count is 3.
@@ -114,13 +116,14 @@ Run the general form and you never have to ask.
 
 A B-rep in STEP is *evaluated* geometry.
 There is no record of how the box was made, no parameters, no features, no dimensions in the engineering sense.
+(AP242 does define records for construction history and for features such as holes and slots; no mainstream exporter writes them.)
 The 60, 20 and 10 of the block appear only as point coordinates — in vertices, in line base points, in plane origins — never as a length.
 If the designer had constrained the block's length to twice its width, that fact is gone.
 This is a limitation and a strength: it is why STEP files from any CAD system can be read by any other, and why they cannot be edited the way the original model could.
 Design intent lives in the CAD system's native format, or — for tolerances and dimensions specifically — in the PMI of @sec-pmi.
 
 ::: {.callout-important title="In brief"}
-A B-rep is a skin described in two layers: geometry (infinite surfaces, curves, points) and topology (finite faces, edges, vertices connected to each other).
+A B-rep is a skin described in two layers: geometry (surfaces, curves, points) and topology (finite faces, edges, vertices connected to each other).
 Connectivity is by shared records, not shared coordinates.
 Everything has a direction, and the directions must compose to an outward normal with the face's material on the left of every loop.
 The general count is $V - E + F - R = 2(S - H)$; the familiar $V - E + F = 2$ is its special case, for one shell with no inner loops and no through-holes.

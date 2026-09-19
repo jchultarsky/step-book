@@ -1,7 +1,7 @@
 # Entity Quick Reference {#sec-entity-reference}
 
 The entities that appear in typical mechanical files, with their attributes in file order (inherited attributes included, derived ones marked `*`) and the chapter where each is discussed.
-Types in italics are supertypes that appear only inside complex instances.
+Types in italics are shown with only the attributes their own block contributes to a complex instance, not with inherited attributes flattened in.
 
 ## Header {#sec-entity-reference-header}
 
@@ -149,7 +149,7 @@ Types in italics are supertypes that appear only inside complex instances.
 |---|---|---|
 | `SHAPE_ASPECT` | name, description, of_shape, product_definitional | @sec-pmi |
 | `SHAPE_ASPECT_RELATIONSHIP` | name, description, relating_shape_aspect, related_shape_aspect | @sec-pmi |
-| `GEOMETRIC_ITEM_SPECIFIC_USAGE` | name, description, definition, used_representation, identified_item (set) | @sec-pmi |
+| `GEOMETRIC_ITEM_SPECIFIC_USAGE` | name, description, definition, used_representation, identified_item | @sec-pmi |
 | `DATUM` | name, description, of_shape, product_definitional, identification | @sec-pmi |
 | `DATUM_FEATURE` | name, description, of_shape, product_definitional | @sec-pmi |
 | `DATUM_SYSTEM` | name, description, of_shape, product_definitional, constituents (list, in precedence order) | @sec-pmi |
@@ -168,5 +168,5 @@ Types in italics are supertypes that appear only inside complex instances.
 | `DRAUGHTING_CALLOUT` | name, contents (set) | @sec-pmi |
 | `ANNOTATION_PLANE` | name, styles (set), item, elements (set) | @sec-pmi |
 | `DRAUGHTING_MODEL` | name, items (set), context_of_items | @sec-pmi |
-| `DRAUGHTING_MODEL_ITEM_ASSOCIATION` | name, description, definition, used_representation, identified_item (set) | @sec-pmi |
+| `DRAUGHTING_MODEL_ITEM_ASSOCIATION` | name, description, definition, used_representation, identified_item | @sec-pmi |
 | `CAMERA_MODEL_D3` | name, view_reference_system, perspective_of_volume | @sec-pmi |
